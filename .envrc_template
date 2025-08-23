@@ -1,0 +1,21 @@
+export PROJECT_DIR="$(pwd)"
+
+
+##############################################################
+# 
+##############################################################
+# project bucket details
+export GS_BUCKET_NAME=
+export GS_PROJECT_ID=
+export GS_CREDENTIALS_PATH=/home/<username>/secrets/<google-key.json>
+
+# Contact details
+export DEFAULT_FROM_EMAIL=
+export NOTIFY_EMAIL=
+
+# postgres DB local
+export DB_NAME=
+export DB_USER=
+export DB_PASSWORD=
+export DB_HOST=
+export DB_PORT=
