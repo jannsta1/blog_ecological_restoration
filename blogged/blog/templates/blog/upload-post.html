@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+
+<form id="overall_form" method="post" enctype="multipart/form-data">
+    
+    {% csrf_token %}
+    
+    <h1>Blog Post</h1>
+        
+    {% for hidden in post_form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+    
+   <!-- Main Post form  -->
+   {% for form in post_form %}
+        <div>
+            <label for="form.id_for_label">{{ form.label }}</label>
+            {{ form }}
+        </div>
+        <br />
+    {% endfor %} 
+
+    <!-- Images -->
+    <h1>GPS coordinates</h1>
+    
+    {{ gps_formset.management_form }}
+    <div id="gps-form-list" class="flex flex-col gap-3">
+    </div>
+
+    <div id="empty-gps-form" class="hidden">  
+        <div class="gps-form flex items-center gap-4 p-2">            
+            {{ gps_formset.empty_form.latitude.as_field_group }}
+            {{ gps_formset.empty_form.longitude.as_field_group }}
+            {{ gps_formset.empty_form.altitude.as_field_group }}
+            <button type="button" class="remove-gps-btn focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Remove</button>
+        </div>
+    </div>
+    <button type="button" id="add-gps-btn" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">+ Add another location</button>
+    <button type="button" id="extract-gps-from-images-btn" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Extract coordinates from images</button>
+
+
+    <!-- Images -->
+    <h1>Blog Post Photos</h1>
+    {{ image_formset.management_form }}
+    <!-- Hidden multiple file picker -->
+    <input type="file" id="global-image-upload" accept="image/*" multiple style="display:none;">
+    <button type="button" id="trigger-global-upload" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">+ Add image(s)</button>
+
+    <div id="image-form-list" class="flex flex-col gap-3">
+    </div>
+        
+    <!-- Hidden empty form template -->
+    <div id="empty-form-template" data-empty-form class="hidden ">
+        
+        <div class="flex items-center gap-4 p-2 rounded-lg bg-white shadow-sm image-form-entry">
+            <div class="image-preview w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                {% comment %} <span class="text-gray-400 text-xs">Preview</span> {% endcomment %}
+            </div>
+
+            <label>Image Caption:</label>
+            {{ image_formset.empty_form.caption }}
+            {{ image_formset.empty_form.image }}
+
+            {% comment %} <div class="image-preview" style="margin-top:5px;">
+            </div> {% endcomment %}
+            
+            <button type="button"
+                class="remove-image px-3 py-1 text-sm font-medium bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                Delete
+            </button>
+        </div>
+    </div>    
+    
+    <!-- Progress Bar -->
+    <div id="progress-wrapper" style="display:none; margin-top:10px;">
+        <progress id="upload-progress" value="0" max="100" style="width:100%;"></progress>
+        <span id="progress-text">0%</span>
+    </div>
+    
+    <div class="py-6 px-2">
+        <input type="submit" name="submit" value="Submit" class="px-4 py-2 bg-emerald-700 text-white" />
+    </div>
+
+</form>
+
+<!-- Image preview modal -->
+<div id="image-preview-modal">
+    <img id="image-preview-modal-img" src="" alt="Preview">
+</div>
+
+
+
+
+<script src="{% static 'blog/js/hello.js' %}"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+
+const EXTRACTING_IMAGE_COORDS_BTN_TEXT = "Extract coordinates from images"
+const EXTRACT_IMAGE_COORDS_BTN_TEXT = "Extracting"
+
+
+
+
+
+function showImageModal(src) {
+    console.log("showing image modal")
+    const modal = document.getElementById('image-preview-modal');
+    const modalImg = document.getElementById('image-preview-modal-img');
+    modalImg.src = src;
+    
+    modal.style.display = 'flex';
+    modal.style.cursor = "default"
+    requestAnimationFrame(() => modal.classList.add('show'));
+    
+}
+// Close modal on click
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('image-preview-modal');
+    modal.addEventListener('click', function () {        
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.getElementById('image-preview-modal-img').src = '';
+        }, 250); // matches CSS transition
+    });
+});
+
+
+function addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=null) {
+    console.log("adding gps row")
+    const formIndex = parseInt(gpsTotalForms.value);
+    gpsTotalForms.value = formIndex + 1;
+    
+    // Clone template HTML
+    const newGpsFormHtml = emptyGpsFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+    const GpsWrapper = document.createElement("div");
+    GpsWrapper.innerHTML = newGpsFormHtml.trim();
+    const newForm = GpsWrapper.firstChild;
+
+    // Make GPS coordinates required fields
+    newForm.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]').forEach(input => {
+        input.required = true;
+    });
+    
+    gpsFormset.appendChild(newForm);
+    console.log("gps row added")
+
+    // Fill in values from gps_dict
+    if (gps_dict) {
+        newForm.querySelector(`[name="gps-${formIndex}-latitude"]`).value = gps_dict.lat;
+        newForm.querySelector(`[name="gps-${formIndex}-longitude"]`).value = gps_dict.lon;
+        newForm.querySelector(`[name="gps-${formIndex}-altitude"]`).value = gps_dict.alt;
+    }
+}
+
+function extractGpsFromImagesCallback(response) {
+
+    console.log("Extracted GPS coordinates received from the server")
+
+    const json_response = JSON.parse(response);    
+    const gpsDataFound = Boolean(json_response.gps_data_found);
+    console.log("gps data found boolean:", gpsDataFound);
+
+    if (gpsDataFound){
+
+        json_gps_array = json_response.gps_array
+
+        // Iterate through json_gps_array, which is a list of dictionaries
+        json_gps_array.forEach(function(gps_dict) {
+
+            const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
+            const gpsFormset = document.getElementById("gps-form-list");
+            const emptyGpsFormTemplate = document.getElementById('empty-gps-form');  
+            console.log("processing image with data: ", gps_dict.lat, gps_dict.lon, gps_dict.alt);
+            addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=gps_dict);
+            
+            {% comment %} console.log("processing image with data: ", gps_dict.lat, gps_dict.lon, gps_dict.alt)
+            const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
+            const formsetDiv = document.getElementById('gps-form-list');
+            const emptyForm = document.getElementById('empty-gps-form').innerHTML;            
+            
+            const formIndex = parseInt(gpsTotalForms.value, 10);
+            gpsTotalForms.value = formIndex + 1;
+            
+            const newFormHtml = emptyForm.replace(/__prefix__/g, formIndex);
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = newFormHtml.trim();
+
+            const newForm = wrapper.firstChild;
+
+            // Make GPS coordinates required fields
+            newForm.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]').forEach(input => {
+                input.required = true;
+            });
+                        
+            formsetDiv.appendChild(newForm);
+
+            // Fill in values from gps_dict
+            newForm.querySelector(`[name="gps-${formIndex}-latitude"]`).value = gps_dict.lat;
+            newForm.querySelector(`[name="gps-${formIndex}-longitude"]`).value = gps_dict.lon;
+            newForm.querySelector(`[name="gps-${formIndex}-altitude"]`).value = gps_dict.alt; {% endcomment %}
+        });
+    
+    }
+
+    document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+}
+
+function extractGpsFromImagesErrorCallback(response) {
+    document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+    alert('Could not extract all image coordinates');
+}
+
+function trigger_gps_handler()
+{
+    console.log("Triggered trigger_gps_handler")
+    document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+
+    // Get the file path of each file input in the image form list
+    const imageFiles = [];
+    var formData = new FormData();
+    document.querySelectorAll('#image-form-list input[type="file"]').forEach(function(input) {
+        console.log("Adding ", input.files.length, " images to the formData")
+        if (input.files.length > 0) {
+            for (let i = 0; i < input.files.length; i++) {
+                console.log("Acting on image ", i);
+                imageFiles.push(input.files[i]); // add file object to array
+                formData.append(input.files[i].name, input.files[i]);
+            }
+        }
+    });
+
+    formData.append("csrfmiddlewaretoken",  '{{ csrf_token }}')
+
+    $.ajax({
+         url:'/extract-gps-coordinates-script/',
+         type: 'POST',
+         data: formData,
+         success: function gps_response(response){
+            extractGpsFromImagesCallback(response);
+         },
+         failed: function gps_extraction_failed(){
+            extractGpsFromImagesErrorCallback();
+         },
+        cache: false,
+        contentType: false,
+        processData: false,
+   });
+
+}
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("Reloading page")
+    
+    //////////////////////////////////////////////////////////////////////
+    // GPS
+    //////////////////////////////////////////////////////////////////////
+
+    document.getElementById('extract-gps-from-images-btn').addEventListener('click', () => trigger_gps_handler());
+
+    // GPS STUFF
+    const addGpsButton = document.getElementById("add-gps-btn");
+    const gpsFormset = document.getElementById("gps-form-list");
+    const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
+    const emptyGpsFormTemplate = document.getElementById('empty-gps-form'); 
+
+    addGpsButton.addEventListener("click", () => addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=null));
+    // add listener to GPS formset for each form delete button
+    gpsFormset.addEventListener("click", function(e) {
+        if (e.target.classList.contains("remove-gps-btn")) {
+            const entry = e.target.closest(".gps-form");
+            entry.remove();
+            gpsTotalForms.value = parseInt(gpsTotalForms.value) - 1;
+        }
+    });
+
+    //////////////////////////////////////////////////////////////////////
+    // Images
+    //////////////////////////////////////////////////////////////////////
+    const globalUpload = document.getElementById("global-image-upload");
+    const triggerButton = document.getElementById("trigger-global-upload");
+    const imageFormset = document.getElementById("image-form-list");
+    const totalFormsInput = document.querySelector('#id_' + '{{ image_formset.prefix }}' + '-TOTAL_FORMS');
+    const emptyFormTemplate = document.querySelector('[data-empty-form]');
+
+    triggerButton.addEventListener("click", () => globalUpload.click());
+
+
+    globalUpload.addEventListener("change", function() {
+        Array.from(this.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                addImageRow(e.target.result, file);
+            };
+            reader.readAsDataURL(file);
+        });
+        this.value = "";
+    });
+
+    function addImageRow(src, file) {
+        const formIndex = parseInt(totalFormsInput.value);
+        totalFormsInput.value = formIndex + 1;
+
+        // Clone template HTML
+        const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = newFormHtml.trim();
+        const newForm = wrapper.firstChild;
+
+        const previewContainer = newForm.querySelector(".image-preview");
+        var img = document.createElement("img");
+        img.src = src;
+        img.className = "object-cover w-full h-full";
+        img.alt = file.name
+        img.loading = "lazy"
+        img.style.cursor = 'pointer';
+        previewContainer.appendChild(img)
+
+        img.addEventListener('click', function () {
+                    console.log("image clicked");
+                    showImageModal(src);
+                }); 
+
+        // Set the file to the file input (so Django gets it on submit)
+        const fileInput = newForm.querySelector('input[type="file"]');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        imageFormset.appendChild(newForm);
+    }
+
+    imageFormset.addEventListener("click", function(e) {
+        if (e.target.classList.contains("remove-image")) {
+            const entry = e.target.closest(".image-form-entry");
+            entry.remove();
+            totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
+        }
+    });
+
+
+    // Form submission with progress bar
+    const form = document.getElementById('overall_form');
+    const progressWrapper = document.getElementById('progress-wrapper');
+    const progressBar = document.getElementById('upload-progress');
+    const progressText = document.getElementById('progress-text');
+
+    // TODO 1 - this doesn't seem to work properly - shows 100% while images are still being uploaded and the form is stuck
+    //          this is because of  const form = document.getElementById('post_form'); - we want image_formset
+    // TODO 2 - there should be an overlay, rather than a progress bar just at the bottom of the screen   
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // Stop normal form submit
+        const formData = new FormData(form);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action);
+
+        // Show progress bar
+        progressWrapper.style.display = 'block';
+        progressBar.value = 0;
+        progressText.textContent = '0%';
+
+        xhr.upload.addEventListener('progress', function (e) {
+            if (e.lengthComputable) {
+                const percent = Math.round((e.loaded / e.total) * 100);
+                progressBar.value = percent;
+                progressText.textContent = percent + '%';
+            }
+        });
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // You could redirect or show a success message here
+                alert('Upload complete!');
+                window.location.reload();
+            } else {
+                alert('Upload failed!');
+            }
+        };
+
+        xhr.send(formData);
+    });
+
+});
+</script>
+
+
+
+{% endblock %}
+
+

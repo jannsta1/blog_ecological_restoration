@@ -1,0 +1,19 @@
+<div class="image-form flex items-center gap-4 p-2 border rounded-lg bg-white shadow-sm image-form-entry">
+                {% comment %} {{ form.as_p }} {% endcomment %}
+                {% comment %} {{ form.image.as_field_group }}  {% endcomment %}
+                
+    <div class="image-preview" style="margin-top:5px;">
+        {% comment %} {% if image_form.instance.pk and image_form.instance.image %} {% endcomment %}
+        {% if image_form.instance.pk and image_form.instance.image %}
+            <img src="{{ image_form.instance.image.url }}" 
+            loading="lazy"
+            style="max-height:100px; border:1px solid #ccc;" 
+            onclick="showImageModal('{{ image_form.instance.image.url }}')"/>
+        {% else %}
+            <span class="text-gray-400 text-xs">No Image</span>
+        {% endif %}
+    </div>
+    
+    {{ image_form.caption.as_field_group }}
+    <button type="button" class="remove-image-btn focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Remove Image</button>
+</div>

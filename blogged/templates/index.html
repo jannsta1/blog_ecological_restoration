@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+
+{% block title %}Jan's rewilding blog{% endblock %}
+
+{% block content %}
+
+    <h1>Jan's rewilding blog</h1>
+
+    <p>
+        This is a blog page created with the goal of logging the rewilding activities that I have previously worked on so that I can gauge the overall impact. 
+        
+        <br>
+
+        I try to document any learnings in "howto" guides for the interested reader.
+    </p>
+
+    <h1>Recent blog posts</h1>
+
+    <div class="grid grid-cols-3 gap-6">
+        {% for post in posts %}
+            {% include 'blog/partials/post.html' %}
+        {% endfor %}
+    </div>
+{% endblock %}

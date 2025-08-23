@@ -1,0 +1,38 @@
+{% load static %}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style_out.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>  -->
+     {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> {% endcomment %}
+     
+    </head>
+    <body>
+      <nav class="py-6 px-12 bg-emerald-700 flex justify-between items-center">
+        <a href="/" class="text-white text-lg font-bold">Blogged</a>
+        
+        <a href="/blog-image-gallery/" class="text-white text-lg font-bold">Image Gallery</a>
+        
+        <a href="/upload-post/" class="text-white text-lg font-bold">Upload Post</a>
+        
+        <a href="/contact/" class="text-white text-lg font-bold">Contact</a>
+      </nav>
+      
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+      
+      <!-- htmx library, added when trialing forms with htmx buttons -->
+      <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
+      
+      <!-- flowbite - used for the image gallery -->
+      <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+      
+      {% comment %} <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> {% endcomment %}
+
+  </body>
+</html>

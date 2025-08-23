@@ -1,0 +1,8 @@
+django
+Pillow
+google-api-python-client
+# google drive option
+django-googledrive-storage
+# google bucket option
+django-storages
+google-cloud-storage
