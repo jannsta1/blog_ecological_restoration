@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&o+cep1kyb07h$w@cx%5f-6z(nt&80wbpk1mkv&*%d$_t)!#u$'
+SECRET_KEY = "django-insecure-&o+cep1kyb07h$w@cx%5f-6z(nt&80wbpk1mkv&*%d$_t)!#u$"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -33,48 +33,48 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # 'formset',  # https://django-formset.fly.dev/
-    'django_flatpickr',
-    'storages',
-    'blog',
-    'blogcontact',
+    "django_flatpickr",
+    "storages",
+    "blog",
+    "blogcontact",
     # 'gdstorage',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'blogged.urls'
+ROOT_URLCONF = "blogged.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'blogged.wsgi.application'
+WSGI_APPLICATION = "blogged.wsgi.application"
 
 
 # Database
@@ -87,13 +87,13 @@ WSGI_APPLICATION = 'blogged.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'eco_blog'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST', 'localhost'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DB_NAME", "eco_blog"),
+        "USER": os.environ.get("DB_USER"),
+        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -103,16 +103,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -120,9 +120,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -131,27 +131,33 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static", ]
+STATIC_URL = "static/"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 # STATIC_ROOT = BASE_DIR.parent / "local-cdn" / "static"
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # for email contact form (followed this blog post: https://learndjango.com/tutorials/django-email-contact-form-tutorial)
 # need to follow the steps - "Production Email Service" to actually get the email to send
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "annonymous@gmail.com"
-NOTIFY_EMAIL = "annonymous@gmail.com" # TODO - use a secret for this?
+NOTIFY_EMAIL = "annonymous@gmail.com"  # TODO - use a secret for this?
 
 # Google drive keys
-GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = "/home/jan/secrets/django-blog-data-9a52eb1b9db9.json"
-GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = "blog/rewilding/images" # <base google drive path for file uploads>' # OPTIONAL
+GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = (
+    "/home/jan/secrets/django-blog-data-9a52eb1b9db9.json"
+)
+GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = (
+    "blog/rewilding/images"  # <base google drive path for file uploads>' # OPTIONAL
+)
 
 
 # STORAGES = {
@@ -172,13 +178,15 @@ GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = "blog/rewilding/images" # <base google drive p
 # }
 
 
-# google cloud 
-DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME')
-GS_PROJECT_ID = os.environ.get('GS_PROJECT_ID')
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(os.environ.get('GS_CREDENTIALS_PATH'))
+# google cloud
+DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME")
+GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.environ.get("GS_CREDENTIALS_PATH")
+)
 
 # For public access to images, set this to publicRead.
 # GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images
 # For private images, you might want to use signed URLs.
-GS_QUERYSTRING_AUTH = False # Recommended for private images and when using signed URLs
+GS_QUERYSTRING_AUTH = False  # Recommended for private images and when using signed URLs

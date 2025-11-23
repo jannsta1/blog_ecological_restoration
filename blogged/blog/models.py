@@ -1,5 +1,5 @@
 from django.db import models
-from gdstorage.storage import GoogleDriveStorage
+# from gdstorage.storage import GoogleDriveStorage
 from storages.backends.gcloud import GoogleCloudStorage
 
 from django.core.exceptions import ValidationError
@@ -7,7 +7,7 @@ from django.template.defaultfilters import slugify
 
 
 # Define Google Drive Storage
-gd_storage = GoogleDriveStorage()
+# gd_storage = GoogleDriveStorage()
 gc_storage = GoogleCloudStorage()
 
 
