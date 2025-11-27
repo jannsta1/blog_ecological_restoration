@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "storages",
     "blog",
     "blogcontact",
+    "impact_maps",
     # 'gdstorage',
 ]
 
