@@ -19,7 +19,7 @@
     <!-- NOTE: The API key is restricted by restricting valid ip addresses, see: https://cloud.google.com/docs/authentication/api-keys#console_3 -->    
     <!-- TODO: create a separate production API key -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=maps,marker"
+      src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&loading=async&callback=initMap"
       async
       defer
     ></script>
@@ -28,46 +28,27 @@
 
 {% block content %}
 
-<h1>Here comes the map...</h1>
+<h1>Impact Map</h1>
 
-<gmp-map center="57.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 700px">
-
-
-
-  {% comment %} <gmp-advanced-marker
-    position="55.464671060172485, -3.3530529887192944"
-    title="Marker 1"
-  ></gmp-advanced-marker>
-
-
-  <gmp-advanced-marker
-    position="57.1994136498289, -4.771256637504935"
-    title="Marker 2"
-  ></gmp-advanced-marker> {% endcomment %}
-
-</gmp-map>
+<gmp-map center="57.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 700px"></gmp-map>
 
 {{ gps_coordinates|json_script:"gps-json" }}
 
  
-
-    
-
 <script>
 
 {% comment %} const parser = new DOMParser(); {% endcomment %}
 const mapElement = document.querySelector('gmp-map');
 async function initMap() {
 
-    let jsondata = JSON.parse(document.getElementById('gps-json').textContent)
-    console.log(jsondata)
-
     // Request needed libraries.
-    const { Map } = await google.maps.importLibrary("maps");
+    const { map } = await google.maps.importLibrary("maps");
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
     // Each PinElement is paired with a marker to demonstrate setting each parameter.
     // Default marker with title text (no PinElement).
 
+    let jsondata = JSON.parse(document.getElementById('gps-json').textContent)
+    // console.log(jsondata)
 
     jsondata.forEach((item, i) => {
         console.log('item', i, item);
@@ -82,26 +63,20 @@ async function initMap() {
         });
 
         const thisMarker = new AdvancedMarkerElement({
+            map,
             position: { lat: item["latitude"], lng: item["longitude"] },
             title: 'Title text for the marker at lat: 37.419, lng: -122.03',
         
         });
         thisMarker.append(thisPin);
-
         // TODO - add a link from the marker to the blog activity as an overlay
         // see: https://developers.google.com/maps/documentation/javascript/advanced-markers/overview
+        // this video might be helpful too: https://www.youtube.com/watch?v=sasx2ppol5c
 
         mapElement.append(thisMarker);
     });
 
-    
-
-
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  initMap();
-});
+  }
 
 </script>
 
