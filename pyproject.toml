@@ -2,7 +2,7 @@
 name = "blog-ecological-restoration"
 version = "0.1.0"
 description = "Add your description here"
-readme = "README.md"
+readme = "readme.md"
 requires-python = ">=3.13"
 dependencies = [
     "django>=5.2.8",
@@ -12,8 +12,9 @@ dependencies = [
     "django-storages>=1.14.6",
     "google-api-python-client>=2.187.0",
     "google-cloud-storage>=3.3.1", # google bucket option
+    "gunicorn>=23.0.0",
     "pillow>=12.0.0",
-    "psycopg2>=2.9.11",
+    "psycopg2-binary>=2.9.11",
     "python-decouple>=3.8",
 ]
 

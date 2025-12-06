@@ -14,6 +14,11 @@ from pathlib import Path
 import os
 from google.oauth2 import service_account
 
+from common.utils import get_secret
+
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,12 +27,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-&o+cep1kyb07h$w@cx%5f-6z(nt&80wbpk1mkv&*%d$_t)!#u$"
+SECRET_KEY = get_secret("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -87,12 +92,16 @@ WSGI_APPLICATION = "blogged.wsgi.application"
 #     }
 # }
 
+
+POSTGRES_PW = get_secret("POSTGRES_PASSWORD")
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("DB_NAME", "eco_blog"),
         "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "PASSWORD": POSTGRES_PW,
         "HOST": os.environ.get("DB_HOST", "localhost"),
         "PORT": os.environ.get("DB_PORT", "5432"),
     }
@@ -183,9 +192,9 @@ GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = (
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME")
 GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.environ.get("GS_CREDENTIALS_PATH")
-)
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     os.environ.get("GS_CREDENTIALS_PATH")
+# )
 
 # For public access to images, set this to publicRead.
 # GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images

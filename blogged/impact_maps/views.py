@@ -1,11 +1,12 @@
-from decouple import config
 from django.shortcuts import render
 
 # Create your views here.
 from blog.models import GpsCoordinates
+from common.utils import get_secret
+
 
 # TODO : Use different API keys for development and production
-GOOGLE_MAPS_API_KEY_DEVELOPMENT = config("GOOGLE_MAPS_API_KEY_DEVELOPMENT")
+GOOGLE_MAPS_API_KEY_DEVELOPMENT = get_secret("GOOGLE_MAPS_API_KEY_DEVELOPMENT")
 
 
 def upload_location(request):

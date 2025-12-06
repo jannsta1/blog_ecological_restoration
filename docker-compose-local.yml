@@ -1,0 +1,46 @@
+name: eco-blog-local
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: ./blogged/Dockerfile
+      # network: host
+    command: uv run blogged/manage.py runserver 0.0.0.0:8000
+    # volumes:
+    #   - ./blogged/:/usr/src/blogged/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.db.local
+      - ./.env.dev
+    environment:
+      - POSTGRES_PASSWORD=/run/secrets/postgres_password
+      - SECRET_KEY=/run/secrets/django_secret_key
+      - GOOGLE_MAPS_API_KEY_DEVELOPMENT=/run/secrets/google_maps_api_key_dev
+    secrets:
+      - postgres_password
+      - django_secret_key
+      - google_maps_api_key_dev
+
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=jan
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB=eco_blog
+    secrets:
+      - postgres_password
+
+volumes:
+  postgres_data:
+
+secrets:
+  postgres_password:
+    file: .secrets/postgres_pw.txt
+  django_secret_key:
+    file: .secrets/django_secret_key.txt
+  google_maps_api_key_dev:
+    file: .secrets/google_maps_api_key_dev.txt

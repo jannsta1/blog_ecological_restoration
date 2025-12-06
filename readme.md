@@ -29,3 +29,53 @@ We recommend the use of the `direnv` package to store your envs in a local file 
 * htmx: https://htmx.org/docs/#introduction
 * htmx todo list: https://www.youtube.com/watch?v=XdZoYmLkQ4w
 
+# django project examples
+- sentry: https://github.com/getsentry/sentry
+- cookiecutter-django: https://github.com/cookiecutter/cookiecutter-django
+
+# setting up postgres on qnap
+https://rexbytes.com/2023/12/11/qnap-container-station-docker-setup-postgres/
+
+## setup a supabase postgres project? 
+https://supabase.com/pricing
+
+## Docker secrets
+https://docs.docker.com/engine/swarm/secrets/
+
+## production setup
+Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
+
+
+
+# TODO
+- optimise docker build further & make safe
+---> uv build optimize
+---> multistage build
+---> take root access away from the production docker file
+------
+- add precommit, black, ruff and mypy
+- add login for page uploading
+- create proper account(s) for the postgresdb 
+-- establish how to backup the data / export blog to e.g. json
+- get a url
+- expose webserver to the internet
+- evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
+
+## .gitignore .envrc, remove from repo and squash history
+
+## handle warning about GCP API error
+/home/jan/dev/blog_ecological_restoration/.venv/lib/python3.13/site-packages/google/auth/_default.py:108: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
+  warnings.warn(_CLOUD_SDK_CREDENTIALS_WARNING)
+
+**steps taken**
+in terminal `gcloud auth application-default set-quota-project django-blog-data` which yielded:
+
+``` bash
+Credentials saved to file: [/home/jan/.config/gcloud/application_default_credentials.json]
+
+These credentials will be used by any library that requests Application Default Credentials (ADC).
+
+Quota project "django-blog-data" was added to ADC which can be used by Google client libraries for billing and quota. Note that some services may still bill the project owning the resource.
+```
+
+

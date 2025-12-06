@@ -1,0 +1,44 @@
+name: eco-blog-qnap-prod
+
+services:
+  web:
+    build: 
+      context: ./
+      dockerfile: ./blogged/Dockerfile.prod
+    command: .venv/bin/gunicorn --chdir blogged blogged.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.db.qnap
+      - ./.env.dev.qnap
+    environment:
+      - UV_COMPILE_BYTECODE=1
+      - POSTGRES_PASSWORD=/run/secrets/postgres_password
+      - SECRET_KEY=/run/secrets/django_secret_key
+      - GOOGLE_MAPS_API_KEY_DEVELOPMENT=/run/secrets/google_maps_api_key_dev
+    secrets:
+      - postgres_password
+      - django_secret_key
+      - google_maps_api_key_dev
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    ports:
+      - 1337:80
+    depends_on:
+      - web
+
+secrets:
+  postgres_password:
+    file: .secrets/postgres_pw_qnap.txt
+  django_secret_key:
+    file: .secrets/django_secret_key.txt
+  google_maps_api_key_dev:
+    file: .secrets/google_maps_api_key_dev.txt
+
+volumes:
+  static_volume:
