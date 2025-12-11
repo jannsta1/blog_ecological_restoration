@@ -19,6 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('accounts/', include('django.contrib.auth.urls')),
     path("", include("blogcontact.urls")),  # new
     path("", include("impact_maps.urls")),  # Include the mapping app's URLs
     path("", include("blog.urls")),  # Include the blog app's URLs

@@ -19,4 +19,9 @@ dependencies = [
 ]
 
 [project.scripts]
+
+[dependency-groups]
+dev = [
+    "djlint>=1.36.4",
+]
 # TODO

@@ -1,0 +1,41 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>Login page</h1>
+
+<b>Note:</b> Logging in is not required to browse this webpage - it exists purely for
+the convenience of the author. 
+
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %} 
+
+{% if next %} {% if user.is_authenticated %}
+<p class="mb-8">
+  Your account doesn't have access to this page. To proceed, please login with
+  an account that has access.
+</p>
+
+
+{% else %}
+<p>Please login to see this page.</p>
+{% endif %} {% endif %}
+
+<form method="post" action="{% url 'login' %}">
+  {% csrf_token %}
+  <table class="mb-8">
+    <tr>
+      <td>{{ form.username.label_tag }}</td>
+      <td class=form-text-field>{{ form.username }}</td>
+    </tr>
+    <tr>
+      <td>{{ form.password.label_tag }}</td>
+      <td class=form-text-field>{{ form.password }}</td>
+    </tr>
+  </table>
+  <input type="submit" value="login" class="px-4 py-2 bg-emerald-700 text-white rounded-md"/>
+  <input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+{# Assumes you set up the password_reset view in your URLConf #}
+
+{% endblock %}

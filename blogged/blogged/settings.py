@@ -200,3 +200,7 @@ GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
 # GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images
 # For private images, you might want to use signed URLs.
 GS_QUERYSTRING_AUTH = False  # Recommended for private images and when using signed URLs
+
+
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

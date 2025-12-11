@@ -52,14 +52,23 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ---> uv build optimize
 ---> multistage build
 ---> take root access away from the production docker file
-------
+## essential features
+- login to google cloud or create an alternative way to store data
+- create proper account(s) for the blog login and postgresdb 
+- add login for page uploading?: https://docs.allauth.org/en/latest/introduction/index.html
+- make sure that the impact map is working
+## desirable features
 - add precommit, black, ruff and mypy
-- add login for page uploading
-- create proper account(s) for the postgresdb 
--- establish how to backup the data / export blog to e.g. json
-- get a url
-- expose webserver to the internet
+- establish how to backup the data / export blog to e.g. json
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
+- remove "node_modules" folder from github
+- website stats - traffic, where logged in from?
+## security
+- squash our git history to remove any previsouly stored passwords
+## Getting us on the internet
+- get a url
+- setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it
+- expose webserver to the internet
 
 ## .gitignore .envrc, remove from repo and squash history
 
