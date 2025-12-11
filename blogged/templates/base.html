@@ -1,22 +1,24 @@
-{% load static %}
 <!doctype html>
-<html>
+{% load static %}
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}{% endblock %}</title>
+    <meta name="description" content="A blog about ecological restoration." />
+    <meta name="keywords" content="ecological, restoration, environment, nature" />
+    <title>{% block title %}{% endblock title %}</title>
+    
     <link rel="stylesheet" href="{% static 'css/style_out.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>  -->
      {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> {% endcomment %}
-    {% block head %}{% endblock %}
-     
+    {% block head %}{% endblock head %}
     </head>
     <body>
-      {% include 'partials/navbar.html' %}
+      {% include "partials/navbar.html" %}
       
       <main class="content">
-        {% block content %}{% endblock %}
+        {% block content %}{% endblock content %}
       </main>
       
       <!-- htmx library, added when trialing forms with htmx buttons -->

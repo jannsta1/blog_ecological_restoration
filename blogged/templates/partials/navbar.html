@@ -1,21 +1,21 @@
 <nav class="py-6 px-12 bg-emerald-700 flex justify-between items-center">
 
-    <a href="/" class="text-white text-lg font-bold">Blogged</a>
+    <a href="{% url 'index' %}" class="navbar-content">Blogged</a>
     
-    <a href="/blog-image-gallery/" class="text-white text-lg font-bold">Image Gallery</a>
+    <a href="{% url 'blog-image-gallery' %}" class="navbar-content">Image Gallery</a>
     
-    <a href="/impact-map/" class="text-white text-lg font-bold">Impact map</a>
+    <a href="{% url 'impact-map' %}" class="navbar-content">Impact map</a>
     
-    <a href="/contact/" class="text-white text-lg font-bold">Contact</a>
+    <a href="{% url 'contact' %}" class="navbar-content">Contact</a>
     
     {% if user.is_authenticated %}
-        <a href="/upload-post/" class="text-white text-lg font-bold">Upload Post</a>
+        <a href="/upload-post/" class="navbar-content">Upload Post</a>
     {% endif %}
     
     {% if user.is_authenticated %}
         <a 
             href="#" 
-            class="text-white text-lg font-bold"
+            class="navbar-content-smaller"
             onClick="document.getElementById('logoutform').submit()"
         >Logout</a>
         <form id="logoutform" method="POST" action="{% url 'logout' %}">
@@ -23,7 +23,7 @@
             <input type="hidden">
         </form>
     {% else %} 
-        <a href="{% url 'login' %}" class="text-white text-lg font-bold">Login</a>
+        <a href="{% url 'login' %}" class="navbar-content-smaller">Login</a>
     {% endif %}
 
 </nav>

@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import CustomLoginView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path("", include("blogcontact.urls")),  # new
     path("", include("impact_maps.urls")),  # Include the mapping app's URLs
     path("", include("blog.urls")),  # Include the blog app's URLs

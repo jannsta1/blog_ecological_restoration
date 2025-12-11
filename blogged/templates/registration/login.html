@@ -1,41 +1,46 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %} 
 
-<h1>Login page</h1>
-
-<b>Note:</b> Logging in is not required to browse this webpage - it exists purely for
-the convenience of the author. 
-
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %} 
-
-{% if next %} {% if user.is_authenticated %}
-<p class="mb-8">
-  Your account doesn't have access to this page. To proceed, please login with
-  an account that has access.
-</p>
-
-
-{% else %}
-<p>Please login to see this page.</p>
-{% endif %} {% endif %}
-
-<form method="post" action="{% url 'login' %}">
-  {% csrf_token %}
-  <table class="mb-8">
-    <tr>
-      <td>{{ form.username.label_tag }}</td>
-      <td class=form-text-field>{{ form.username }}</td>
-    </tr>
-    <tr>
-      <td>{{ form.password.label_tag }}</td>
-      <td class=form-text-field>{{ form.password }}</td>
-    </tr>
-  </table>
-  <input type="submit" value="login" class="px-4 py-2 bg-emerald-700 text-white rounded-md"/>
-  <input type="hidden" name="next" value="{{ next }}" />
-</form>
+{% block content %}
 
 {# Assumes you set up the password_reset view in your URLConf #}
 
-{% endblock %}
+<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    {% comment %} <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" class="mx-auto h-10 w-auto dark:hidden" />
+    <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" class="mx-auto h-10 w-auto not-dark:hidden" /> {% endcomment %}
+    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">Blog administrator login</h2>
+    <h2 class="text-center text-l/9 font-bold tracking-tight text-gray-300 dark:text-white">Login not required to view the page</h2>
+  </div>
+
+  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <form action="{% url 'login' %}" method="post" class="space-y-6">
+      {% csrf_token %}
+      <div>
+        <label for="email" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">{{ form.username.label_tag }}</label>
+        <div class="mt-2">
+          {{ form.username }}
+        </div>
+      </div>
+
+      <div>
+        <div class="mt-2">
+          <label for="password" class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100">{{ form.password.label_tag }}</label>
+        </div>
+        <div class="mt-2">
+          {{ form.password }}
+        </div>
+      </div>
+
+      {% if form.errors %}
+        <p class="block text-sm/6 font-medium text-red-500">Your username and password didn't match. Please try again.</p>
+      {% endif %} 
+
+      <div>
+        <button type="submit" class="flex w-full justify-center rounded-md bg-emerald-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-emerald-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 dark:bg-emerald-500 dark:shadow-none dark:hover:bg-emerald-400 dark:focus-visible:outline-emerald-500">Sign in</button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock content %}
