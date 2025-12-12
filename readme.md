@@ -12,6 +12,8 @@ uv pip install -r requirements.txt
 To build the .css files from tailwind:
 * npm run (watch) # to keep rebuilding the custom tailwind styles
 
+NB. to see updates in chrome, disable cache (while devtools is open): https://stackoverflow.com/questions/20300400/google-chrome-css-doesnt-update-unless-clear-cache
+ 
 # Setup
 
 The user can setup the django settings.py to their preference, here we provide an overview of the envs that need to be set for some common use cases
@@ -48,18 +50,31 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 
 
 # TODO
+## essential features
+- login to google cloud or create an alternative way to store data
+- create proper account(s) for the blog login and postgresdb 
+- make sure that the impact map is working
+## desirable features
+- add precommit, black, ruff and mypy
+- establish how to backup the data / export blog to e.g. json
+- evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
+- remove "node_modules" folder from github
+- website stats - traffic, where logged in from?
 - optimise docker build further & make safe
 ---> uv build optimize
 ---> multistage build
 ---> take root access away from the production docker file
-------
-- add precommit, black, ruff and mypy
-- add login for page uploading
-- create proper account(s) for the postgresdb 
--- establish how to backup the data / export blog to e.g. json
+- add dark mode
+- improve website aesthetic
+  - the navbar should be aligned left, except for login/logout which should be aligned right
+  - 
+## security
+- squash our git history to remove any previsouly stored passwords
+- upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
+## Getting us on the internet
 - get a url
+- setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it
 - expose webserver to the internet
-- evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 
 ## .gitignore .envrc, remove from repo and squash history
 

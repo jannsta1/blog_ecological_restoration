@@ -1,0 +1,29 @@
+<nav class="py-6 px-12 bg-emerald-700 flex justify-between items-center">
+
+    <a href="{% url 'index' %}" class="navbar-content">Blogged</a>
+    
+    <a href="{% url 'blog-image-gallery' %}" class="navbar-content">Image Gallery</a>
+    
+    <a href="{% url 'impact-map' %}" class="navbar-content">Impact map</a>
+    
+    <a href="{% url 'contact' %}" class="navbar-content">Contact</a>
+    
+    {% if user.is_authenticated %}
+        <a href="/upload-post/" class="navbar-content">Upload Post</a>
+    {% endif %}
+    
+    {% if user.is_authenticated %}
+        <a 
+            href="#" 
+            class="navbar-content-smaller"
+            onClick="document.getElementById('logoutform').submit()"
+        >Logout</a>
+        <form id="logoutform" method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <input type="hidden">
+        </form>
+    {% else %} 
+        <a href="{% url 'login' %}" class="navbar-content-smaller">Login</a>
+    {% endif %}
+
+</nav>
