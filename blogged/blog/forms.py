@@ -1,15 +1,11 @@
-from django.forms import Form, ModelForm, TextInput, ClearableFileInput, FileField, Textarea, DateField, DateInput, CharField, FileInput, ClearableFileInput, fields, NumberInput
-from django.template.defaultfilters import slugify
-from django.core.exceptions import ValidationError
+from django.forms import ModelForm, TextInput, FileField, Textarea, FileInput, ClearableFileInput, NumberInput
 from django.forms import inlineformset_factory, BaseInlineFormSet
 from django.forms.formsets import DELETION_FIELD_NAME
-from formset.widgets import DatePicker
-from django_flatpickr.widgets import DatePickerInput
 
 
 from datetime import datetime
 
-from .models import Comment, MediaAttachment, Post, Images, GpsCoordinates
+from .models import Comment, Post, Images, GpsCoordinates
 
 
 

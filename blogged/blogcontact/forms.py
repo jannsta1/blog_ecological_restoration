@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import ModelForm
 
 class ContactForm(forms.Form):
     # def __init__(self, *args, **kwargs):

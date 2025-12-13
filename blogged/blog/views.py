@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 
 from .models import Images, Post, MediaAttachment
-from .forms import ImageFormSet, GpsFormSet, GpsCoordinates, Images, CommentForm, PostForm
+from .forms import ImageFormSet, GpsFormSet, GpsCoordinates, CommentForm, PostForm
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
 
 
