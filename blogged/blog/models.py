@@ -1,5 +1,6 @@
 import os
 from django.db import models
+
 # from gdstorage.storage import GoogleDriveStorage
 from storages.backends.gcloud import GoogleCloudStorage
 
@@ -16,7 +17,9 @@ gc_storage = GoogleCloudStorage()
 class Post(models.Model):
     title = models.CharField(max_length=255)
     date = models.DateField()
-    slug = models.SlugField(null=False, unique=True)  # TODO - use a uid or something instead to allow blog posts with the same title?
+    slug = models.SlugField(
+        null=False, unique=True
+    )  # TODO - use a uid or something instead to allow blog posts with the same title?
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -26,43 +29,47 @@ class Post(models.Model):
 
         TODO - might be better just to use an ID rather than slug?:
         https://learndjango.com/tutorials/django-slug-tutorial#:~:text=The%20best%20solution%20is%20to,be%20applied%20to%20the%20serializer.
-        """                
-        self.slug = slugify(getattr(self, 'title'))
+        """
+        self.slug = slugify(getattr(self, "title"))
         super().save(*args, **kwargs)
-    
+
     class Meta:
-        ordering = ['-created_at',]
+        ordering = [
+            "-created_at",
+        ]
 
     def __str__(self):
         return self.title
-    
+
 
 class Comment(models.Model):
-    post = models.ForeignKey(Post, related_name='comments', on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at',]
+        ordering = [
+            "-created_at",
+        ]
 
     def __str__(self):
-        return f'{self.name} - {self.post.title}'
-    
+        return f"{self.name} - {self.post.title}"
+
 
 class MediaAttachment(models.Model):
-    id = models.AutoField( primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     caption = models.TextField(default="No caption")
     # image = models.ImageField(upload_to='uploaded-images', storage=gd_storage)
     # image = models.ImageField(upload_to='uploaded-images/')
-    image = models.ImageField(upload_to='rewilding/images', storage=gc_storage)
+    image = models.ImageField(upload_to="rewilding/images", storage=gc_storage)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)    
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
-    
+
     @property
     def public_url(self):
         """
@@ -74,34 +81,37 @@ class MediaAttachment(models.Model):
         """
 
         url = self.image.url
-        return url.replace("https://storage.googleapis.com", "https://storage.cloud.google.com")
-    
+        return url.replace(
+            "https://storage.googleapis.com", "https://storage.cloud.google.com"
+        )
+
 
 class GoogleBucketAttachment(models.Model):
-    
-    id = models.AutoField( primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     # caption = models.TextField(default="No caption")
-    image = models.ImageField(upload_to='rewilding/images', storage=gc_storage)
+    image = models.ImageField(upload_to="rewilding/images", storage=gc_storage)
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
-    
+
 
 def get_image_filename(instance, filename):
     id = instance.post.id
     database_tag = os.environ.get("PROJECT_DB_TAG")
     if database_tag is None:
         raise ValueError("Missing required env: PROJECT_DB_TAG")
-    
+
     return f"rewilding/images/{database_tag}/{id}/{filename}"
 
 
 class Images(models.Model):
     post = models.ForeignKey(Post, default=None, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=get_image_filename, storage=gc_storage, verbose_name='Image')
+    image = models.ImageField(
+        upload_to=get_image_filename, storage=gc_storage, verbose_name="Image"
+    )
     caption = models.TextField(null=True, blank=True)
 
     @property
@@ -115,7 +125,9 @@ class Images(models.Model):
         """
 
         url = self.image.url
-        return url.replace("https://storage.googleapis.com", "https://storage.cloud.google.com")
+        return url.replace(
+            "https://storage.googleapis.com", "https://storage.cloud.google.com"
+        )
 
 
 class GpsCoordinates(models.Model):
@@ -125,7 +137,6 @@ class GpsCoordinates(models.Model):
     altitude = models.FloatField()
 
     def clean(self):
-
         super().clean()
 
         if not self.latitude:

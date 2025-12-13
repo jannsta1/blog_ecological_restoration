@@ -17,8 +17,6 @@ from google.oauth2 import service_account
 from common.utils import get_secret
 
 
-
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,7 +32,6 @@ DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]  # TODO - update for production
-
 
 
 # Application definition

@@ -1,17 +1,19 @@
 from PIL import Image
 from PIL.ExifTags import TAGS
 
+
 def get_gps_coordinates_from_meta_data(image_path):
-    # The path to the image 
+    # The path to the image
     image = Image.open(image_path)
     # image_path = "PXL_20250330_112845921.jpg"
 
     def decimal_coords(coords, ref):
-        decimal_degrees = float(coords[0]) + float(coords[1]) / 60 + float(coords[2]) / 3600
-        if ref == "S" or ref =='W' :
+        decimal_degrees = (
+            float(coords[0]) + float(coords[1]) / 60 + float(coords[2]) / 3600
+        )
+        if ref == "S" or ref == "W":
             decimal_degrees = -1 * decimal_degrees
         return decimal_degrees
-
 
     GPSINFO_TAG = next(tag for tag, name in TAGS.items() if name == "GPSInfo")
 
@@ -29,6 +31,6 @@ def get_gps_coordinates_from_meta_data(image_path):
     # lon = lon._numerator / lon._denominator
     alt = alt._numerator / alt._denominator
 
-    print(f'Lat: {lat} Lon: {lon} Alt: {alt}')
+    print(f"Lat: {lat} Lon: {lon} Alt: {alt}")
 
     return (lat, lon, alt)

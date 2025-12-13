@@ -1,5 +1,6 @@
 import os
 
+
 def get_secret(key):
     value = os.getenv(key)
 
@@ -8,5 +9,5 @@ def get_secret(key):
             return f.read()
     else:
         raise IOError(f"Secret file for {key} not found at {value}")
-    
+
     return value
