@@ -22,6 +22,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "djhtml>=3.0.10",
     "djlint>=1.36.4",
+    "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
+    "ruff>=0.14.9",
 ]
 # TODO
