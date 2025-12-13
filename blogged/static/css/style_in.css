@@ -21,11 +21,7 @@ p {
 }
 
 .navbar-content {
-  @apply text-white text-lg font-bold;
-}
-
-.navbar-content-smaller {
-  @apply text-white;
+  @apply text-white text-base  px-3 py-2 hover:bg-white/5 hover:text-white;
 }
 
 .login-form-field {
@@ -50,30 +46,30 @@ p {
 
 
 #image-preview-modal {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.25s ease-in-out;
-    position: fixed;
-    z-index: 1000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8);
-    justify-content: center;
-    align-items: center;
-    cursor: zoom-out;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
 }
 
 #image-preview-modal.show {
-    display: flex;
-    opacity: 1;
+  display: flex;
+  opacity: 1;
 }
 
 #image-preview-modal-img {
-    max-width: 90%;
-    max-height: 90%;
-    box-shadow: 0 0 10px #000;
-    border: 3px solid white;
-    border-radius: 4px;
+  max-width: 90%;
+  max-height: 90%;
+  box-shadow: 0 0 10px #000;
+  border: 3px solid white;
+  border-radius: 4px;
 }
 
 /* .navbar-text {

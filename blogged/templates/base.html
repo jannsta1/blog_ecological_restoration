@@ -7,26 +7,27 @@
     <meta name="description" content="A blog about ecological restoration." />
     <meta name="keywords" content="ecological, restoration, environment, nature" />
     <title>{% block title %}{% endblock title %}</title>
-    
+
     <link rel="stylesheet" href="{% static 'css/style_out.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon-leaves.png' %}" >
     <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>  -->
      {% comment %} <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> {% endcomment %}
     {% block head %}{% endblock head %}
-    </head>
-    <body>
-      {% include "partials/navbar.html" %}
-      
-      <main class="content">
-        {% block content %}{% endblock content %}
-      </main>
-      
+  </head>
+  <body>
+    {% include "partials/navbar.html" %}
+
+    <main class="content">
+      {% block content %}{% endblock content %}
+    </main>
+
       <!-- htmx library, added when trialing forms with htmx buttons -->
-      <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
-      
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
+
       <!-- flowbite - used for the image gallery -->
-      <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-      
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+
       {% comment %} <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> {% endcomment %}
 
   </body>

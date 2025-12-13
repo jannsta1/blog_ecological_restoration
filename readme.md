@@ -56,7 +56,6 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ## essential features
 - create proper account(s) for the blog login and postgresdb 
 --> add a dev database as well?
-- make sure that the impact map is working
 - remove blog comments
 ## desirable features
 - establish how to backup the data / export blog to e.g. json
@@ -75,10 +74,14 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
   - the navbar should be aligned left, except for login/logout which should be aligned right
   - improve blog post aesthetic
 - add a favicon.ico for the site
+- ensure that the cache is cleared when we update .css files
+- replace leaf-vector and favicon-leaves with my own logos
 ## security
 - squash our git history to remove any previsouly stored passwords
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
 - set CSRF_TRUSTED_ORIGINS to a safe value
+## Low priority
+- make sure that the impact map is working - the pins don't show for docker-compose-local.yml (not a production issue)
 ## Getting us on the internet
 - get a url
 - setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it
