@@ -33,6 +33,8 @@ SECRET_KEY = get_secret("SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]  # TODO - update for production
+
 
 
 # Application definition
@@ -169,7 +171,6 @@ GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = (
     "blog/rewilding/images"  # <base google drive path for file uploads>' # OPTIONAL
 )
 
-
 # STORAGES = {
 #     "default": {
 #         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
@@ -188,19 +189,27 @@ GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = (
 # }
 
 
-# google cloud
+# google cloud - https://django-storages.readthedocs.io/en/latest/backends/gcloud.html
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME")
 GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
-# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-#     os.environ.get("GS_CREDENTIALS_PATH")
-# )
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.environ.get("GS_CREDENTIALS_PATH")
+)
 
 # For public access to images, set this to publicRead.
-# GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images
+# GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images. Requires ACLs to be enabled on the bucket.
 # For private images, you might want to use signed URLs.
 GS_QUERYSTRING_AUTH = False  # Recommended for private images and when using signed URLs
 
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+
+# Check required envs exist
+required_envs = ["PROJECT_DB_TAG"]
+
+for env in required_envs:
+    if not os.environ.get(env):
+        raise ValueError(f"Missing required env variable: {env}")

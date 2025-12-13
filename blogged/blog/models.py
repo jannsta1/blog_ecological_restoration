@@ -1,3 +1,4 @@
+import os
 from django.db import models
 # from gdstorage.storage import GoogleDriveStorage
 from storages.backends.gcloud import GoogleCloudStorage
@@ -91,7 +92,11 @@ class GoogleBucketAttachment(models.Model):
 
 def get_image_filename(instance, filename):
     id = instance.post.id
-    return f"rewilding/images/{id}/{filename}"
+    database_tag = os.environ.get("PROJECT_DB_TAG")
+    if database_tag is None:
+        raise ValueError("Missing required env: PROJECT_DB_TAG")
+    
+    return f"rewilding/images/{database_tag}/{id}/{filename}"
 
 
 class Images(models.Model):

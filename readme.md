@@ -30,10 +30,13 @@ We recommend the use of the `direnv` package to store your envs in a local file 
 * using django with tailwind: https://medium.com/@bhuwan.pandey9867/django-with-tailwind-css-v4-5679d1f04b0d
 * htmx: https://htmx.org/docs/#introduction
 * htmx todo list: https://www.youtube.com/watch?v=XdZoYmLkQ4w
+* django TV: https://djangotv.com/
 
 # django project examples
+- compendium: https://github.com/wsvincent/awesome-django
 - sentry: https://github.com/getsentry/sentry
 - cookiecutter-django: https://github.com/cookiecutter/cookiecutter-django
+- wagtail (content management): https://github.com/wagtail/wagtail
 
 # setting up postgres on qnap
 https://rexbytes.com/2023/12/11/qnap-container-station-docker-setup-postgres/
@@ -51,9 +54,11 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 
 # TODO
 ## essential features
-- login to google cloud or create an alternative way to store data
 - create proper account(s) for the blog login and postgresdb 
+--> add a dev database as well?
+- login to google cloud or create an alternative way to store data
 - make sure that the impact map is working
+- remove blog comments
 ## desirable features
 - add precommit, black, ruff and mypy
 - establish how to backup the data / export blog to e.g. json
@@ -64,13 +69,18 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ---> uv build optimize
 ---> multistage build
 ---> take root access away from the production docker file
+- handle image upload failure scenario
+- post slug is a unique id rather than the blog title
 - add dark mode
+- add formatting options for blog posts
 - improve website aesthetic
   - the navbar should be aligned left, except for login/logout which should be aligned right
-  - 
+  - improve blog post aesthetic
+- add a favicon.ico for the site
 ## security
 - squash our git history to remove any previsouly stored passwords
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
+- set CSRF_TRUSTED_ORIGINS to a safe value
 ## Getting us on the internet
 - get a url
 - setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it

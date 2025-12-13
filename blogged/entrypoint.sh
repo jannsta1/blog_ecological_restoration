@@ -23,6 +23,8 @@ if [ $reset_django = true ] ; then
   echo "Preparing Django..."
   uv run blogged/manage.py flush --no-input
   uv run blogged/manage.py migrate
+else
+  echo "not meddling with django"
 fi
 
 exec "$@"

@@ -1,0 +1,1 @@
+docker exec -it <docker container id> uv run blogged/manage.py createsuperuser
