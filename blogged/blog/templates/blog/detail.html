@@ -3,45 +3,18 @@
 {% block title %}{{ post.title }}{% endblock %}
 
 {% block content %}
-    <h1 class="text-3xl">{{ post.title }}</h1>
+  <h1 class="text-3xl">{{ post.title }}</h1>
 
-    <span class="text-sm text-gray-500">{{ post.date |date:'d.m.Y' }}</span>
+  <span class="text-sm text-gray-500">{{ post.date |date:'d.m.Y' }}</span>
 
-    <div class="mt-8 text-lg">
-        {{ post.content }}
-    </div>
+  <div class="mt-8 text-lg">
+    {{ post.content }}
+  </div>
 
+  <hr class="my-8">
+  {% if post_images %}
+    {% include 'blog/partials/image_gallery.html' with images=post_images %}
     <hr class="my-8">
-    {% if post_images %}
-        {% include 'blog/partials/image_gallery.html' with images=post_images %}
-        <hr class="my-8">
-    {% endif %}
+  {% endif %}
 
-    <div class="mt-8">
-        <form method="post" action="." class="space-y-4">
-            {% csrf_token %}
-
-            {{ form.as_p }}
-
-            <button type="submit" class="px-4 py-2 bg-emerald-700 text-white">Add Comment</button>
-        </form>
-
-
-        <hr class="my-8">
-
-        {% for comment in post.comments.all %}
-            <div class="py-4 px-6 bg-gray-100">
-                <h3 class="font-bold">{{ comment.name }} @ {{ comment.created_at|timesince }} ago </h3>
-
-                <p>{{ comment.content }}</p>
-            </div>
-        {% empty %}
-            <div class="py-4 px-6 bg-gray-100">
-                <p>No comments yet</p>
-            </div>            
-        {% endfor %}
-
-
-
-    </div>
 {% endblock %}

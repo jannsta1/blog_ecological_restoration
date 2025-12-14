@@ -56,7 +56,6 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ## essential features
 - create proper account(s) for the blog login and postgresdb 
 --> add a dev database as well?
-- remove blog comments
 ## desirable features
 - establish how to backup the data / export blog to e.g. json
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?

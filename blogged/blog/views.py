@@ -1,12 +1,19 @@
 import json
 
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.http import JsonResponse
-
-from .models import Images, Post, MediaAttachment
-from .forms import ImageFormSet, GpsFormSet, GpsCoordinates, CommentForm, PostForm
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import render
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
+
+from .forms import GpsCoordinates
+from .forms import GpsFormSet
+from .forms import ImageFormSet
+from .forms import PostForm
+from .models import Images
+from .models import MediaAttachment
+from .models import Post
 
 
 def index(request):
@@ -16,25 +23,13 @@ def index(request):
 
 def detail(request, slug):
     post = get_object_or_404(Post, slug=slug)
-
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.save()
-
-            return redirect("detail", slug=slug)
-    else:
-        form = CommentForm()
-        post_images = Images.objects.all().filter(post=post)
+    post_images = Images.objects.all().filter(post=post)
 
     return render(
         request,
         "blog/detail.html",
         {
             "post": post,
-            "form": form,
             "post_images": post_images,
         },
     )

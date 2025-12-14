@@ -1,11 +1,10 @@
 import os
-from django.db import models
-
-# from gdstorage.storage import GoogleDriveStorage
-from storages.backends.gcloud import GoogleCloudStorage
 
 from django.core.exceptions import ValidationError
+from django.db import models
 from django.template.defaultfilters import slugify
+from storages.backends.gcloud import GoogleCloudStorage
+# from gdstorage.storage import GoogleDriveStorage
 
 
 # Define Google Drive Storage
@@ -40,21 +39,6 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class Comment(models.Model):
-    post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = [
-            "-created_at",
-        ]
-
-    def __str__(self):
-        return f"{self.name} - {self.post.title}"
 
 
 class MediaAttachment(models.Model):

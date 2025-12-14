@@ -1,30 +1,19 @@
-from django.forms import (
-    ModelForm,
-    TextInput,
-    FileField,
-    Textarea,
-    FileInput,
-    ClearableFileInput,
-    NumberInput,
-)
-from django.forms import inlineformset_factory, BaseInlineFormSet
-from django.forms.formsets import DELETION_FIELD_NAME
-
-
 from datetime import datetime
 
-from .models import Comment, Post, Images, GpsCoordinates
+from django.forms import BaseInlineFormSet
+from django.forms import ClearableFileInput
+from django.forms import FileField
+from django.forms import FileInput
+from django.forms import inlineformset_factory
+from django.forms import ModelForm
+from django.forms import NumberInput
+from django.forms import Textarea
+from django.forms import TextInput
+from django.forms.formsets import DELETION_FIELD_NAME
 
-
-class CommentForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(CommentForm, self).__init__(*args, **kwargs)
-        self.fields["name"].widget.attrs.update({"class": "w-full py-4 bg-gray-100"})
-        self.fields["content"].widget.attrs.update({"class": "w-full py-4 bg-gray-100"})
-
-    class Meta:
-        model = Comment
-        fields = ["name", "content"]
+from .models import GpsCoordinates
+from .models import Images
+from .models import Post
 
 
 class PostForm(ModelForm):
@@ -118,20 +107,6 @@ GpsFormSet = inlineformset_factory(
     can_delete=True,
     formset=GpsInlineFormSet,
 )
-
-
-# class ImageForm(ModelForm):
-
-#     image = MultipleFileField(label='Select images', required=False)
-
-#     class Meta:
-#         model = Images
-#         fields = ('image', 'caption')
-#         widgets = {
-#             'caption': Textarea(attrs={'class': 'form-text-field', 'rows': 3}),
-#             # 'title': TextInput(attrs={'class': 'w-full py-2 bg-gray-100'}),
-#             # 'caption': TextInput(attrs={'class': 'w-full py-2 bg-gray-100'}),
-#         }
 
 
 class ImageInlineFormSet(BaseInlineFormSet):
