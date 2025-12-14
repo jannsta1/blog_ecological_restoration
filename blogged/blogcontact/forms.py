@@ -7,17 +7,17 @@ class ContactForm(forms.Form):
 
     email = forms.EmailField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Your e-mail", "class": "w-full p-4 bg-gray-100"}
+            attrs={"placeholder": "Your e-mail", "class": "form-text-field block w-full"}
         )
     )
     subject = forms.CharField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Subject", "class": "w-full p-4 bg-gray-100"}
+            attrs={"placeholder": "Subject", "class": "form-text-field block w-full"}
         )
     )
     message = forms.CharField(
         widget=forms.Textarea(
-            attrs={"placeholder": "Your message", "class": "w-full p-4 bg-gray-100"}
+            attrs={"placeholder": "Your message", "class": "form-text-field block w-full"}
         )
     )
 

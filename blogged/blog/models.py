@@ -40,36 +40,6 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
-
-class MediaAttachment(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    caption = models.TextField(default="No caption")
-    # image = models.ImageField(upload_to='uploaded-images', storage=gd_storage)
-    # image = models.ImageField(upload_to='uploaded-images/')
-    image = models.ImageField(upload_to="rewilding/images", storage=gc_storage)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def public_url(self):
-        """
-        For the google cloud API there is the 'public' and 'authenticated' address for images.
-
-        Experiments showed that the authenticated API is stored by django-storage but only the public address is accessible.
-        This properties provides a way to access the working public address.
-
-        """
-
-        url = self.image.url
-        return url.replace(
-            "https://storage.googleapis.com", "https://storage.cloud.google.com"
-        )
-
-
 class GoogleBucketAttachment(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)

@@ -12,7 +12,6 @@ from .forms import GpsFormSet
 from .forms import ImageFormSet
 from .forms import PostForm
 from .models import Images
-from .models import MediaAttachment
 from .models import Post
 
 
@@ -36,7 +35,8 @@ def detail(request, slug):
 
 
 def blog_image_gallery(request):
-    images = MediaAttachment.objects.all()
+    images = Images.objects.all()
+    print(f"Number of images: {len(images)}")
     return render(request, "blog/blog-image-gallery.html", {"images": images})
 
 
