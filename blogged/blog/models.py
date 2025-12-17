@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.template.defaultfilters import slugify
 from storages.backends.gcloud import GoogleCloudStorage
+from django.urls import reverse
 # from gdstorage.storage import GoogleDriveStorage
 
 
@@ -24,13 +25,14 @@ class Post(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        We create the slug automatically from the title
-
-        TODO - might be better just to use an ID rather than slug?:
-        https://learndjango.com/tutorials/django-slug-tutorial#:~:text=The%20best%20solution%20is%20to,be%20applied%20to%20the%20serializer.
+        We create the slug automatically from the title        
         """
-        self.slug = slugify(getattr(self, "title"))
+        if not self.slug:
+            self.slug = slugify(getattr(self, "title"))
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("article_detail", kwargs={"slug": self.slug, "id": self.pk})
 
     class Meta:
         ordering = [
@@ -39,17 +41,6 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-
-class GoogleBucketAttachment(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255)
-    # caption = models.TextField(default="No caption")
-    image = models.ImageField(upload_to="rewilding/images", storage=gc_storage)
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
 
 
 def get_image_filename(instance, filename):

@@ -9,7 +9,7 @@ urlpatterns = [
     path("upload-location/", views.upload_location, name="upload-location"),
     path("upload-image/", views.upload_image, name="upload-image"),
     path("extract-gps-coordinates-script/", views.handle_extract_gps_coords),
-    path("<slug:slug>/", views.detail, name="detail"),
+    path("article/<slug:slug>-<int:id>/", views.detail, name="detail"),
     path("", views.index, name="index"),
 ]
 

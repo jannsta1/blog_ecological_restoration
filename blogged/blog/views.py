@@ -20,8 +20,8 @@ def index(request):
     return render(request, "index.html", {"posts": posts})
 
 
-def detail(request, slug):
-    post = get_object_or_404(Post, slug=slug)
+def detail(request, slug, id):
+    post = get_object_or_404(Post, slug=slug, id=id)
     post_images = Images.objects.all().filter(post=post)
 
     return render(

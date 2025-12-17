@@ -31,12 +31,15 @@ We recommend the use of the `direnv` package to store your envs in a local file 
 * htmx: https://htmx.org/docs/#introduction
 * htmx todo list: https://www.youtube.com/watch?v=XdZoYmLkQ4w
 * django TV: https://djangotv.com/
+* django podcasts: https://djangochat.com/episodes
+* slugifying article ids: https://learndjango.com/tutorials/django-slug-tutorial#:~:text=The%20best%20solution%20is%20to,be%20applied%20to%20the%20serializer.
 
 # django project examples
 - compendium: https://github.com/wsvincent/awesome-django
 - sentry: https://github.com/getsentry/sentry
 - cookiecutter-django: https://github.com/cookiecutter/cookiecutter-django
-- wagtail (content management): https://github.com/wagtail/wagtail
+- wagtail: (content management): https://github.com/wagtail/wagtail
+- saleor: https://github.com/saleor/saleor
 
 # setting up postgres on qnap
 https://rexbytes.com/2023/12/11/qnap-container-station-docker-setup-postgres/
@@ -56,37 +59,42 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ## essential features
 - create proper account(s) for the blog login and postgresdb 
 --> add a dev database as well?
-## desirable features
-- establish how to backup the data / export blog to e.g. json
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
-- remove "node_modules" folder from github
+## desirable features
+- add a tags field to the articles (e.g. tree-planting)
+- add an organisation field to the articles (e.g. borders forest trust)
+- establish how to backup the data
+---> pgdump to google bucket, weekly task?
+---> how to store X previous backups?
 - website stats - traffic, where logged in from?
-- optimise docker build further & make safe
----> uv build optimize
----> multistage build
----> take root access away from the production docker file
-- handle image upload failure scenario
 - post slug is a unique id rather than the blog title
-- add dark mode
 - add formatting options for blog posts
 - improve website aesthetic
-  - the navbar should be aligned left, except for login/logout which should be aligned right
-  - improve blog post aesthetic
-- add a favicon.ico for the site
-- ensure that the cache is cleared when we update .css files
-- replace leaf-vector and favicon-leaves with my own logos
+  - add dark mode
+  - home page tiles to include photos
+- hookup email account to contact form
+- add "about the author" page
 ## security
-- squash our git history to remove any previsouly stored passwords
+- squash our git history to remove any previsouly stored passwords - .gitignore .envrc, remove from repo and squash history
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
 - set CSRF_TRUSTED_ORIGINS to a safe value
+- create non-root user for .prod Docker file
+- review all TODOs
+- setup SSL on prod
+## tasks
+- setup celery or similar for periodic tasks
+- periodic task to remove empty folders on gcloud (e.g. if we've deleted blog records - the image folders persist)
 ## Low priority
+- make our own .svg icons for favicon.ico and website logo
 - make sure that the impact map is working - the pins don't show for docker-compose-local.yml (not a production issue)
+- optimise docker build further - multi stage build, Nuitka
+- ensure that the cache is cleared when we update .css files
+- handle image upload failure scenario
+## refactoring
 ## Getting us on the internet
 - get a url
 - setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it
 - expose webserver to the internet
-
-## .gitignore .envrc, remove from repo and squash history
 
 ## handle warning about GCP API error
 /home/jan/dev/blog_ecological_restoration/.venv/lib/python3.13/site-packages/google/auth/_default.py:108: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 
