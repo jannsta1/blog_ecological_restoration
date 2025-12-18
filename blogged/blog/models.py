@@ -15,20 +15,24 @@ gc_storage = GoogleCloudStorage()
 
 # Create your models here.
 class Post(models.Model):
+    MAX_SLUG_LENGTH = 60
+
     title = models.CharField(max_length=255)
     date = models.DateField()
     slug = models.SlugField(
-        null=False, unique=True
-    )  # TODO - use a uid or something instead to allow blog posts with the same title?
+        null=False,
+        max_length=MAX_SLUG_LENGTH,
+        # unique=True,  NOTE - we instead protect against duplicates by having the Post id in the URL
+    )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         """
-        We create the slug automatically from the title        
+        We create the slug automatically from the title - the spaces are replaced with hyphens and it is truncated to MAX_SLUG_LENGTH.
         """
         if not self.slug:
-            self.slug = slugify(getattr(self, "title"))
+            self.slug = slugify(getattr(self, "title"))[:self.MAX_SLUG_LENGTH]
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):

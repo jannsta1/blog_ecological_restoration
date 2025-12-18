@@ -33,10 +33,12 @@ dev = [
 
 [tool.pytest.ini_options]
 # django_find_project = false
-# pythonpath = ".blogged"
+pythonpath = [".", "blogged"]
 DJANGO_SETTINGS_MODULE = "tests.settings"
-addopts = [
-    "--create-db",
-    # --reuse-db
-]
-
+# addopts = [
+#     "--maxfail 1 --reuse-db"
+#     # --reuse-db,
+#     # "--create-db",
+# ]
+testpaths = "tests"
+markers = ["asyncio: asyncio mark"] # https://github.com/jonghwanhyeon/python-ffmpeg/issues/21

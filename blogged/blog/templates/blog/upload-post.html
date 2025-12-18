@@ -376,10 +376,10 @@ document.addEventListener('DOMContentLoaded', function () {
         xhr.onload = function () {
             if (xhr.status === 200) {
                 // You could redirect or show a success message here
-                alert('Upload complete!');
+                console.log('Image upload complete!');
                 window.location.reload();
             } else {
-                alert('Upload failed!');
+                console.log('Image apload failed!');
             }
         };
 

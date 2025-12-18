@@ -6,13 +6,11 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
+from django.core.exceptions import BadRequest
+from django.contrib.auth.decorators import login_required
 
-from .forms import GpsCoordinates
-from .forms import GpsFormSet
-from .forms import ImageFormSet
-from .forms import PostForm
-from .models import Images
-from .models import Post
+from blog.forms import GpsCoordinates, GpsFormSet, ImageFormSet, PostForm
+from blog.models import Images, Post
 
 
 def index(request):
@@ -40,8 +38,9 @@ def blog_image_gallery(request):
     return render(request, "blog/blog-image-gallery.html", {"images": images})
 
 
-# TODO # @login_required
+@login_required
 def upload_post(request):
+
     if request.method == "POST":
         post_form = PostForm(request.POST)
         gps_formset = GpsFormSet(
@@ -50,25 +49,29 @@ def upload_post(request):
         image_formset = ImageFormSet(request.POST, request.FILES, prefix="images")
 
         if post_form.is_valid() and gps_formset.is_valid() and image_formset.is_valid():
-            post = post_form.save()
-            gps_formset.instance = post
-            gps_formset.save()
-            image_formset.instance = post
-            image_formset.save()
-            messages.success(request, "Post succesfully added")
+            try:
+                post = post_form.save()
+                gps_formset.instance = post
+                gps_formset.save()
+                image_formset.instance = post
+                image_formset.save()
+                messages.info(request, "Post succesfully added")
+                print(request, "Post succesfully added")
+            except Exception as e:
+                # TODO - remove any partially saved data? e.g. if form saving gps_formset fails after post is saved
+                messages.error(request, f"Error saving post: {e}")  
+                print(request, f"Error saving post: {e}")  
+                raise BadRequest(f"Error saving post: {e}")
 
         else:
             if not post_form.is_valid():
-                print("Error in post form!")
-                print(post_form.errors)
+                messages.error(request, f"Post form errors: {post_form.errors}")
             if not gps_formset.is_valid():
-                print(gps_formset.errors)
-                print("Error in GPS form!")
+                messages.error(request, f"GPS form errors: {gps_formset.errors}")
             if not image_formset.is_valid():
-                print("Error in Image form!")
-                print(image_formset.errors)
+                messages.error(request, f"Image form errors: {image_formset.errors}")
 
-        return redirect("index")
+        return redirect("upload-post")  # TODO - redirect to the new post detail page
 
     post_form = PostForm()
     gps_formset = GpsFormSet(queryset=GpsCoordinates.objects.none(), prefix="gps")
