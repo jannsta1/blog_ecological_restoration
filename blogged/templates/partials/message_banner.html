@@ -1,0 +1,24 @@
+{% if messages %}
+<div id="bottom-banner" tabindex="-1" class="fixed bottom-0 start-0 z-50 flex justify-between w-full p-2 border-t border-default bg-red-300">
+
+    <div class="flex items-center mx-auto">
+        
+        <ul class="messages">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+                <span class="flex items-center justify-center ms-0 text-sm font-medium text-fg-brand md:ms-1 md:inline-flex">{{ message }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        
+    </div>
+
+    <div class="flex items-center">
+        <button data-dismiss-target="#bottom-banner" type="button" class="shrink-0 inline-flex justify-center text-sm w-7 h-7 items-center text-body hover:bg-neutral-tertiary hover:text-heading rounded-sm">
+            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/></svg>
+            <span class="sr-only">Close banner</span>
+        </button>
+    </div>
+</div>
+{% endif %}

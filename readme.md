@@ -39,7 +39,8 @@ We recommend the use of the `direnv` package to store your envs in a local file 
 - sentry: https://github.com/getsentry/sentry
 - cookiecutter-django: https://github.com/cookiecutter/cookiecutter-django
 - wagtail: (content management): https://github.com/wagtail/wagtail
-- saleor: https://github.com/saleor/saleor
+- saleor: https://github.com/saleor/saleor (pytest, celery)
+- jewly: https://github.com/m1ndvortex/jewely (pytest, celery, redis, documentation)
 
 # setting up postgres on qnap
 https://rexbytes.com/2023/12/11/qnap-container-station-docker-setup-postgres/
@@ -61,6 +62,7 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 --> add a dev database as well?
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 ## desirable features
+- take a look at: https://github.com/m1ndvortex/jewely/tree/main?tab=readme-ov-file
 - add a tags field to the articles (e.g. tree-planting)
 - add an organisation field to the articles (e.g. borders forest trust)
 - establish how to backup the data
@@ -74,6 +76,7 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
   - home page tiles to include photos
 - hookup email account to contact form
 - add "about the author" page
+- add the "how toos" page
 ## security
 - squash our git history to remove any previsouly stored passwords - .gitignore .envrc, remove from repo and squash history
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html

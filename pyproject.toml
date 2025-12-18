@@ -26,5 +26,17 @@ dev = [
     "djlint>=1.36.4",
     "mypy>=1.19.0",
     "pre-commit>=4.5.0",
+    "pytest>=9.0.2",
+    "pytest-django>=4.11.1",
     "ruff>=0.14.9",
 ]
+
+[tool.pytest.ini_options]
+# django_find_project = false
+# pythonpath = ".blogged"
+DJANGO_SETTINGS_MODULE = "tests.settings"
+addopts = [
+    "--create-db",
+    # --reuse-db
+]
+
