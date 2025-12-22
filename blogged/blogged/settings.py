@@ -37,6 +37,8 @@ CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]  # TODO - update for production
 # Application definition
 
 INSTALLED_APPS = [
+    'dal',
+    'dal_select2',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

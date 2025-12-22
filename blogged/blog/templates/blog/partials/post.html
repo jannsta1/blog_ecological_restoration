@@ -1,4 +1,26 @@
 <div class="p-6 bg-gray-100">   
     <h2 class="">{{ post.title }}</h2>
     <a href="{% url 'detail' post.slug  post.pk %}" class="text-emerald-700">Read more</a>
+
+    {% if post.organisation_tags.all %}  
+    <br>
+    <small>
+        <b>Organisations: </b>
+        {% for tag in post.organisation_tags.all %}  
+            {{ tag.name }},
+        {% endfor %}
+    </small>
+    {% endif %}
+    
+    {% if post.activities_tag.all %}  
+    <br>
+    <small>
+        <b>Activities: </b>
+        {% for tag in post.activities_tag.all %}  
+        {{ tag.name }},
+        {% endfor %}
+    </small>
+    {% endif %}
+    
+        {% comment %} <a>org_tag.name</a> {% endcomment %}
 </div>

@@ -8,9 +8,11 @@ from django.shortcuts import render
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
 from django.core.exceptions import BadRequest
 from django.contrib.auth.decorators import login_required
+from dal import autocomplete
+from django.utils.html import format_html
 
 from blog.forms import GpsCoordinates, GpsFormSet, ImageFormSet, PostForm
-from blog.models import Images, Post
+from blog.models import Images, Post, Activity, Organisation
 
 
 def index(request):
@@ -36,6 +38,46 @@ def blog_image_gallery(request):
     images = Images.objects.all()
     print(f"Number of images: {len(images)}")
     return render(request, "blog/blog-image-gallery.html", {"images": images})
+
+class OrganisationAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_result_label(self, result):
+        return format_html('<span style="font-weight: bold;">{}</span>', result.name)
+    
+    def get_selected_result_label(self, item):
+        return item.name
+
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Organisation.objects.none()
+
+        qs = Organisation.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+class ActivityAutocomplete(autocomplete.Select2QuerySetView):
+
+    def get_result_label(self, result):
+        return format_html('<span style="font-weight: bold;">{}</span>', result.name)
+    
+    def get_selected_result_label(self, item):
+        return item.name
+
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return Activity.objects.none()
+
+        qs = Activity.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
 
 
 @login_required
@@ -66,10 +108,13 @@ def upload_post(request):
         else:
             if not post_form.is_valid():
                 messages.error(request, f"Post form errors: {post_form.errors}")
+                print(request, f"Post form errors: {post_form.errors}")
             if not gps_formset.is_valid():
                 messages.error(request, f"GPS form errors: {gps_formset.errors}")
+                print(request, f"GPS form errors: {gps_formset.errors}")
             if not image_formset.is_valid():
                 messages.error(request, f"Image form errors: {image_formset.errors}")
+                print(request, f"Image form errors: {image_formset.errors}")
 
         return redirect("upload-post")  # TODO - redirect to the new post detail page
 

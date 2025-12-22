@@ -6,6 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent / "blogged"
 # ROOT_URLCONF = "spice_orgs.tests.urls"
 SECRET_KEY = os.environ.get("SECRET_KEY", "TEST_KEY")
 INSTALLED_APPS = [
+    'dal', # must be imported before contrib.admin
+    'dal_select2', # must be imported before contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

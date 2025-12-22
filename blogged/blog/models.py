@@ -12,6 +12,17 @@ from django.urls import reverse
 # gd_storage = GoogleDriveStorage()
 gc_storage = GoogleCloudStorage()
 
+class Activity(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Organisation(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 # Create your models here.
 class Post(models.Model):
@@ -26,6 +37,9 @@ class Post(models.Model):
     )
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    activities_tag = models.ManyToManyField(Activity, blank=True, related_name='custom_activity_tags')
+    organisation_tags = models.ManyToManyField(Organisation, blank=True, related_name='custom_organisation_tags')
 
     def save(self, *args, **kwargs):
         """

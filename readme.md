@@ -63,8 +63,7 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 ## desirable features
 - take a look at: https://github.com/m1ndvortex/jewely/tree/main?tab=readme-ov-file
-- add a tags field to the articles (e.g. tree-planting)
-- add an organisation field to the articles (e.g. borders forest trust)
+- filter articles on the home page based on tags: https://www.youtube.com/watch?v=Wy3yrZ-bbvE (this video uses alpine, alternatives may be possible)
 - establish how to backup the data
 ---> pgdump to google bucket, weekly task?
 ---> how to store X previous backups?

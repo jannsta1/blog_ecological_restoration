@@ -9,21 +9,47 @@ from django.forms import ModelForm
 from django.forms import NumberInput
 from django.forms import Textarea
 from django.forms import TextInput
+from django.forms import ModelMultipleChoiceField
 from django.forms.formsets import DELETION_FIELD_NAME
+from dal import autocomplete
+
 
 from .models import GpsCoordinates
 from .models import Images
 from .models import Post
+from .models import Activity, Organisation
 
 
 class PostForm(ModelForm):
+    
+    organisation_tags = ModelMultipleChoiceField(
+        queryset=Organisation.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(url='organisation-tag-autocomplete',
+                                         attrs={
+                                             'data-html': True,
+                                             'class': 'form-text-field block w-full',
+                                         }),
+        # label='My activity label'
+    )
+    activities_tag = ModelMultipleChoiceField(
+        queryset=Activity.objects.all(),
+        required=False,
+        widget=autocomplete.ModelSelect2Multiple(url='activity-tag-autocomplete',
+                                         attrs={
+                                             'data-html': True,
+                                             'class': 'form-text-field block w-full',
+                                         }),
+        # label='My activity label'
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.initial["date"] = datetime.today().date()
 
     class Meta:
         model = Post
-        fields = ("title", "date", "content")
+        fields = ("title", "date", "content", "organisation_tags", "activities_tag")
         widgets = {
             "title": TextInput(attrs={"class": "form-text-field block w-full"}),
             # 'date': DatePickerInput(),
@@ -34,7 +60,7 @@ class PostForm(ModelForm):
             #                          'placeholder': 'YYYY-MM-DD'}),
             "content": Textarea(attrs={"class": "form-text-field block w-full"}),
         }
-
+        required_fields = ["title", "date", "content"]
 
 class MultipleFileInput(ClearableFileInput):
     allow_multiple_selected = True
