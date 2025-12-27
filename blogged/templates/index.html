@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-
 {% block title %}Jan's rewilding blog{% endblock %}
 
 {% block content %}
@@ -17,9 +16,74 @@
 
     <h1>Recent blog posts</h1>
 
-    <div class="grid grid-cols-3 gap-6">
-        {% for post in posts %}
-            {% include 'blog/partials/post.html' %}
-        {% endfor %}
+        
+    <div class="grid grid-cols-2 gap-2 mb-4">
+        <div class="p-2 content-center ">
+            <label for="org-select">Filter by Organisation:</label>
+            {% comment %} <select id="org-select" name="organisation-select" onchange="update_org()"> {% endcomment %}
+            <select id="org-select">
+                <option value="all">All</option>
+                {% for org_tag in organisation_tags %}
+                    <option value="{{ org_tag.id }}">{{ org_tag.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="p-2 content-center ">
+            <label for="activity-select">Filter by Activity:</label>
+            <select id="activity-select">
+                <option value="all">All</option>
+                {% for activity_tag in activity_tags %}
+                    <option value="{{ activity_tag.id }}">{{ activity_tag.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
-{% endblock %}
+
+    <div id="post-grid" class="grid grid-cols-3 gap-6">
+        {% for post in posts %}
+        {% include 'blog/partials/post.html' %}
+        {% endfor %}
+    </div>         
+    
+    <script>
+        
+        const selectEl = document.getElementById("org-select");
+        const selectE2 = document.getElementById("activity-select");
+        const gridEl = document.getElementById("post-grid");
+        
+        selectEl.addEventListener("change", function() {
+            updatePosts()
+        });
+        selectE2.addEventListener("change", function() {
+            updatePosts()
+        });
+
+        function updatePosts() {
+
+            const orgId = selectEl.value
+            const activityId = selectE2.value
+            
+            fetch(`/api/posts/?organisation_id=${orgId}&activity_id=${activityId}`)
+            .then(response => response.json())
+            .then(data => {
+                
+                gridEl.innerHTML = ""; // Clear current posts
+                
+                data.posts.forEach(post => {
+                    const card = document.createElement("div");
+                    card.classList.add("card");
+                    card.innerHTML = `
+                    <h2>${post.title}</h2>
+                    <a href=article/${post.slug}-${post.id} class="text-emerald-700">Read more...</a>
+                    <p>${post.content}</p>
+                    `;
+                    gridEl.appendChild(card);
+                });
+                
+            })
+            .catch(err => console.error(err));
+        }
+        
+    </script>
+    
+{% endblock content %}

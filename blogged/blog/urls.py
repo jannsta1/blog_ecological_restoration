@@ -1,4 +1,6 @@
 from django.urls import path
+
+from blog.api_views import PostListAPI
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -24,6 +26,7 @@ urlpatterns = [
         name='organisation-tag-autocomplete',
     ),
     path("", views.index, name="index"),
+    path("api/posts/", PostListAPI.as_view(), name="api_post_filter"),
 ]
 
 # these settings should not be used in prod

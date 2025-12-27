@@ -68,7 +68,6 @@ Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django
 ---> pgdump to google bucket, weekly task?
 ---> how to store X previous backups?
 - website stats - traffic, where logged in from?
-- post slug is a unique id rather than the blog title
 - add formatting options for blog posts
 - improve website aesthetic
   - add dark mode

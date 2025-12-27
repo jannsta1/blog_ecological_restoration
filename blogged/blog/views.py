@@ -17,7 +17,11 @@ from blog.models import Images, Post, Activity, Organisation
 
 def index(request):
     posts = Post.objects.all()
-    return render(request, "index.html", {"posts": posts})
+    
+    organisation_tags = Organisation.objects.all()
+    activity_tags = Activity.objects.all()
+
+    return render(request, "index.html", {"posts": posts, "organisation_tags": organisation_tags, "activity_tags": activity_tags})
 
 
 def detail(request, slug, id):
