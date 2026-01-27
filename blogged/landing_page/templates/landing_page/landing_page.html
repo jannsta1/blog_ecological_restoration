@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Jan's Ecologigcal Restoration Blog{% endblock title %}
+
+{% block content %}
+
+  <div class="flex items-center justify-center" style="min-height: calc(100vh - var(--header-height, 100px) - var(--footer-height, 100px));">
+    {% comment %} <div class="static text-center max-w-4xl px-4 bg-[url(../images/frosty_trees.jpg)] opacity-10">
+    </div> {% endcomment %}
+    <div class="text text-center max-w-4xl px-4 space-x-8 text-lg leading-relaxed my-6">
+      <h1 class="text-4xl mb-6 font-semibold text-center">Jan's Ecological Restoration Blog</h1>
+      <p class="my-6">Welcome to my blog in ecological restoration!!!</p>
+      <p class="my-6">
+        The motivation for this blog page is to record participation in ecological restoration activities.
+        By tracking activities and returning to their sites over time, I hope to learn which interventions are effective.
+        A summary of the impact of activities to-date can be found on the <a href="{% url 'impact-map' %}" class="text-[var(--color-primary)] font-bold">Impact</a> page.
+      </p>
+      {% comment %} <p class="my-6">
+      There is also an attempt to quantify the environmental costs and benefits of ecological interventions in order to evaluate the effectiveness.
+      </p> {% endcomment %}
+      <p class="my-6">
+      I also aim to provide an idea of what to expect at a volunteering session with different organisations, as an aid for those who may be considering giving it a go. 
+      Such readers may wish to visit the <a href="{% url 'blog_listing' %}" class="text-[var(--color-primary)] font-bold">Blog</a>.
+      {% comment %} Photos taken to record planting sites, often not the most beautiful! But give an impression of the landscape and different sites
+      I try to document any learnings in "howto" guides for the interested reader. {% endcomment %}
+    </p>
+    <p>
+    Please don't hesistate to contact me with any questions or feedback via the <a href="{% url 'blog_listing' %}" class="text-[var(--color-primary)] font-bold">Contact</a> page.
+  </p>
+    </div>
+  </div>
+
+{% endblock content %}

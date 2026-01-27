@@ -1,0 +1,52 @@
+[project]
+name = "blog-ecological-restoration"
+version = "0.1.0"
+description = "Add your description here"
+readme = "readme.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2.8",
+    "django-autocomplete-light>=3.12.1",
+    "django-flatpickr>=2.0.3",
+    # "django-googledrive-storage>=1.6.0", # google drive option
+    "django-formset>=2.1.4",
+    "django-imagekit>=6.0.0",
+    "django-polymorphic>=4.10.3",
+    "django-storages>=1.14.6",
+    "django-taggit>=6.1.0",
+    "djangorestframework>=3.16.1",
+    "google-api-python-client>=2.187.0",
+    "google-cloud-storage>=3.3.1", # google bucket option
+    "gunicorn>=23.0.0",
+    "markdown>=3.10",
+    "pillow>=12.0.0",
+    "psycopg2-binary>=2.9.11",
+    "python-decouple>=3.8",
+]
+
+[dependency-groups]
+dev = [
+    "djhtml>=3.0.10",
+    "djlint>=1.36.4",
+    "mypy>=1.19.0",
+    "pre-commit>=4.5.0",
+    "pytest>=9.0.2",
+    "pytest-django>=4.11.1",
+    "ruff>=0.14.9",
+    "django-extensions>=4.1",
+    "pydot>=4.0.1",
+    "pyparsing>=3.2.5",
+    "pygraphviz>=1.14",
+]
+
+[tool.pytest.ini_options]
+# django_find_project = false
+pythonpath = [".", "blogged"]
+DJANGO_SETTINGS_MODULE = "settings.test"
+# addopts = [
+#     "--maxfail 1 --reuse-db"
+#     # --reuse-db,
+#     # "--create-db",
+# ]
+testpaths = "tests"
+markers = ["asyncio: asyncio mark"] # https://github.com/jonghwanhyeon/python-ffmpeg/issues/21

@@ -1,0 +1,62 @@
+{
+    "Fraxinus excelsior": {
+        "common_name": "European Ash",
+        "genus": "Fraxinus",
+        "specific_epithet": "excelsior"
+    },
+    "Quercus robur": {
+        "common_name": "English Oak",
+        "genus": "Quercus",
+        "specific_epithet": "robur"
+    },
+    "Betula nana": {
+        "common_name": "Dwarf Birch",
+        "genus": "Betula",
+        "specific_epithet": "nana"
+    },
+    "Betula pendula": {
+        "common_name": "Silver Birch",
+        "genus": "Betula",
+        "specific_epithet": "pendula"
+    },
+    "Betula pubescens": {
+        "common_name": "Downy Birch",
+        "genus": "Betula",
+        "specific_epithet": "pubescens"
+    },
+    "Alnus glutinosa": {
+        "common_name": "Black Alder",
+        "genus": "Alnus",
+        "specific_epithet": "glutinosa"
+    },
+    "Populus Tremula": {
+        "common_name": "Aspen",
+        "genus": "Populus",
+        "specific_epithet": "Tremula"
+    },
+    "Salix lapponum": {
+        "common_name": "Downy Willow",
+        "genus": "Salix",
+        "specific_epithet": "lapponum"
+    },
+    "Salix phylicifolia": {
+        "common_name": "tea-leaved willow",
+        "genus": "Salix",
+        "specific_epithet": "phylicifolia"
+    },
+    "Salix caprea": {
+        "common_name": "Goat Willow",
+        "genus": "Salix",
+        "specific_epithet": "caprea"
+    },
+    "Corylus avellana": {
+        "common_name": "Common Hazel",
+        "genus": "Corylus",
+        "specific_epithet": "avellana"
+    },
+    "Vibernum opulus": {
+        "common_name": "Geulder rose",
+        "genus": "Viburnum",
+        "specific_epithet": "opulus"
+    }
+}

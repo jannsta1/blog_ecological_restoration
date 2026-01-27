@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Impact Dashboard{% endblock title %}
+
+{% block head %}
+
+  <style>
+    gmp-map {
+      height: 100%;
+    }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+    <!-- NOTE: The API key is restricted by restricting valid ip addresses, see: https://cloud.google.com/docs/authentication/api-keys#console_3 -->    
+    <!-- TODO: create a separate production API key -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&loading=async&callback=initMap"
+    async
+    defer
+  ></script>
+
+{% endblock head %}
+
+{% block content %}
+
+  <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Impact Dashboard</h1>
+
+  <p>This page contains a summary of the volunteering outcomes.</p>
+
+  <h2 class="text-[var(--color-primary)] font-medium text-xl">Volunteer Hours Summary</h2>
+  <p class="mb-2">
+    The table below summarises how many hours have been conducted for the listed volunteering activities.
+  </p>
+  <div>
+    <table class="table-auto border-separate mb-6 rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-[var(--color-border)]">
+          <th class="border px-4 py-1 rounded-tl-lg">Activity</th>
+          <th class="border px-4 py-1 rounded-tr-lg">Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for activity, hours in activity_hours_dict.items %}
+          <tr class="odd:bg-[var(--color-surface)] even:bg-[var(--color-surface-alt)]">
+            <td class="border px-2 py-1 text-center">{{ activity }}</td>
+            <td class="border px-2 py-1 text-center">{{ hours }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="font-bold border border-[var(--color-border)] bg-[var(--color-border)]">
+          <td class="border px-2 py-1 text-right rounded-bl-lg">Total:</td>
+          <td class="border px-2 py-1 text-center rounded-br-lg">{{ activity_hours_total }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <h2 class="text-[var(--color-primary)] font-medium text-xl">Tree Planting Summary</h2>
+  <p class="mb-2">
+    The table below provides a breakdown of how many trees have been planted by species type.
+  </p>
+  <div>
+    <table class="table-auto border-separate mb-6 rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-[var(--color-border)]">
+          <th class="border px-4 py-1 rounded-tl-lg">Species</th>
+          <th class="border px-4 py-1 rounded-tr-lg">Quantity Planted</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for species, quantity in trees_planted_dict.items %}
+          <tr class="odd:bg-[var(--color-surface)] even:bg-[var(--color-surface-alt)]">
+            <td class="border px-2 py-1 text-center">{{ species }}</td>
+            <td class="border px-2 py-1 text-center">{{ quantity }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr class="font-bold border border-[var(--color-border)] bg-[var(--color-border)]">
+          <td class="border px-2 py-1 text-right rounded-bl-lg">Total:</td>
+          <td class="border px-2 py-1 text-center rounded-br-lg">{{ trees_planted_total }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <h2 class="text-[var(--color-primary)] font-medium text-xl">Activity Map</h2>
+  <p class="mb-2">
+    The map below shows the locations of the volunteering activities that have been undertaken by the author.
+  </p>
+  <p class="mb-2">
+    <b>NOTE:</b> these locations are extracted from meta data in images which have been found to not always be correct.
+    A solution to this is being worked on.
+  </p>
+
+
+  <gmp-map center="56.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 500px"></gmp-map>
+{% comment %} <gmp-map center="57.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 500px"></gmp-map> {% endcomment %}
+
+
+  {{ gps_coordinates|json_script:"gps-json" }}
+
+
+  <script>
+
+{% comment %} const parser = new DOMParser(); {% endcomment %}
+    const mapElement = document.querySelector('gmp-map');
+    async function initMap() {
+
+    // Request needed libraries.
+      const { map } = await google.maps.importLibrary("maps");
+      const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+    // Each PinElement is paired with a marker to demonstrate setting each parameter.
+    // Default marker with title text (no PinElement).
+
+      let jsondata = JSON.parse(document.getElementById('gps-json').textContent)
+    // console.log(jsondata)
+
+      jsondata.forEach((item, i) => {
+        // console.log('item', i, item);
+
+        // TODO - set color according to the activity - e.g. tree planting green. Parhaps add an icon also?
+        // for the icon see: https://developers.google.com/maps/documentation/javascript/advanced-markers/graphic-markers
+        const thisPin = new PinElement({
+          scale: 1.1,
+          glyphColor: 'green',
+          background: 'green',
+          borderColor: 'green'
+        });
+
+        const thisMarker = new AdvancedMarkerElement({
+          map,
+          position: { lat: item["latitude"], lng: item["longitude"] },
+          title: 'Title text for the marker at lat: 37.419, lng: -122.03',
+
+        });
+        thisMarker.append(thisPin);
+        // TODO - add a link from the marker to the blog activity as an overlay
+        // see: https://developers.google.com/maps/documentation/javascript/advanced-markers/overview
+        // this video might be helpful too: https://www.youtube.com/watch?v=sasx2ppol5c
+
+        mapElement.append(thisMarker);
+      });
+
+    }
+
+  </script>
+
+{% endblock content %}

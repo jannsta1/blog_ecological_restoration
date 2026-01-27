@@ -1,0 +1,12 @@
+{# activities/partials/vole-guard-removal-details.html #}
+<div class="mt-4 mb-4 p-4 border rounded bg-[var(--color-surface)]">
+  <h2 class="text-xl font-semibold mb-2">Vole Guard Removal Details</h2>
+
+  <ul>
+        {% comment %} <li><strong>Date:</strong> {{ activity.date|date:"F j, Y" }}</li> {% endcomment %}
+        {% comment %} <li><strong>Location:</strong> {{ activity.location }}</li> {% endcomment %}
+    <li><strong>Trees liberated:</strong> {{ activity.activityvoleguardremoval.trees_liberated }}</li>
+    <li><strong>Plastic removed:</strong> {{ activity.activityvoleguardremoval.plastic_removed }} Kgs</li>
+        {% comment %} <li><strong>Notes:</strong> {{ activity.notes|default:"No additional notes." }}</li> {% endcomment %}
+  </ul>
+</div>

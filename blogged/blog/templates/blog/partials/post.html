@@ -1,0 +1,59 @@
+{% load static %}
+{% load markdown_filters %}
+
+<article class="card p-4 rounded-md relative">
+  <a href="{% url 'detail' post.slug post.pk %}" class="absolute inset-0 z-0" aria-label="Read full post">
+  </a>
+
+      {% comment %} iterate through images until we find the main image - since there is no continue/break in templates we do the following: {% endcomment %}
+  {% for image in post.images_set.all|dictsortreversed:'is_main_image'|slice:'1' %}
+    {% if image.is_main_image %}
+      <img src="{{ image.public_thumbnail_url }}" alt="{% static 'images/tree.svg' %}" class="rounded-full float-right ml-4 mb-2" height="80" width="80"/>
+    {% endif %}
+  {% empty %}
+    <img src="{% static 'images/tree.svg' %}" alt="Tree image" class="rounded-full float-right ml-4 mb-2" height="80" width="80" />
+  {% endfor %}
+
+  <div>
+    <span class="text-xs">{{ post.date }}</span>
+  </div>
+
+  <h2 class="dark:text-[var(--color-accent)]">{{ post.title|safe|title|truncatechars:50 }}</h2>
+  <p>{{ post.content|render_markdown|safe|truncatechars:100 }}</p>
+
+  <div class="clear-right">
+    {% if post.organisation_tags.all %}
+      <div class="my-2">
+        <small class="space-x-1 font-bold">
+          Organisations:
+          {% for tag in post.organisation_tags.all %}
+            <a href="{{ tag.website }}" class="relative" target="_blank">
+              <span class="pill">
+                {{ tag.name }}
+              </span>
+            </a>
+          {% endfor %}
+        </small>
+      </div>
+    {% endif %}
+
+    {% if post.post_activities %}
+      <div class="my-2">
+        <small class="space-x-1 font-bold">
+          Activities:
+          {% for activitity_item in post.post_activities %}
+            <span class="pill">
+              {{ activitity_item }}
+            </span>
+          {% endfor %}
+        </small>
+      </div>
+    {% endif %}
+    <div class="my-2">
+      <small class="space-x-1 font-bold">
+        Word count: <span class="font-normal">{{ post.word_count }}</span>
+      </small>
+    </div>
+  </div>
+
+</article>

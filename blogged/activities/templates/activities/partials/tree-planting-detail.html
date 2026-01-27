@@ -1,0 +1,25 @@
+
+<div class="mt-4 mb-4 p-4 border rounded bg-[var(--color-surface)]">
+  <h2 class="text-xl font-semibold mb-2">Summary of trees planted.</h2>
+
+  <table class="min-w-full border text-left text-sm">
+    <thead>
+      <tr>
+        <th class="border px-2 py-1">Species</th>
+        <th class="border px-2 py-1">Quantity</th>
+        {% comment %} <th class="border px-2 py-1">GPS Data</th> {% endcomment %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for planting in activity.tree_plantings.all %}
+        <tr>
+          <td class="border px-2 py-1">{{ planting.species.common_name }}</td>
+          <td class="border px-2 py-1">{{ planting.quantity }}</td>
+            {% comment %} <td class="border px-2 py-1">
+            <pre class="whitespace-pre-wrap">{{ planting.gps_data|json_script:"gpsdata"|safe }}</pre>
+            </td> {% endcomment %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

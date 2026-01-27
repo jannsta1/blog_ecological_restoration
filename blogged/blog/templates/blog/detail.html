@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load markdown_filters %}
+
+{% block title %}{{ post.title }}{% endblock title %}
+
+{% block content %}
+
+  <h1 class="text-3xl mt-2 font-semibold text-center">{{ post.title }}</h1>
+  <span class="text-sm text-gray-500">
+      {% comment %} <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11h14M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg> {% endcomment %}
+    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline w-4 h-4 mr-1 align-middle">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+    </svg>
+    <span class="align-middle">{{ post.date |date:'d.m.Y' }}</span>
+  </span>
+
+  <div class="text-lg mt-4">
+    {{ post.content|render_markdown }}
+  </div>
+
+  {% if post_images %}
+    <h1 class="text-3xl mb-2 mt-2 font-semibold">Photo gallery</h1>
+    {% include "blog/partials/image_gallery.html" with images=post_images %}
+  {% endif %}
+
+  <h1 class="text-3xl mb-2 mt-2 font-semibold">Impact Analysis</h1>
+  {% for activity in post.activities.all %}
+    {% if activity.activitytreeplantingsession %}
+      {% include "activities/partials/tree-planting-detail.html" %}
+    {% endif %}
+
+    {% if activity.activityvoleguardremoval %}
+      {% include "activities/partials/vole-guard-removal-detail.html" %}
+    {% endif %}
+
+    {% comment %} Now deal with transport {% endcomment %}
+    {% if activity.transportcar_set.exists or activity.transportpublic_set.exists %}
+      {% include "activities/partials/activity-transport-detail.html" %}
+    {% endif %}
+  {% endfor %}
+
+{% endblock content %}

@@ -1,0 +1,24 @@
+{
+    "BFT": { 
+        "name": "Borders Forest Trust",
+        "website": "https://bordersforesttrust.org/",
+        "description": "Borders Forest Trust is a community-based charity dedicated to the restoration of the native woodland and wildlife of the Scottish Borders."
+    },
+    "TFL": {
+        "name": "Trees for Life",
+        "website": "https://treesforlife.org.uk/",
+        "description": "Trees for Life is a conservation charity focused on restoring the Caledonian Forest and rewilding the Scottish Highlands."
+    },
+    "BL": {
+        "name": "Buglife",
+        "website": "https://www.buglife.org.uk/",
+        "description": "Buglife aims to halt the extinction of invertebrate species and to achieve sustainable populations of invertebrates. They are working hard to promote the environmental importance of invertebrates and to raise awareness about the challenges to their survival; assist in the development of legislation and policy that will ensure the conservation of invertebrates and undertake practical conservation projects that will contribute to achieving their aim."
+
+    },
+    "PT": {
+        "name": "Pollinators Along the Tweed",
+        "website": "https://www.buglife.org.uk/projects/pollinators-along-the-tweed/",
+        "description": "A project within buglife aimed to create a network of habitat for pollinating insects along the River Tweed B-Line by increasing and connecting the area of wildflower-rich habitat."
+
+    }
+}

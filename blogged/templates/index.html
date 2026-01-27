@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Jan's Ecologigcal Restoration Blog{% endblock title %}
+
+{% block content %}
+
+  <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Blog Posts</h1>
+
+  <form action="{% url 'blog_listing' %}" method="get">
+    <div class="flex justify-center gap-2 mb-4">
+      <div class="p-2 content-center ">
+        <label for="org-select">Filter by Organisation:</label>
+        <select name="org-select" id="org-select" class="rounded-md px-3 py-1 text-sm font-semiboldshadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] min-w-40" onchange="this.form.submit()">
+          <option value={{ select_all_option_str }} > {{ select_all_option_str }} </option>
+          {% for org_tag in organisation_tags %}
+            <option value="{{ org_tag.id }}" {% if current_organisation_id == org_tag.id %} selected{% endif %}>{{ org_tag.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="p-2 content-center ">
+        <label for="activity-select">Filter by Activity:</label>
+        <select name="activity-select" id="activity-select" class="rounded-md px-3 py-1 text-sm font-semiboldshadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] min-w-40" onchange="this.form.submit()">
+          {% for activity_id, activity_label in activity_tags.items %}
+            <option value="{{ activity_id }}" {% if current_activity_id == activity_id %} selected{% endif %}>{{ activity_label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </form>
+
+  <div id="post-grid" class="grid [grid-template-columns:repeat(auto-fit,minmax(var(--card-min),1fr))] gap-[var(--grid-gap)] px-[var(--grid-padding)]" >
+    {% for post in posts|dictsortreversed:"date" %}
+      {% include "blog/partials/post.html" %}
+    {% endfor %}
+  </div>
+
+  {% comment %} enables parsing of markdown->html, see "marked.parse" below  {% endcomment %}
+  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+
+
+{% endblock content %}

@@ -1,0 +1,18 @@
+<div class="mt-4 mb-4 p-4 border rounded bg-[var(--color-surface)]">
+  <h2 class="text-xl font-semibold mb-2">Transport Impact</h2>
+  {% for car in activity.transportcar_set.all %}
+    <div class="mb-2">
+      <span class="font-medium">Car:</span>
+      {{ car.get_powertrain_display }} &mdash; {{ car.distance }} km,
+      {{ car.passengers }} passengers,
+      Carbon offset: {{ car.carbon_offset|yesno:"Yes,No" }}
+    </div>
+  {% endfor %}
+  {% for public in activity.transportpublic_set.all %}
+    <div class="mb-2">
+      <span class="font-medium">Public Transport:</span>
+      {{ public.get_type_display }} &mdash; {{ public.distance }} km,
+      Carbon offset: {{ public.carbon_offset|yesno:"Yes,No" }}
+    </div>
+  {% endfor %}
+</div>

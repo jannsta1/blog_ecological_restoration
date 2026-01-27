@@ -1,0 +1,29 @@
+export PROJECT_DIR="$(pwd)"
+
+
+##############################################################
+# 
+##############################################################
+# project bucket details
+export GS_BUCKET_NAME=
+export GS_PROJECT_ID=
+export GS_CREDENTIALS_PATH=/home/<username>/secrets/<google-key.json>
+
+# Contact details
+export DEFAULT_FROM_EMAIL=
+export NOTIFY_EMAIL=
+
+# postgres DB local
+export DB_NAME=
+export DB_USER=
+export POSTGRES_PASSWORD=$PROJECT_DIR/.secrets/postgres_pw_local.txt
+export DB_HOST=localhost
+export DB_PORT=5432
+
+# django details
+export DEBUG=1
+export DJANGO_ALLOWED_HOSTS="localhost 127.0.0.1 [::1]"
+export SECRET_KEY=$PROJECT_DIR/.secrets/django_secret_key.txt
+
+# google maps key
+export GOOGLE_MAPS_API_KEY_DEVELOPMENT=$PROJECT_DIR/.secrets/google_maps_api_key_dev.txt
