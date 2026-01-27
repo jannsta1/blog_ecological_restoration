@@ -7,7 +7,7 @@ export PROJECT_DIR="$(pwd)"
 # project bucket details
 export GS_BUCKET_NAME=
 export GS_PROJECT_ID=
-export GS_CREDENTIALS_PATH=/home/<username>/secrets/<google-key.json>
+export GOOGLE_APPLICATION_CREDENTIALS=/home/<username>/secrets/<google-key.json>
 
 # Contact details
 export DEFAULT_FROM_EMAIL=

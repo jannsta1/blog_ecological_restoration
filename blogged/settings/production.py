@@ -27,7 +27,7 @@ SECRET_KEY = get_secret("SECRET_KEY")
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]  # TODO - update for production
+CSRF_TRUSTED_ORIGINS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ") # ["http://localhost:1337"]  # TODO - update for production
 
 
 WSGI_APPLICATION = "blogged.wsgi.application"
@@ -138,7 +138,7 @@ DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME")
 GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.environ.get("GS_CREDENTIALS_PATH")
+    os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
 )
 
 # For public access to images, set this to publicRead.
