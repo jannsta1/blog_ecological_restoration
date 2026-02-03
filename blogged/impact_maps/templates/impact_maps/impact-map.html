@@ -29,7 +29,27 @@
 
   <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Impact Dashboard</h1>
 
-  <p>This page contains a summary of the volunteering outcomes.</p>
+  <h2 class="text-[var(--color-primary)] font-medium text-xl">Background</h2>
+
+  <p class="mb-2">
+    This page contains a summary of the volunteering outcomes. Measuring ecological outcomes is both a difficult and controversial business.
+    It is difficult to measure ecological interventions because each landscape is different and has its own concerns. 
+    Biodiversity may be a good way to measure the impact of a given ecological project or campaign. 
+    But at the level of the individual volunteer, how can we attribute the benefit of a few hours of volunteering towards the biodiversity of a large landmass? 
+    Since there may be environmental costs to attending a volunteering day (e.g. travel), one wishes to be sure that on average, volunteering efforts are outweighing the environmental costs.
+  </p>
+  <p class="mb-2">
+   As for controversial - on the face of it, planting trees should be beneficial right?
+    Trees lock up carbon and take it out of the atmosphere, thus helping to negate the harmful effects of climate change. 
+    Well, many have written about the adverse impact of Sitka spruce plantations on previously more ecologically diverse habitats.
+    Even within the context of the United Kingdom, some argue for the restoration of closed-canopy forests while others campaign for more of a mixed scrubby landscape.
+    While this debate rages on, there is little doubt in my mind that there are many areas of the United Kingdom that would benefit from ecological restoration in the form of tree-planting.
+    Especially on the uplands of Scotland which have been transformed by sheep farming and the activities of sporting estates in recent centuries into areas of low biodiversity.
+    In these areas at least, I consider that transforming the landscape with well-managed tree-planting schemes on to be an un-arguably.
+  </p>
+  <p class="mb-2">
+    These are questions I aim to address. Below is a summary of the data I'm collecting in order to work towards a resolution.
+  </p>
 
   <h2 class="text-[var(--color-primary)] font-medium text-xl">Volunteer Hours Summary</h2>
   <p class="mb-2">
@@ -89,6 +109,50 @@
     </table>
   </div>
 
+    <h2 class="text-[var(--color-primary)] font-medium text-xl">Transport Summary</h2>
+  <p class="mb-2">
+    The table below provides a breakdown of the transport miles undertaken across all volunteering activities.
+  </p>
+  <div>
+    <table class="table-auto border-separate mb-6 rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-[var(--color-border)]">
+          <th class="border px-4 py-1 rounded-tl-lg">Type</th>
+          <th class="border px-4 py-1 rounded-tr-lg">Miles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for label, mileage in transport_dict.items %}
+          <tr class="odd:bg-[var(--color-surface)] even:bg-[var(--color-surface-alt)]">
+            <td class="border px-2 py-1 text-center">{{ label }}</td>
+            <td class="border px-2 py-1 text-center">{{ mileage|floatformat:1 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+    <p class="mb-2">
+    The table below outlines how many miles of travel have been saved by carpooling.
+  </p>
+  <div>
+    <table class="table-auto border-separate mb-6 rounded-lg overflow-hidden">
+      <thead>
+        <tr class="bg-[var(--color-border)]">
+          <th class="border px-4 py-1 rounded-tl-lg">Type</th>
+          <th class="border px-4 py-1 rounded-tr-lg">Miles</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for label, mileage in liftshare_dict.items %}
+          <tr class="odd:bg-[var(--color-surface)] even:bg-[var(--color-surface-alt)]">
+            <td class="border px-2 py-1 text-center">{{ label }}</td>
+            <td class="border px-2 py-1 text-center">{{ mileage|floatformat:1 }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
   <h2 class="text-[var(--color-primary)] font-medium text-xl">Activity Map</h2>
   <p class="mb-2">
     The map below shows the locations of the volunteering activities that have been undertaken by the author.
@@ -98,13 +162,10 @@
     A solution to this is being worked on.
   </p>
 
-
   <gmp-map center="56.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 500px"></gmp-map>
 {% comment %} <gmp-map center="57.1, -4.2" zoom="7" map-id="DEMO_MAP_ID" style="height: 500px"></gmp-map> {% endcomment %}
 
-
   {{ gps_coordinates|json_script:"gps-json" }}
-
 
   <script>
 

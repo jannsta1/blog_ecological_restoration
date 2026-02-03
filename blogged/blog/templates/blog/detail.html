@@ -21,11 +21,11 @@
   </div>
 
   {% if post_images %}
-    <h1 class="text-3xl mb-2 mt-2 font-semibold">Photo gallery</h1>
+    <h1 class="text-3xl mb-4 mt-2 font-semibold text-center">Photo gallery</h1>
     {% include "blog/partials/image_gallery.html" with images=post_images %}
   {% endif %}
 
-  <h1 class="text-3xl mb-2 mt-2 font-semibold">Impact Analysis</h1>
+  <h1 class="text-3xl mb-2 mt-2 font-semibold text-center">Impact Analysis</h1>
   {% for activity in post.activities.all %}
     {% if activity.activitytreeplantingsession %}
       {% include "activities/partials/tree-planting-detail.html" %}

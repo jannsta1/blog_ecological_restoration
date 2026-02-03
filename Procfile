@@ -1,0 +1,1 @@
+web: gunicorn --chdir blogged --config gunicorn.conf.py blogged.wsgi

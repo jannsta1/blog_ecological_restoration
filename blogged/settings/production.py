@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from google.oauth2 import service_account
+import dj_database_url
 
 from common.utils import get_secret
 from settings.common import * # noqa: F401
@@ -26,8 +27,12 @@ SECRET_KEY = get_secret("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
+IS_HEROKU_APP = "DYNO" in os.environ and "CI" not in os.environ
+
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-CSRF_TRUSTED_ORIGINS = ["http://localhost:1337"]  # TODO - update for production
+csrf = os.environ.get("CSRF_TRUSTED_ORIGINS") # ["http://localhost:1337"]  # TODO - update for production
+if csrf:
+    CSRF_TRUSTED_ORIGINS = csrf.split(" ")
 
 
 WSGI_APPLICATION = "blogged.wsgi.application"
@@ -45,17 +50,31 @@ WSGI_APPLICATION = "blogged.wsgi.application"
 
 POSTGRES_PW = get_secret("POSTGRES_PASSWORD")
 
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME", "eco_blog"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": POSTGRES_PW,
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+if IS_HEROKU_APP:
+    # In production on Heroku the database configuration is derived from the `DATABASE_URL`
+    # environment variable by the dj-database-url package. `DATABASE_URL` will be set
+    # automatically by Heroku when a database addon is attached to your Heroku app. See:
+    # https://devcenter.heroku.com/articles/provisioning-heroku-postgres#application-config-vars
+    # https://github.com/jazzband/dj-database-url
+    DATABASES = {
+        "default": dj_database_url.config(
+            env="DATABASE_URL",
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        ),
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "eco_blog"),
+            "USER": os.environ.get("DB_USER"),
+            "PASSWORD": POSTGRES_PW,
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+        }
+    }
 
 
 # Password validation
@@ -115,31 +134,52 @@ GOOGLE_DRIVE_STORAGE_MEDIA_ROOT = (
     "blog/rewilding/images"  # <base google drive path for file uploads>' # OPTIONAL
 )
 
+# try:
+#     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#         os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+#     )
+#     print("Succesfully loaded Google Cloud credentials: ")
+# except Exception as e:
+#     GS_CREDENTIALS = ""
+#     print("Error loading Google Cloud credentials: " + str(e))
+#     print("File system contents at /app: " + str(os.listdir("/app")))
+#     print("File system contents at /: " + str(os.listdir("/")))
+
 # STORAGES = {
 #     "default": {
 #         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
 #         "OPTIONS": {
-#           "GS_BUCKET_NAME": 'django-blog-data',
-#           "GS_PROJECT_ID": 'django-blog-data',
-#           "GS_CREDENTIALS": service_account.Credentials.from_service_account_file("/home/jan/secrets/django-blog-data-9a52eb1b9db9.json"),
+#             "GS_BUCKET_NAME": os.environ.get("GS_BUCKET_NAME"),
+#             "GS_PROJECT_ID": os.environ.get("GS_PROJECT_ID"),
+#             "GS_CREDENTIALS": GS_CREDENTIALS,
 #         },
 #     },
-#     'staticfiles': {
-#         'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
-#         'OPTIONS': {
-#             'location': STATIC_ROOT,
-#         },
+#     "staticfiles": {
+#         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
 #     }
 # }
 
-
-# google cloud - https://django-storages.readthedocs.io/en/latest/backends/gcloud.html
 DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+IMAGEKIT_DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
 GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME")
 GS_PROJECT_ID = os.environ.get("GS_PROJECT_ID")
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.environ.get("GS_CREDENTIALS_PATH")
-)
+try:
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    )
+except Exception as e:
+    GS_CREDENTIALS = None
+    print("Error loading Google Cloud credentials: " + str(e))
+
+MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+
+# Don't store the original (un-hashed filename) version of static files, to reduce slug size:
+# https://whitenoise.readthedocs.io/en/latest/django.html#WHITENOISE_KEEP_ONLY_HASHED_FILES
+# WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
+# TODO - add https://whitenoise.readthedocs.io/en/stable/index.html for whitenoise 
+# google cloud - https://django-storages.readthedocs.io/en/latest/backends/gcloud.html
+
 
 # For public access to images, set this to publicRead.
 # GS_DEFAULT_ACL = 'publicRead' # Optional, but recommended for public images. Requires ACLs to be enabled on the bucket.

@@ -45,8 +45,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2025, 9, 10))
-    end_date = options.get("end_date", date(2025, 9, 25))
+    start_date = options.get("start_date", date(2025, 9, 25))
+    end_date = options.get("end_date", date(2025, 9, 30))
 
     # Get list of data folders
     data_folders = extract_data_folders(base_photo_dir)
@@ -118,12 +118,15 @@ def process_transport_data(details_data: dict, post: Post):
         mode = transport_entry.get("mode")
         distance = transport_entry.get("distance")
         carbon_offset = transport_entry.get("carbon_offset", False)
+        
 
         if mode == "car":
             TransportCar.objects.create(
                 activity=post.activities.first(),  # assuming one activity per post for simplicity
                 distance=distance,
                 carbon_offset=carbon_offset,
+                powertrain = transport_entry.get("powertrain"),
+                passengers = transport_entry.get("passengers", 0),
             )
             logger.info(
                 f"Added car transport: {distance} km, carbon offset: {carbon_offset}"
@@ -133,6 +136,7 @@ def process_transport_data(details_data: dict, post: Post):
                 activity=post.activities.first(),  # assuming one activity per post for simplicity
                 distance=distance,
                 carbon_offset=carbon_offset,
+                type=transport_entry.get("type"),
             )
             logger.info(
                 f"Added public transport: {distance} km, carbon offset: {carbon_offset}"
@@ -324,15 +328,19 @@ def process_activity_data(post: Post, activity_data: dict):
     Process activity data from YAML and create appropriate activity models.
     """
     if "tree_planting_session" in activity_data:
-        process_tree_planting_session(post, activity_data)
+        activity = process_tree_planting_session(post, activity_data)
     elif "vole_guard_removal" in activity_data:
-        process_vole_guard_removal(post, activity_data)
+        activity = process_vole_guard_removal(post, activity_data)
     elif "invasive_species_removal" in activity_data:
-        process_invasive_species_removal(post, activity_data)
+        activity = process_invasive_species_removal(post, activity_data)
     elif "survey" in activity_data:
-        process_survey_activity(post, activity_data)
+        activity = process_survey_activity(post, activity_data)
     else:
-        process_generic_activity(post, activity_data)
+        activity = process_generic_activity(post, activity_data)
+
+    activity.location = activity_data.get("location")
+    activity.hours_spent = activity_data.get("hours", 0)
+    activity.save()
 
     logger.info(f"Processed activity data for post '{post.title}'")
 
@@ -341,20 +349,18 @@ def process_generic_activity(post: Post, activity_data: dict):
     """
     Create a generic Activity object.
     """
-    location = activity_data.get("location")
-    Activity.objects.create(post=post, location=location)
     logger.info("Added generic activity")
+    return Activity.objects.create(post=post)
 
 
 def process_survey_activity(post: Post, activity_data: dict):
     """
     Create a Survey Activity object.
     """
-    location = activity_data.get("location")
     # survey_data = activity_data.get("survey")
     # Assuming ActivitySurvey is defined similarly to other activity models
-    ActivitySurveying.objects.create(post=post, location=location)
     logger.info("Added survey activity")
+    return ActivitySurveying.objects.create(post=post)
 
 
 def process_tree_planting_session(post: Post, activity_data: dict):
@@ -362,14 +368,13 @@ def process_tree_planting_session(post: Post, activity_data: dict):
     Create ActivityTreePlantingSession and associated TreePlanting objects.
     """
     # Extract location if provided
-    location = activity_data.get("location")
-
+    
     session_data = activity_data["tree_planting_session"]
     notes = session_data.get("notes")
 
     # Create the tree planting session
     activity = ActivityTreePlantingSession.objects.create(
-        post=post, location=location, notes=notes
+        post=post, notes=notes
     )
 
     # Process tree plantings
@@ -420,12 +425,14 @@ def process_tree_planting_session(post: Post, activity_data: dict):
         )
         logger.info(f"Added tree planting: {quantity} x {species.common_name}")
 
+    return activity
+
 
 def process_vole_guard_removal(post: Post, activity_data: dict):
     """
     Create ActivityVoleGuardRemoval object.
     """
-    location = activity_data.get("location")
+
 
     removal_data = activity_data["vole_guard_removal"]
     area_covered = removal_data.get("area_covered")
@@ -437,22 +444,20 @@ def process_vole_guard_removal(post: Post, activity_data: dict):
         logger.warning("Missing required field 'area_covered' for vole guard removal")
         return
 
-    ActivityVoleGuardRemoval.objects.create(
+    logger.info("Added vole guard removal activity")
+    return ActivityVoleGuardRemoval.objects.create(
         post=post,
-        location=location,
         area_covered=area_covered,
         plastic_removed=plastic_removed,
         trees_liberated=trees_liberated,
         gps_track=gps_track,
     )
-    logger.info("Added vole guard removal activity")
 
 
 def process_invasive_species_removal(post: Post, activity_data: dict):
     """
     Create ActivityInvasiveSpeciesRemoval object.
     """
-    location = activity_data.get("location")
     removal_data = activity_data["invasive_species_removal"]
 
     species_removed_name = removal_data.get("species_removed")
@@ -482,14 +487,13 @@ def process_invasive_species_removal(post: Post, activity_data: dict):
         logger.warning(f"Could not find species: {species_removed_name}")
         return
 
-    ActivityInvasiveSpeciesRemoval.objects.create(
+    logger.info(f"Added invasive species removal activity: {species.common_name}")
+    return ActivityInvasiveSpeciesRemoval.objects.create(
         post=post,
-        location=location,
         species_removed=species,
         quantity_removed=quantity_removed,
         gps_track=gps_track,
     )
-    logger.info(f"Added invasive species removal activity: {species.common_name}")
 
 
 def create_gps_coordinates(post: Post, image_path: Path, *args, **options):

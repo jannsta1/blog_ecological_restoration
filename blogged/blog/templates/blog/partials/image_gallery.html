@@ -1,35 +1,163 @@
-<div id="default-carousel" class="relative w-full" data-carousel="slide">
-    <!-- Carousel wrapper -->
-    <div class="relative h-56 overflow-hidden rounded-lg md:h-96">
-        {% for image in images %}
-        <div class="hidden duration-700 ease-in-out" data-carousel-item>
-            <img class="absolute block -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" src="{{ image.public_url }}" alt="{{ image.name }}">
-        </div>            
-        {% endfor %}
+<div id="default-carousel" class="relative w-full" data-carousel="static" data-carousel-interval="8000">
+
+    {{ captions|json_script:"caption-data" }}
+    {{ attributions|json_script:"attribution-data" }}
+
+    <style>
+        #default-carousel .fade-item {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 5000ms ease;
+            transform: none !important;
+        }
+        #default-carousel .fade-item.is-active {
+            opacity: 1;
+        }
+        #default-carousel .fade-item.deactivate {
+            transition: opacity 5000ms ease;
+            opacity: 0;
+        }
+    </style>
+
+    <div class="grid-cols-1 space-y-6">
+
+        <!-- Carousel wrapper -->
+        <div class="relative h-56 overflow-hidden md:h-96 flex-shrink-0">
+            {% for image in images %}
+            <div class="fade-item" data-carousel-item>
+                <img 
+                class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 object-contain h-full max-h-full w-auto rounded-lg"
+                src="{{ image.public_url }}" 
+                alt="{{ image.name }}"></img>
+            </div>            
+            {% endfor %}
+            
+            <!-- Image selector -->
+            <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 space-x-3 m-4 z-50">
+            {% for image in images %}
+                <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="{{ forloop.counter0 }}" data-carousel-slide-to="{{ forloop.counter0 }}"></button>   
+            {% endfor %}
+        </div>
+        </div>
+
+        <div class="relative flex items-center justify-center">
+            <div class="grid-cols-1 space-y-1">
+                <p id="caption-box" class="text-sm text-center text-body"><b>Caption:</b> {{ captions|first|default:"No caption"}} </p>
+                <p id="attribution-box" class="text-sm text-center text-body"><b>Attribution:</b> {{ attributions|first|default:"None"}} </p>
+            </div>
+            
+            {% comment %} <h2 id="caption-box" class="justify-center"><b>Caption:</b> {{ captions|first|default:"No caption"}}</h2>
+            <h2 id="caption-box" class="justify-center"><b> Attribution:</b> {{ attributions|first|default:"No attribution"}}</h2> {% endcomment %}
+        </div>
+
+        <!-- Slider indicators -->
+        
+            <!-- Slider controls -->     
+            <div class="relative flex space-x-6 items-center justify-center">
+                <!-- Select previous image -->     
+                <button type="button" class="cursor-pointer" data-carousel-prev>
+                    <span class="inline-flex items-center justify-center rounded hover:bg-gray-200">
+                        <svg class="w-10 h-10 p-2 text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
+                        </svg>
+                        <span class="sr-only">Previous</span>
+                    </span>
+                </button>
+                
+                <!-- Play/pause image rotations  -->     
+                <button id="play-pause" type="button" class="cursor-pointer">
+                    <span class="inline-flex items-center justify-center rounded hover:bg-gray-200">
+                        <svg class="w-10 h-10 p-1 text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                        </svg>
+                        <span class="sr-only">play</span>
+                    </span>
+                </button>
+                
+                <!-- Select next image -->     
+                <button type="button" class="cursor-pointer" data-carousel-next>
+                    <span class="inline-flex items-center justify-center rounded hover:bg-gray-200">
+                        <svg class="w-10 h-10 p-2 text-gray-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                        </svg>
+                        <span class="sr-only">Previous</span>
+                    </span>
+                </button>
+
+        </div>
     </div>
-    <!-- Slider indicators -->
-    <div class="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
-        {% for image in images %}
-            <button type="button" class="w-3 h-3 rounded-full" aria-current="true" aria-label="{{ forloop.counter0 }}" data-carousel-slide-to="{{ forloop.counter0 }}"></button>   
-        {% endfor %}
-    </div>
-    <!-- Slider controls -->
-    <button type="button" class="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
-        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-            <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4"/>
-            </svg>
-            <span class="sr-only">Previous</span>
-        </span>
-    </button>
-    <button type="button" class="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
-        <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-            <svg class="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
-            </svg>
-            <span class="sr-only">Next</span>
-        </span>
-    </button>
 </div>
 
-<!-- <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>   -->
+<script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+ <script>
+
+    initFlowbite();
+    
+    const carousel = FlowbiteInstances.getInstance('Carousel', 'default-carousel');
+    carousel.cycle();  // we have to start with the carousel set to "static" in html otherwise this doesn't work
+    var playing = true
+    let captionData = JSON.parse(document.getElementById('caption-data').textContent)
+    let attributionData = JSON.parse(document.getElementById('attribution-data').textContent)
+
+    document.addEventListener('DOMContentLoaded', function() {
+    
+        const playPauseBtn = document.getElementById('play-pause');
+        const captionBox = document.getElementById('caption-box');
+        const attributionBox = document.getElementById('attribution-box');
+        const carouselItems = Array.from(document.querySelectorAll('#default-carousel [data-carousel-item]'));
+
+        var active_item = carousel.getActiveItem();
+
+        function applyFadeState(activeIndex) {
+            carouselItems.forEach((item, index) => {
+                item.classList.remove('hidden');
+                item.classList.add('block');
+                item.classList.toggle('is-active', index === activeIndex);
+            });
+        }
+        function applyFadeOutState(activeIndex) {
+            carouselItems.forEach((item, index) => {
+                item.classList.remove('hidden');
+                item.classList.add('block');            
+                item.classList.toggle('deactivate', index === activeIndex - 1);
+            });
+        }
+
+        if (active_item) {
+            applyFadeState(active_item.position);
+            applyFadeOutState(active_item.position);
+        }
+
+
+        const pauseIcon = '<svg class="w-10 h-10 p-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>';
+        const playIcon = '<svg class="w-10 h-10 p-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+
+        playPauseBtn.addEventListener('click', function(){
+
+            active_item = carousel.getActiveItem();
+            if (playing) {
+                carousel.pause();
+                playPauseBtn.innerHTML = playIcon;
+            }
+            else {
+                carousel.cycle();
+                playPauseBtn.innerHTML = pauseIcon;
+            }
+            playing = !playing;
+            })
+
+        carousel.updateOnChange( function(){
+            active_item = carousel.getActiveItem();
+            applyFadeState(active_item.position);
+            applyFadeOutState(active_item.position);
+            captionBox.innerHTML = "<b>Caption:</b> " + captionData[active_item.position];
+            attributionBox.innerHTML = "<b>Attribution:</b> " + attributionData[active_item.position];
+        }
+        )
+
+    })
+
+    
+
+ </script>

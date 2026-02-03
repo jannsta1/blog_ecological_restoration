@@ -58,5 +58,10 @@
         "common_name": "Geulder rose",
         "genus": "Viburnum",
         "specific_epithet": "opulus"
+    },
+    "Prunus padus": {
+        "common_name": "Bird cherry",
+        "genus": "Prunus",
+        "specific_epithet": "padus"
     }
 }

@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "watch": "npx @tailwindcss/cli -i blogged/static/css/style_in.css -o blogged/static/css/style_out.css --watch"
+    "watch": "npx @tailwindcss/cli -i static-src/css/style_in.css -o blogged/static/css/style_out.css --watch"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.1.11",

@@ -125,3 +125,12 @@ These credentials will be used by any library that requests Application Default 
 
 Quota project "django-blog-data" was added to ADC which can be used by Google client libraries for billing and quota. Note that some services may still bill the project owning the resource.
 ```
+
+
+## Updating domain
+### envs to update
+
+### services to add new url to safe senders:
+- update cors.json and then run -> gsutil cors set cors.json gs://django-blog-data
+- update map apo https://console.cloud.google.com/google/maps-apis - see keys & credentials
+- update mailgun

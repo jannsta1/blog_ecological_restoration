@@ -93,6 +93,8 @@ def blog_listing(request):
 def detail(request, slug, id):
     post = get_object_or_404(Post, slug=slug, id=id)
     post_images = Images.objects.all().filter(post=post)
+    captions = [img.caption for img in post_images]
+    attributions = ["Jan Stankiewicz" for _ in post_images]
 
     return render(
         request,
@@ -100,6 +102,8 @@ def detail(request, slug, id):
         {
             "post": post,
             "post_images": post_images,
+            "captions": captions,
+            "attributions": attributions,
         },
     )
 

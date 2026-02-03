@@ -18,7 +18,7 @@ services:
       - POSTGRES_PASSWORD=/run/secrets/postgres_password
       - SECRET_KEY=/run/secrets/django_secret_key
       - GOOGLE_MAPS_API_KEY_DEVELOPMENT=/run/secrets/google_maps_api_key_dev
-      - GS_CREDENTIALS_PATH=/run/secrets/service_account_key
+      - GOOGLE_APPLICATION_CREDENTIALS=/run/secrets/service_account_key
     secrets:
       - postgres_password
       - django_secret_key

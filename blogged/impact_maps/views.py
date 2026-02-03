@@ -1,4 +1,4 @@
-from activities.models import Activity
+from activities.models import Activity, Transport, TransportCar, TransportPublic
 from activities.models import TreePlanting
 from blog.models import GpsCoordinates
 from common.utils import get_secret
@@ -21,8 +21,29 @@ def upload_location(request):
         category = a.activity_type.label
         if category not in activity_hours_dict:
             activity_hours_dict[category] = 0
-        activity_hours_dict[category] += a.hours_spent
+        if a.hours_spent is not None:
+            activity_hours_dict[category] += a.hours_spent
     activity_hours_total = sum(activity_hours_dict.values())
+
+    transport_dict = {}
+    liftshare_dict = {}
+    for t in TransportCar.objects.all():        
+
+        category = "Car - " + TransportCar.Powertrain(t.powertrain).label
+        if category not in transport_dict:
+            transport_dict[category] = 0
+            
+        if t.passengers > 0:
+            if category not in liftshare_dict:
+                liftshare_dict[category] = 0
+            liftshare_dict[category] += t.distance * t.passengers
+        transport_dict[category] += t.distance 
+
+    
+
+    for t in TransportPublic.objects.all():        
+        category = "Public Transport - " + TransportPublic.Type(t.type).label
+        transport_dict[category] = t.distance
 
     trees_planted_dict = {}
     for tp in TreePlanting.objects.all():
@@ -42,5 +63,7 @@ def upload_location(request):
             "activity_hours_total": activity_hours_total,
             "trees_planted_dict": trees_planted_dict,
             "trees_planted_total": trees_planted_total,
+            "transport_dict": transport_dict,
+            "liftshare_dict": liftshare_dict,
         },
     )

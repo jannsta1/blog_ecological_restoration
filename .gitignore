@@ -30,4 +30,8 @@ media
 # secrets
 .secrets
 
+# collected static files
+blogged/staticfiles
+
+
 data/photos
