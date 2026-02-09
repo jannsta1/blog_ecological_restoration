@@ -1,4 +1,9 @@
 {
+    "Frangula alnus": {
+        "common_name": "Alder Buckthorn",
+        "genus": "Frangula",
+        "specific_epithet": "alnus"
+    },
     "Fraxinus excelsior": {
         "common_name": "European Ash",
         "genus": "Fraxinus",
