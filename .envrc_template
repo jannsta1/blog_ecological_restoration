@@ -12,6 +12,8 @@ export GOOGLE_APPLICATION_CREDENTIALS=/home/<username>/secrets/<google-key.json>
 # Contact details
 export DEFAULT_FROM_EMAIL=
 export NOTIFY_EMAIL=
+# mailgun secrets
+export MAILGUN_API_KEY=$PROJECT_DIR/.secrets/mail_gun_api_key.txt
 
 # postgres DB local
 export DB_NAME=

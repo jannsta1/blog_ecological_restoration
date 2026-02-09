@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "landing_page",
     "activities",
     # 'gdstorage',
+    "anymail",
 ]
 
 MIDDLEWARE = [

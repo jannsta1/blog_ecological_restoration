@@ -119,10 +119,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # for email contact form (followed this blog post: https://learndjango.com/tutorials/django-email-contact-form-tutorial)
 # TODO - should we switch to anymail?: https://github.com/anymail/django-anymail
 # need to follow the steps - "Production Email Service" to actually get the email to send
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" 
-EMAIL_HOST = "smtp.eu.mailgun.org"  # new
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_HOST_USER = os.environ.get("MAILGUN_API_KEY")
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" 
+
+ANYMAIL = {
+    # (exact settings here depend on your ESP...)
+    "MAILGUN_API_KEY": get_secret("MAILGUN_API_KEY"),
+    "MAILGUN_SENDER_DOMAIN": 'mg.jansweb.co.uk',  # your Mailgun domain, if needed
+    "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",  # since we are in the EU region
+}
+EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # comment this out to test email sending in the console instead of actually sending emails
+# EMAIL_HOST = "smtp.eu.mailgun.org"  # new
+# EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+# EMAIL_HOST_USER = os.environ.get("MAILGUN_API_KEY")
 # EMAIL_HOST_PASSWORD = "<sendgrid_password>"  # new
 EMAIL_USE_TLS = True  
 
