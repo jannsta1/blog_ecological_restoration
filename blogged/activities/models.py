@@ -54,7 +54,9 @@ class Activity(PolymorphicModel):
     location = models.CharField(max_length=2, null=True, choices=Location.choices)
 
     activity_type = ActivityType.GENERIC
-    hours_spent = models.FloatField(null=True, default=0.0) # TODO : we don't want null here, remove it
+    hours_spent = models.FloatField(
+        null=True, default=0.0
+    )  # TODO : we don't want null here, remove it
 
 
 class ActivityTreePlantingSession(Activity):

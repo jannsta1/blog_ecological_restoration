@@ -7,7 +7,10 @@ class ContactForm(forms.Form):
 
     email = forms.EmailField(
         widget=forms.TextInput(
-            attrs={"placeholder": "Your e-mail", "class": "select-form-field block w-full"}
+            attrs={
+                "placeholder": "Your e-mail",
+                "class": "select-form-field block w-full",
+            }
         )
     )
     subject = forms.CharField(
@@ -17,7 +20,10 @@ class ContactForm(forms.Form):
     )
     message = forms.CharField(
         widget=forms.Textarea(
-            attrs={"placeholder": "Your message", "class": "select-form-field block w-full"}
+            attrs={
+                "placeholder": "Your message",
+                "class": "select-form-field block w-full",
+            }
         )
     )
 

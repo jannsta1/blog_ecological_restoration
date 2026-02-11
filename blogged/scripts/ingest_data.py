@@ -118,15 +118,14 @@ def process_transport_data(details_data: dict, post: Post):
         mode = transport_entry.get("mode")
         distance = transport_entry.get("distance")
         carbon_offset = transport_entry.get("carbon_offset", False)
-        
 
         if mode == "car":
             TransportCar.objects.create(
                 activity=post.activities.first(),  # assuming one activity per post for simplicity
                 distance=distance,
                 carbon_offset=carbon_offset,
-                powertrain = transport_entry.get("powertrain"),
-                passengers = transport_entry.get("passengers", 0),
+                powertrain=transport_entry.get("powertrain"),
+                passengers=transport_entry.get("passengers", 0),
             )
             logger.info(
                 f"Added car transport: {distance} km, carbon offset: {carbon_offset}"
@@ -368,14 +367,12 @@ def process_tree_planting_session(post: Post, activity_data: dict):
     Create ActivityTreePlantingSession and associated TreePlanting objects.
     """
     # Extract location if provided
-    
+
     session_data = activity_data["tree_planting_session"]
     notes = session_data.get("notes")
 
     # Create the tree planting session
-    activity = ActivityTreePlantingSession.objects.create(
-        post=post, notes=notes
-    )
+    activity = ActivityTreePlantingSession.objects.create(post=post, notes=notes)
 
     # Process tree plantings
     tree_plantings = session_data.get("tree_planting", [])
@@ -432,7 +429,6 @@ def process_vole_guard_removal(post: Post, activity_data: dict):
     """
     Create ActivityVoleGuardRemoval object.
     """
-
 
     removal_data = activity_data["vole_guard_removal"]
     area_covered = removal_data.get("area_covered")

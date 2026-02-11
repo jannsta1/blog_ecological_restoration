@@ -1,4 +1,4 @@
-from settings.common import * # noqa: F401
+from settings.common import *  # noqa: F403
 
 DATABASES = {
     "default": {
@@ -10,6 +10,3 @@ DATABASES = {
         # "PORT": "",
     }
 }
-
-
-

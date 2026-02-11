@@ -1,29 +1,30 @@
+import os
 from pathlib import Path
+
+import django
 from activities.models import ActivityTreePlantingSession
 from activities.models import ActivityVoleGuardRemoval
 from activities.models import Location
 from activities.models import TransportCar
 from activities.models import TreePlanting
 from activities.models import TreeSpecies
-from blog.models import GpsCoordinates, Organisation
-from blog.models import Post
+from blog.models import GpsCoordinates
 from blog.models import Images
-import os
-from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
-import django
-from django.conf import settings
+from blog.models import Organisation
+from blog.models import Post
 from django.core.files import File
+from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
 
 
 # e.g.: dm runscript gps_from_image --script-args /home/jan/dev/blog_ecological_restoration/data/photos/2025/05/04/PXL_20250504_120358738.jpg
 def run(*args, **options):
-
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "blogged.settings.production")
     django.setup()
     # Example: Create a blog post for a tree planting activity with associated data
     create_tree_planting_activity_with_photos(*args, **options)
     create_tree_planting_activity(*args, **options)
     create_vole_guard_activity(*args, **options)
+
 
 def create_gps_coordinates(post: Post, image_path: Path, *args, **options):
     lat, lon, alt = get_gps_coordinates_from_meta_data(image_path=image_path)
@@ -39,10 +40,8 @@ def create_gps_coordinates(post: Post, image_path: Path, *args, **options):
     )
     gps_coordinate.save()
 
-            
 
 def create_tree_planting_activity_with_photos(*args, **options):
-
     organisation = Organisation.objects.get(name="Borders Forest Trust")
     # Create the blog post
     post, created = Post.objects.get_or_create(
@@ -75,18 +74,15 @@ def create_tree_planting_activity_with_photos(*args, **options):
         )
 
         image_path = "/home/jan/dev/blog_ecological_restoration/data/photos/2024/02/04/PXL_20240204_115446467.jpg"
-        with open(image_path, 'rb') as img_file:
+        with open(image_path, "rb") as img_file:
             image = Images.objects.create(
-                post=post,
-                caption="My precious trees",
-                is_main_image=True
+                post=post, caption="My precious trees", is_main_image=True
             )
             create_gps_coordinates(post=post, image_path=Path(image_path))
             image.image.save(os.path.basename(image_path), File(img_file), save=True)
 
         # print(image.public_thumbnail_url)
         print(image.public_url)
-
 
 
 def create_tree_planting_activity(*args, **options):

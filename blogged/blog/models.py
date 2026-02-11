@@ -142,7 +142,9 @@ class Images(models.Model):
     is_main_image = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
     caption = models.TextField(null=True, blank=True)
-    attribution = models.CharField(max_length=255, null=True, blank=True, default="Jan Stankiewicz")
+    attribution = models.CharField(
+        max_length=255, null=True, blank=True, default="Jan Stankiewicz"
+    )
 
     @property
     def public_thumbnail_url(self):

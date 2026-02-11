@@ -18,7 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "whitenoise.runserver_nostatic", # equivalent to `dm runserver --nostatic`
+    "whitenoise.runserver_nostatic",  # equivalent to `dm runserver --nostatic`
     "django.contrib.staticfiles",
     "django_extensions",
     "imagekit",
@@ -65,7 +65,9 @@ TEMPLATES = [
 ]
 
 STATIC_URL = "/static/"  # used by django/the app as an api for static files
-STATIC_ROOT = BASE_DIR / "staticfiles"  # where collectstatic puts static files for production
+STATIC_ROOT = (
+    BASE_DIR / "staticfiles"
+)  # where collectstatic puts static files for production
 STATICFILES_DIRS = [
     BASE_DIR / "static",  # where generic static files are stored - e.g. css, js, images
 ]
