@@ -134,3 +134,7 @@ Quota project "django-blog-data" was added to ADC which can be used by Google cl
 - update cors.json and then run -> gsutil cors set cors.json gs://django-blog-data
 - update map apo https://console.cloud.google.com/google/maps-apis - see keys & credentials
 - update mailgun
+
+### Active urls
+- www.jansweb.co.uk
+- https://eco-blog-a5505b400183.herokuapp.com/
