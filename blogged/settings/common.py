@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "activities",
     # 'gdstorage',
     "anymail",
+    "django_cleanup.apps.CleanupSelectedConfig",  # recommended to be the last app in the list, so it can clean up files from other apps when models are deleted/updated
 ]
 
 MIDDLEWARE = [
