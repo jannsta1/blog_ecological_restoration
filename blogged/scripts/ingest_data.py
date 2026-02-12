@@ -19,6 +19,10 @@ from blog.models import Organisation
 from blog.models import Post
 from django.core.files import File
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
+from scripts.resize_images import (
+    resize_images_from_path,
+    DEFAULT_LARGEST_DIMENSION_SIZE,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,8 +49,14 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2025, 9, 25))
-    end_date = options.get("end_date", date(2025, 9, 30))
+    # start_date = options.get("start_date", date(2025, 9, 25))
+    # end_date = options.get("end_date", date(2025, 9, 30))
+
+    # resize all images in the photos folder to a maximum dimension of 1200px before processing
+    # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
+    resize_images_from_path(
+        base_photo_dir, largest_dimension_size=DEFAULT_LARGEST_DIMENSION_SIZE
+    )
 
     # Get list of data folders
     data_folders = extract_data_folders(base_photo_dir)
