@@ -1,5 +1,9 @@
 # installation
 
+## dependencies
+
+sudo apt-get update && sudo apt-get install -y graphviz  
+
 ## python 
 
 uv pip install -r requirements.txt
