@@ -145,6 +145,22 @@ pumpkin ED7D3A  */
     /* @apply mb-4; */
     color: var(--color-text-muted);
   }
+
+  ul li {
+    @apply mx-2 mtb-2 text-[var(--color-text-muted)]
+  }
+
+  ul li {
+    @apply list-disc list-inside
+  }
+
+  ol {
+    @apply mx-2 mtb-2 text-[var(--color-text-muted)]
+  }
+
+  ol li {
+    @apply list-decimal list-inside
+  }
 }
 
 /* ----------------------------------
