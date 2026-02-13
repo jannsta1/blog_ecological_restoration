@@ -1,47 +1,47 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
 {% block content %}
 
 {# Assumes you set up the password_reset view in your URLConf #}
 
-<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-  <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+  <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
     {% comment %} <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" class="mx-auto h-10 w-auto dark:hidden" />
     <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" class="mx-auto h-10 w-auto not-dark:hidden" /> {% endcomment %}
-    <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Blog Administrator Login Page</h1>
-    <h2 class="text-center text-l/9 font-medium tracking-tight text-[var(--color-text-muted)]">(No login required for site visitors).</h2>
-  </div>
+      <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Blog Administrator Login Page</h1>
+      <h2 class="text-center text-l/9 font-medium tracking-tight text-[var(--color-text-muted)]">(No login required for site visitors).</h2>
+    </div>
 
-  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-    <form action="{% url 'login' %}" method="post" class="space-y-6">
-      {% csrf_token %}
-      <div>
-        <label for="email" class="block text-sm/6 font-medium ">{{ form.username.label_tag }}</label>
-        <div class="mt-2">
-          {{ form.username }}
+    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+      <form action="{% url 'login' %}" method="post" class="space-y-6">
+        {% csrf_token %}
+        <div>
+          <label for="email" class="block text-sm/6 font-medium ">{{ form.username.label_tag }}</label>
+          <div class="mt-2">
+            {{ form.username }}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <div class="mt-2">
-          <label for="password" class="block text-sm/6 font-medium ">{{ form.password.label_tag }}</label>
+        <div>
+          <div class="mt-2">
+            <label for="password" class="block text-sm/6 font-medium ">{{ form.password.label_tag }}</label>
+          </div>
+          <div class="mt-2">
+            {{ form.password }}
+          </div>
         </div>
-        <div class="mt-2">
-          {{ form.password }}
-        </div>
-      </div>
 
-      {% if form.errors %}
-        <p class="block text-sm/6 font-medium text-red-500">Your username and password didn't match. Please try again.</p>
-      {% endif %} 
+        {% if form.errors %}
+          <p class="block text-sm/6 font-medium text-red-500">Your username and password didn't match. Please try again.</p>
+        {% endif %}
 
-      <div>
-        <button type="submit" class="flex w-full btn-primary">Sign in</button>
+        <div>
+          <button type="submit" class="flex w-full btn-primary">Sign in</button>
         {% comment %}   focus-visible:outline-emerald-600 dark:bg-emerald-500 dark:shadow-none dark:hover:bg-emerald-400 dark:focus-visible:outline-emerald-500 {% endcomment %}
-      </div>
-    </form>
+        </div>
+      </form>
 
+    </div>
   </div>
-</div>
 
 {% endblock content %}

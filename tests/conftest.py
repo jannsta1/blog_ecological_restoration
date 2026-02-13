@@ -6,6 +6,7 @@
 """
 Pytest configuration and fixtures for the jewelry shop SaaS platform.
 """
+
 import pytest
 from django.contrib.sessions.middleware import SessionMiddleware
 

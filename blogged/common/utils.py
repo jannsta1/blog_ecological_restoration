@@ -8,6 +8,6 @@ def get_secret(key):
         with open(value) as f:
             return f.read()
     # else:
-        # raise IOError(f"Secret file for {key} not found at {value}")
+    # raise IOError(f"Secret file for {key} not found at {value}")
 
     return value

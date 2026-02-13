@@ -1,0 +1,18 @@
+<!-- templates/contact.html -->
+{% extends "base.html" %}
+
+{% block title %}Message Failure{% endblock title %}
+
+{% block content %}
+
+  <div class="flex items-center justify-center" style="min-height: calc(100vh - var(--header-height, 100px) - var(--footer-height, 100px));">
+    <div class="text text-center max-w-4xl px-4 space-x-8 text-lg leading-relaxed my-6">
+      <h1 class="text-4xl mb-6 font-semibold text-center">Message Failed.</h1>
+      <p class="my-6">The issue has been logged and will be repaired soon. If we collected your email in the log we will be in touch shortly.</p>
+      <p class="my-6">
+        <a href="{% url 'landing_page' %}" class="text-[var(--color-primary)] font-bold">Return Home.</a>
+      </p>
+    </div>
+  </div>
+
+{% endblock content %}

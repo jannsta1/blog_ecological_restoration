@@ -1,4 +1,6 @@
-from activities.models import Activity, Transport, TransportCar, TransportPublic
+from activities.models import Activity
+from activities.models import TransportCar
+from activities.models import TransportPublic
 from activities.models import TreePlanting
 from blog.models import GpsCoordinates
 from common.utils import get_secret
@@ -27,21 +29,18 @@ def upload_location(request):
 
     transport_dict = {}
     liftshare_dict = {}
-    for t in TransportCar.objects.all():        
-
+    for t in TransportCar.objects.all():
         category = "Car - " + TransportCar.Powertrain(t.powertrain).label
         if category not in transport_dict:
             transport_dict[category] = 0
-            
+
         if t.passengers > 0:
             if category not in liftshare_dict:
                 liftshare_dict[category] = 0
             liftshare_dict[category] += t.distance * t.passengers
-        transport_dict[category] += t.distance 
+        transport_dict[category] += t.distance
 
-    
-
-    for t in TransportPublic.objects.all():        
+    for t in TransportPublic.objects.all():
         category = "Public Transport - " + TransportPublic.Type(t.type).label
         transport_dict[category] = t.distance
 

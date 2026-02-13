@@ -1,7 +1,8 @@
 [
   {
     "origin": [
-        "https://eco-blog-a5505b400183.herokuapp.com/"
+        "https://eco-blog-a5505b400183.herokuapp.com/",
+        "https://jansweb.co.uk/"
         ],
     "method": ["GET", "HEAD"],
     "responseHeader": ["Content-Type"],

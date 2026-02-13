@@ -5,7 +5,6 @@
 # Note: The classic Python buildpack currently sets a few gunicorn settings automatically via
 # the `GUNICORN_CMD_ARGS` env var (which take priority over the settings in this file):
 # https://github.com/heroku/heroku-buildpack-python/blob/main/vendor/python.gunicorn.sh
-
 import os
 
 # On Heroku, web dynos must bind to the port number specified via the `PORT` env var. This

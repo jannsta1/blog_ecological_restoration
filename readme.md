@@ -1,5 +1,9 @@
 # installation
 
+## dependencies
+
+sudo apt-get update && sudo apt-get install -y graphviz  
+
 ## python 
 
 uv pip install -r requirements.txt
@@ -76,8 +80,6 @@ dependencies: graphviz ||
 --> add a dev database as well?
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 ## desirable features
-- hookup email account to contact form
-- improve detail page
 - article pagination?
 - add "about the author" page
 - add the "how toos" page
@@ -87,12 +89,9 @@ dependencies: graphviz ||
 ## questions
 - should all templates go either all into the common templates folder? Or all be in their own area?
 ## security
-- squash our git history to remove any previsouly stored passwords - .gitignore .envrc, remove from repo and squash history
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
-- set CSRF_TRUSTED_ORIGINS to a safe value
 - create non-root user for .prod Docker file
 - review all TODOs
-- setup SSL on prod
 ## tasks
 - setup celery or similar for periodic tasks
 - periodic task to remove empty folders on gcloud (e.g. if we've deleted blog records - the image folders persist)
@@ -100,7 +99,6 @@ dependencies: graphviz ||
 - take a look at: https://github.com/m1ndvortex/jewely/tree/main?tab=readme-ov-file
 - make our own .svg icons for favicon.ico and website logo
 - markdown preview added on upload post form
-- make sure that the impact map is working - the pins don't show for docker-compose-local.yml (not a production issue)
 - optimise docker build further - multi stage build, Nuitka
 - ensure that the cache is cleared when we update .css files
 - handle image upload failure scenario
@@ -134,3 +132,7 @@ Quota project "django-blog-data" was added to ADC which can be used by Google cl
 - update cors.json and then run -> gsutil cors set cors.json gs://django-blog-data
 - update map apo https://console.cloud.google.com/google/maps-apis - see keys & credentials
 - update mailgun
+
+### Active urls
+- www.jansweb.co.uk
+- https://eco-blog-a5505b400183.herokuapp.com/
