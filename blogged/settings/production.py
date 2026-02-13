@@ -11,11 +11,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
-from google.oauth2 import service_account
-import dj_database_url
 
+import dj_database_url
 from common.utils import get_secret
-from settings.common import * # noqa: F401
+from google.oauth2 import service_account
+from settings.common import *  # noqa: F403
 
 
 # Quick-start development settings - unsuitable for production
@@ -30,7 +30,9 @@ DEBUG = bool(os.environ.get("DEBUG", default=0))
 IS_HEROKU_APP = "DYNO" in os.environ and "CI" not in os.environ
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
-csrf = os.environ.get("CSRF_TRUSTED_ORIGINS") # ["http://localhost:1337"]  # TODO - update for production
+csrf = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS"
+)  # ["http://localhost:1337"]  # TODO - update for production
 if csrf:
     CSRF_TRUSTED_ORIGINS = csrf.split(" ")
 
@@ -109,7 +111,7 @@ USE_TZ = True
 
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / "media"  # noqa: F405
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -119,12 +121,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # for email contact form (followed this blog post: https://learndjango.com/tutorials/django-email-contact-form-tutorial)
 # TODO - should we switch to anymail?: https://github.com/anymail/django-anymail
 # need to follow the steps - "Production Email Service" to actually get the email to send
-# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" 
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 ANYMAIL = {
     # (exact settings here depend on your ESP...)
     "MAILGUN_API_KEY": get_secret("MAILGUN_API_KEY"),
-    "MAILGUN_SENDER_DOMAIN": 'mg.jansweb.co.uk',  # your Mailgun domain, if needed
+    "MAILGUN_SENDER_DOMAIN": "mg.jansweb.co.uk",  # your Mailgun domain, if needed
     "MAILGUN_API_URL": "https://api.eu.mailgun.net/v3",  # since we are in the EU region
 }
 EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # comment this out to test email sending in the console instead of actually sending emails
@@ -132,7 +134,7 @@ EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"  # comment this out to t
 # EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 # EMAIL_HOST_USER = os.environ.get("MAILGUN_API_KEY")
 # EMAIL_HOST_PASSWORD = "<sendgrid_password>"  # new
-EMAIL_USE_TLS = True  
+EMAIL_USE_TLS = True
 
 # Google drive keys
 GOOGLE_DRIVE_STORAGE_JSON_KEY_FILE = (
@@ -185,7 +187,7 @@ MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
 # https://whitenoise.readthedocs.io/en/latest/django.html#WHITENOISE_KEEP_ONLY_HASHED_FILES
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
-# TODO - add https://whitenoise.readthedocs.io/en/stable/index.html for whitenoise 
+# TODO - add https://whitenoise.readthedocs.io/en/stable/index.html for whitenoise
 # google cloud - https://django-storages.readthedocs.io/en/latest/backends/gcloud.html
 
 

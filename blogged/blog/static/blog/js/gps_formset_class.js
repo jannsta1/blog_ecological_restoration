@@ -24,10 +24,10 @@ class GpsFormset {
     removeForm() {
         const formDiv = event.target.closest('.image-form, .gps-form');
         const deleteField = formDiv.querySelector(`input[type="checkbox"][name$="-DELETE"]`);
-        
+
         formDiv.remove();
         this.totalForms = this.totalForms - 1;
-        
+
     }
 
 

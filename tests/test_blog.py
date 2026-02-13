@@ -1,10 +1,9 @@
-import pytest
 from datetime import datetime
-from django.urls import reverse
 
-
-from blog.models import Post
+import pytest
 from blog.forms import PostForm
+from blog.models import Post
+from django.urls import reverse
 # from blogged.blog.forms import PostForm
 
 
@@ -16,15 +15,17 @@ def authenticated_client(client, django_user_model):
     client.login(username=username, password=password)
     return client
 
+
 @pytest.fixture
 def blog_post():
     post = Post.objects.create(
         title="Sample Blog Post",
         date=datetime.today().date(),
         content="This is a sample blog post for testing.",
-        slug="sample-blog-post"
-        )
+        slug="sample-blog-post",
+    )
     return post
+
 
 @pytest.fixture
 def post_form_data(blog_post):
@@ -37,8 +38,9 @@ def post_form_data(blog_post):
     form = PostForm(data=data)
     yield form
 
+
 @pytest.mark.django_db
-class TestBlogPostCreation:    
+class TestBlogPostCreation:
     def test_blog_post_creation(self, blog_post):
         assert blog_post.title == "Sample Blog Post"
         assert blog_post.content == "This is a sample blog post for testing."
@@ -54,7 +56,7 @@ class TestBlogPostCreation:
             title="Sample Blog Post",
             date=datetime.today().date(),
             content="This is a sample blog post for testing.",
-            slug="sample-blog-post"
+            slug="sample-blog-post",
         )
 
     def test_long_title_slug_truncation(self):
@@ -62,7 +64,7 @@ class TestBlogPostCreation:
         post = Post.objects.create(
             title=long_title,
             date=datetime.today().date(),
-            content="Testing long title slug truncation."
+            content="Testing long title slug truncation.",
         )
         assert len(post.slug) <= Post.MAX_SLUG_LENGTH
         assert post.slug == "a" * Post.MAX_SLUG_LENGTH
@@ -75,25 +77,23 @@ def test_post_form_valid(post_form_data):
 
 @pytest.mark.django_db
 def test_upload_post_view(authenticated_client):
-
-    url = reverse('upload-post')
+    url = reverse("upload-post")
 
     pot_data = {
-        'title': 'Test Post',
-        'date': '2024-06-01',
-        'content': 'This is a test post content.',
+        "title": "Test Post",
+        "date": "2024-06-01",
+        "content": "This is a test post content.",
         # GPS formset data is required even if no gps coordinates are added. TODO - why not the case for images?
-        'gps-TOTAL_FORMS': '1',
-        'gps-INITIAL_FORMS': '0',
-        'gps-MIN_NUM_FORMS': '0',
-        'gps-MAX_NUM_FORMS': '1000',
+        "gps-TOTAL_FORMS": "1",
+        "gps-INITIAL_FORMS": "0",
+        "gps-MIN_NUM_FORMS": "0",
+        "gps-MAX_NUM_FORMS": "1000",
     }
-    
+
     # submit the post, and expect a redirect on success
     response = authenticated_client.post(url, pot_data)
-    assert response.status_code == 302 
+    assert response.status_code == 302
 
     # follow the redirect and check that the new post page loads correctly
     final_reponse = authenticated_client.get(response.url, follow=True)
     assert final_reponse.status_code == 200
-    

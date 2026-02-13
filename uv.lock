@@ -29,6 +29,7 @@ dependencies = [
     { name = "django" },
     { name = "django-anymail" },
     { name = "django-autocomplete-light" },
+    { name = "django-cleanup" },
     { name = "django-extensions" },
     { name = "django-flatpickr" },
     { name = "django-formset" },
@@ -68,6 +69,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.8" },
     { name = "django-anymail", extras = ["mailgun"], specifier = ">=14.0" },
     { name = "django-autocomplete-light", specifier = ">=3.12.1" },
+    { name = "django-cleanup", specifier = ">=9.0.0" },
     { name = "django-extensions", specifier = ">=4.1" },
     { name = "django-flatpickr", specifier = ">=2.0.3" },
     { name = "django-formset", specifier = ">=2.1.4" },
@@ -366,6 +368,15 @@ dependencies = [
     { name = "django" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/bc/49/fd4705cd96f313d858f9a8c5fce1c33f1f61adb6b25acc92a924acf0a305/django_autocomplete_light-3.12.1.tar.gz", hash = "sha256:50f7b83681feec6491c38e6114d7a4fe80f9e99a8cc6c8458a3e7bb137ad6b1d", size = 296420, upload-time = "2025-02-26T08:21:16.332Z" }
+
+[[package]]
+name = "django-cleanup"
+version = "9.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4b/01/b15a8de8b9ec75ea157ec58f86411894ca1182305fabaee31193076e7f62/django_cleanup-9.0.0.tar.gz", hash = "sha256:bb9fb560aaf62959c81e31fa40885c36bbd5854d5aa21b90df2c7e4ba633531e", size = 17917, upload-time = "2024-09-18T21:58:06.089Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/87/d7/a83dc87c2383e125da29948f7bccf5b30126c087a5a831316482407a960f/django_cleanup-9.0.0-py3-none-any.whl", hash = "sha256:19f8b0e830233f9f0f683b17181f414672a0f48afe3ea3cc80ba47ae40ad880c", size = 10726, upload-time = "2024-09-18T21:58:04.626Z" },
+]
 
 [[package]]
 name = "django-extensions"

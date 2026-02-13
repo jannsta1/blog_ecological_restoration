@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load markdown_filters %}
 
 {% block title %}{{ post.title }}{% endblock title %}
@@ -20,9 +21,41 @@
     {{ post.content|render_markdown }}
   </div>
 
+  <h1 class="text-3xl mt-2 font-semibold text-center mb-4">Image Gallery</h1>
+
   {% if post_images %}
-    <h1 class="text-3xl mb-4 mt-2 font-semibold text-center">Photo gallery</h1>
-    {% include "blog/partials/image_gallery.html" with images=post_images %}
+    <div id="main-image-canvas" class="relative w-full h-96 lg:h-115  lex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-4 border-gray-900">
+      {% for image in post_images %}
+        <div id="mySlides" class="mySlides hidden w-full h-full my-4 flex items-center justify-center">
+          <div class="absolute top-0 left-0 text-[var(--color-text)] font-bold px-3 py-2 z-20">{{ forloop.counter }} / {{ post_images|length }}</div>
+          <div class="relative inline-block h-full">
+            <img class="h-full block" src="{{ image.public_url }}" alt="{{ post.title }}">
+            {% if image.attribution %}
+              <div class="absolute bottom-2 left-0">
+                <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ image.attribution }}</span>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+      <!-- Navigation buttons -->
+      <button class="prev absolute top-1/2 -translate-y-1/2 left-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-r hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(-1)">❮</button>
+      <button class="next absolute top-1/2 -translate-y-1/2 right-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-l hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(1)">❯</button>
+    </div>
+
+    <!-- Caption container -->
+    <div class="bg-gray-900 text-center  px-4 ">
+      <p id="caption"></p>
+    </div>
+
+    <div class="flex overflow-x-auto gap-2 p-2 rounded-b-2xl border-4 border-gray-900 text-white">
+      {% for image in post_images %}
+        <div class="flex-shrink-0">
+          <img id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" src="{{ image.public_url }}" onclick="currentSlide({{ forloop.counter }})" alt="{{ image.caption|default:"no caption" }}" width="96" height="96">
+        </div>
+      {% endfor %}
+    </div>
+
   {% endif %}
 
   <h1 class="text-3xl mb-2 mt-2 font-semibold text-center">Impact Analysis</h1>
@@ -40,5 +73,54 @@
       {% include "activities/partials/activity-transport-detail.html" %}
     {% endif %}
   {% endfor %}
+
+
+
+  <script>
+
+    let slideIndex = 1;
+    showSlides(slideIndex);
+
+    function plusSlides(n) {
+      console.log("current slide");
+      showSlides(slideIndex += n);
+    }
+
+    function currentSlide(n) {
+      console.log("current slide");
+      showSlides(slideIndex = n);
+    }
+
+    function showSlides(n) {
+      console.log("showing slides");
+      let i;
+      let slides = document.getElementsByClassName("mySlides");
+      let dots = document.querySelectorAll('*[id=gallery-image]');
+      let captionText = document.getElementById("caption");
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      for (i = 0; i < slides.length; i++) {
+        slides[i].classList.add('hidden');
+      }
+    //for (i = 0; i < dots.length; i++) {
+    //  dots[i].className = dots[i].className.replace(" active", "");
+    //}
+
+      slides[slideIndex-1].classList.add('flex');
+      slides[slideIndex-1].classList.add('animate-[wiggle_1s_ease-in-out_infinite]');
+      slides[slideIndex-1].classList.remove('hidden');
+      slides[slideIndex-1].classList.add('bg-[var(--color-surface-alt)]');
+    //dots[slideIndex-1].className += " active";
+      captionText.innerHTML = dots[slideIndex-1].alt;
+      captionText.classList.add('text-white')
+    }
+
+  // document.addEventListener('DOMContentLoaded', function() {
+    // console.log("lets show some");
+    // showSlides(1);
+  // })
+
+
+  </script>
 
 {% endblock content %}

@@ -19,6 +19,10 @@ from blog.models import Organisation
 from blog.models import Post
 from django.core.files import File
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
+from scripts.resize_images import (
+    resize_images_from_path,
+    DEFAULT_LARGEST_DIMENSION_SIZE,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,8 +49,14 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2025, 9, 25))
-    end_date = options.get("end_date", date(2025, 9, 30))
+    # start_date = options.get("start_date", date(2025, 9, 25))
+    # end_date = options.get("end_date", date(2025, 9, 30))
+
+    # resize all images in the photos folder to a maximum dimension of 1200px before processing
+    # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
+    resize_images_from_path(
+        base_photo_dir, largest_dimension_size=DEFAULT_LARGEST_DIMENSION_SIZE
+    )
 
     # Get list of data folders
     data_folders = extract_data_folders(base_photo_dir)
@@ -118,15 +128,14 @@ def process_transport_data(details_data: dict, post: Post):
         mode = transport_entry.get("mode")
         distance = transport_entry.get("distance")
         carbon_offset = transport_entry.get("carbon_offset", False)
-        
 
         if mode == "car":
             TransportCar.objects.create(
                 activity=post.activities.first(),  # assuming one activity per post for simplicity
                 distance=distance,
                 carbon_offset=carbon_offset,
-                powertrain = transport_entry.get("powertrain"),
-                passengers = transport_entry.get("passengers", 0),
+                powertrain=transport_entry.get("powertrain"),
+                passengers=transport_entry.get("passengers", 0),
             )
             logger.info(
                 f"Added car transport: {distance} km, carbon offset: {carbon_offset}"
@@ -368,14 +377,12 @@ def process_tree_planting_session(post: Post, activity_data: dict):
     Create ActivityTreePlantingSession and associated TreePlanting objects.
     """
     # Extract location if provided
-    
+
     session_data = activity_data["tree_planting_session"]
     notes = session_data.get("notes")
 
     # Create the tree planting session
-    activity = ActivityTreePlantingSession.objects.create(
-        post=post, notes=notes
-    )
+    activity = ActivityTreePlantingSession.objects.create(post=post, notes=notes)
 
     # Process tree plantings
     tree_plantings = session_data.get("tree_planting", [])
@@ -432,7 +439,6 @@ def process_vole_guard_removal(post: Post, activity_data: dict):
     """
     Create ActivityVoleGuardRemoval object.
     """
-
 
     removal_data = activity_data["vole_guard_removal"]
     area_covered = removal_data.get("area_covered")

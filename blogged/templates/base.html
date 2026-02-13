@@ -9,7 +9,6 @@
     <title>{% block title %}{% endblock title %}</title>
 
     <link rel="stylesheet" href="{% static 'css/style_out.css' %}">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
     <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon-leaves.png' %}" >
 
     <script src="https://kit.fontawesome.com/1b1c6a2d99.js" crossorigin="anonymous"></script>  {% comment %} TODO - pick some better icons & host in the project static files{% endcomment %}
@@ -26,7 +25,7 @@
         {% include "partials/message_banner.html" %}
         {% include "partials/navbar.html" %}
       </header>
-      <main class="lg:mx-20 md:mx-10 sm:mx-2 m-auto grow">
+      <main class="max-sm:mx-2 sm:mx-4 md:mx-10 lg:mx-20 m-auto grow">
         {% block content %}{% endblock content %}
       </main>
       <footer class="relative mt-4 border-t border-[var(--color-border)] ">
@@ -41,10 +40,6 @@
 
     <!-- htmx library, added when trialing forms with htmx buttons -->
   <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
-
-    <!-- flowbite - used for the image gallery -->
-  <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-
     {% comment %} <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> {% endcomment %}
 
 

@@ -8,6 +8,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from storages.backends.gcloud import GoogleCloudStorage
 from taggit.managers import TaggableManager
+from django_cleanup import cleanup
 # from gdstorage.storage import GoogleDriveStorage
 
 # Define Google Drive Storage
@@ -122,6 +123,8 @@ def get_image_filename(instance, filename):
     return f"rewilding/images/{database_tag}/{id}/{filename}"
 
 
+# Adding this decorator ensures that when an Images instance is deleted, the associated image file is also deleted from google storage bucket
+@cleanup.select
 class Images(models.Model):
     """
     Docstring for Images
@@ -142,7 +145,9 @@ class Images(models.Model):
     is_main_image = models.BooleanField(default=False)
     is_featured = models.BooleanField(default=False)
     caption = models.TextField(null=True, blank=True)
-    attribution = models.CharField(max_length=255, null=True, blank=True, default="Jan Stankiewicz")
+    attribution = models.CharField(
+        max_length=255, null=True, blank=True, default="Jan Stankiewicz"
+    )
 
     @property
     def public_thumbnail_url(self):
