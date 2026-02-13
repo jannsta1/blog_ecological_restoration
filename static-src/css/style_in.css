@@ -85,7 +85,7 @@ pumpkin ED7D3A  */
 
 }
 
-/* Breakpoint-based overrides */
+/* Breakpoint-based overrides TODO - just replace with tailwind */
 @media (min-width: 640px) {
   :root {
     --grid-gap: 1.5rem;
@@ -147,7 +147,7 @@ pumpkin ED7D3A  */
   }
 
   ul li {
-    @apply mx-2 mtb-2 text-[var(--color-text-muted)]
+    @apply mx-2 my-2 text-[var(--color-text-muted)]
   }
 
   ul li {
@@ -155,7 +155,7 @@ pumpkin ED7D3A  */
   }
 
   ol {
-    @apply mx-2 mtb-2 text-[var(--color-text-muted)]
+    @apply mx-2 my-2 text-[var(--color-text-muted)]
   }
 
   ol li {
