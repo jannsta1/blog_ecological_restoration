@@ -7,6 +7,7 @@ from activities.models import ActivityTraining
 from activities.models import ActivityTreePlantingSession
 from activities.models import ActivityVoleGuardRemoval
 from activities.models import ActivityWorkshop
+from activities.models import Location
 from blog.forms import GpsCoordinates
 from blog.forms import GpsFormSet
 from blog.forms import ImageFormSet
@@ -27,6 +28,7 @@ from hitcount.views import track_hit_count
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
 
 SELECT_ALL_OPTION_STR = "-- All --"
+SELECT_ALL_OPTION_VAL = "All"
 
 
 @track_hit_count
@@ -37,8 +39,10 @@ def blog_listing(request):
     activity_tags[0] = (
         SELECT_ALL_OPTION_STR  # Replace UNDEFINED with SELECT_ALL_OPTION_STR for ui display purposes
     )
+    location_tags = Location.choices
     current_activity_id = 0
     current_organisation_id = 0
+    current_location_id = SELECT_ALL_OPTION_VAL
 
     if request.GET.get("activity-select"):
         activity_id = request.GET.get("activity-select")
@@ -75,6 +79,13 @@ def blog_listing(request):
             posts = posts.filter(organisation_tags=org_id)
             current_organisation_id = int(org_id)
 
+    if request.GET.get("location-select"):
+        location = request.GET.get("location-select")
+        # print(f"Filtering by location: {location}")
+        if location != SELECT_ALL_OPTION_VAL:
+            current_location_id = location
+            posts = posts.filter(activities__location=location).distinct()
+
     return render(
         request,
         "index.html",
@@ -85,6 +96,9 @@ def blog_listing(request):
             "current_activity_id": current_activity_id,
             "current_organisation_id": current_organisation_id,
             "select_all_option_str": SELECT_ALL_OPTION_STR,
+            "select_all_option_val": SELECT_ALL_OPTION_VAL,
+            "current_location_id": current_location_id,
+            "location_select_options": location_tags,
         },
     )
 

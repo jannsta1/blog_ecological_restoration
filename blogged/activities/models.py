@@ -128,6 +128,11 @@ class ActivitySurveying(Activity):
 ################################################################
 # Transport Models
 ################################################################
+# talla: 46.6
+# corehead: 74.8
+# carrifran: 56.6
+
+
 class Transport(models.Model):
     # activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transport')
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
