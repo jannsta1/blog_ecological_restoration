@@ -12,7 +12,7 @@ from blog.forms import GpsCoordinates
 from blog.forms import GpsFormSet
 from blog.forms import ImageFormSet
 from blog.forms import PostForm
-from blog.models import Images
+from blog.models import Images, Videos
 from blog.models import Organisation
 from blog.models import Post
 from dal import autocomplete
@@ -107,6 +107,8 @@ def blog_listing(request):
 def detail(request, slug, id):
     post = get_object_or_404(Post, slug=slug, id=id)
     post_images = Images.objects.all().filter(post=post)
+    post_videos = Videos.objects.all().filter(post=post)
+    all_media = list(post_images) + list(post_videos)
     captions = [img.caption for img in post_images]
     attributions = ["Jan Stankiewicz" for _ in post_images]
 
@@ -115,7 +117,9 @@ def detail(request, slug, id):
         "blog/detail.html",
         {
             "post": post,
+            "all_media": all_media,
             "post_images": post_images,
+            "post_videos": post_videos,
             "captions": captions,
             "attributions": attributions,
         },

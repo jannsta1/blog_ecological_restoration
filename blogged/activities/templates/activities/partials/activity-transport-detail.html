@@ -15,4 +15,10 @@
       Carbon offset: {{ public.carbon_offset|yesno:"Yes,No" }}
     </div>
   {% endfor %}
+  {% for walk in activity.transportwalking_set.all %}
+    <div class="mb-2">
+      <span class="font-medium">Walking:</span>
+      Distance - {{ walk.distance }} km,
+    </div>
+  {% endfor %}
 </div>

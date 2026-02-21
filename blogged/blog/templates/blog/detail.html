@@ -25,15 +25,27 @@
 
   {% if post_images %}
     <div id="main-image-canvas" class="relative w-full h-96 lg:h-115  lex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-4 border-gray-900">
-      {% for image in post_images %}
-        <div id="mySlides" class="mySlides hidden w-full h-full my-4 flex items-center justify-center">
+      {% for media in all_media %}
+        <div id="mySlides" class="mySlides w-full h-full my-4 items-center justify-center"> <!-- we set flex/hidden in the JS depending on if the image is selected or not -->
           <div class="absolute top-0 left-0 text-[var(--color-text)] font-bold px-3 py-2 z-20">{{ forloop.counter }} / {{ post_images|length }}</div>
           <div class="relative inline-block h-full">
-            <img class="h-full block" src="{{ image.public_url }}" alt="{{ post.title }}">
-            {% if image.attribution %}
-              <div class="absolute bottom-5 left-0">
-                <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ image.attribution }}</span>
-              </div>
+            {% if media.media_type == "IMAGE" %}
+              <img class="h-full block" src="{{ media.public_url }}" alt="{{ post.title }}">
+              {% if media.attribution %}
+                <div class="absolute bottom-5 left-0">
+                  <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ media.attribution }}</span>
+                </div>
+              {% endif %}
+            {% else %}
+              <video
+                class="block w-full h-full object-contain rounded-lg bg-black"
+                controls
+                preload="metadata"
+                playsinline
+              >
+                <source src="{{ media.public_url }}" type="video/mp4" alt="{{ post.title }}">
+                Your browser does not support the video tag.
+              </video>
             {% endif %}
           </div>
         </div>
@@ -49,13 +61,21 @@
     </div>
 
     <div class="flex overflow-x-auto gap-2 p-2 rounded-b-2xl border-4 border-gray-900 text-white">
-      {% for image in post_images %}
+      {% for media in all_media %}
         <div class="flex-shrink-0">
-          <img id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" src="{{ image.public_url }}" onclick="currentSlide({{ forloop.counter }})" alt="{{ image.caption|default:"no caption" }}" width="96" height="96">
+          {% if media.media_type == "IMAGE" %}
+            <img id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" src="{{ media.public_url }}" onclick="currentSlide({{ forloop.counter }})" alt="{{ media.caption|default:"no caption" }}" title="{{ media.caption|default:"no caption" }}" width="96" height="96">
+          {% elif media.media_type == "VIDEO"  %}
+            <!-- Draw a "play" symbol to denote that its a video -->
+            <svg id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" onclick="currentSlide({{ forloop.counter }})" width="96" height="96" viewBox="0 0 24 24" stroke="var(--color-primary)">
+              <title>{{ media.caption|default:"Video" }}</title>
+              <circle cx="12" cy="12" r="11" fill="none" stroke="var(--color-primary)" stroke-width="1.5"/>
+              <path stroke="var(--color-primary)" fill="var(--color-primary)" d="M10 8.5c0-.706.756-1.149 1.311-.646l4.5 3.75a.75.75 0 0 1 0 1.192l-4.5 3.75c-.555.503-1.311.06-1.311-.646V8.5Z" />
+            </svg>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
-
   {% endif %}
 
   <h1 class="text-3xl mb-2 mt-2 font-semibold text-center">Impact Analysis</h1>
@@ -69,7 +89,7 @@
     {% endif %}
 
     {% comment %} Now deal with transport {% endcomment %}
-    {% if activity.transportcar_set.exists or activity.transportpublic_set.exists %}
+    {% if activity.transportcar_set.exists or activity.transportpublic_set.exists or activity.transportwalking_set.exists %}
       {% include "activities/partials/activity-transport-detail.html" %}
     {% endif %}
   {% endfor %}

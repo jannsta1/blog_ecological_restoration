@@ -86,7 +86,6 @@ dependencies: graphviz ||
 ## desirable features
 - how organise blog, campaign, activity, travel
 - ingest - allow multiple transports to be ingested per trip
-- ability to show videos
 - overhaul blog upload page
 - ability to add links (e.g. to images) in blog? Also inline images?
 - landing page photo? The one here is a nice example: https://www.wildlifetrusts.org/wildlife-explorer/wildflowers/ragged-robin
