@@ -24,7 +24,7 @@
   <h1 class="text-3xl mt-2 font-semibold text-center mb-4">Image Gallery</h1>
 
   {% if post_images %}
-    <div id="main-image-canvas" class="relative w-full h-96 lg:h-115  lex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-4 border-gray-900">
+    <div id="main-image-canvas" class="relative w-full h-96 lg:h-115 flex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-4 border-gray-900">
       {% for media in all_media %}
         <div id="mySlides" class="mySlides w-full h-full my-4 items-center justify-center"> <!-- we set flex/hidden in the JS depending on if the image is selected or not -->
           <div class="absolute top-0 left-0 text-[var(--color-text)] font-bold px-3 py-2 z-20">{{ forloop.counter }} / {{ post_images|length }}</div>
@@ -32,7 +32,7 @@
             {% if media.media_type == "IMAGE" %}
               <img class="h-full block" src="{{ media.public_url }}" alt="{{ post.title }}">
               {% if media.attribution %}
-                <div class="absolute bottom-5 left-0">
+                <div class="absolute bottom-2 left-0">
                   <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ media.attribution }}</span>
                 </div>
               {% endif %}
