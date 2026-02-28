@@ -80,19 +80,18 @@ dependencies: graphviz ||
 - add "about the author" page
 - add the "how tos" page
 ## essential features
-- create proper account(s) for the blog login and postgresdb 
---> add a dev database as well?
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 ## desirable features
-- how organise blog, campaign, activity, travel
 - ingest - allow multiple transports to be ingested per trip
 - overhaul blog upload page
+- how organise blog, campaign, activity, travel
 - ability to add links (e.g. to images) in blog? Also inline images?
 - landing page photo? The one here is a nice example: https://www.wildlifetrusts.org/wildlife-explorer/wildflowers/ragged-robin
 - article pagination?
 - establish how to backup the data
 ---> pgdump to google bucket, weekly task?
 ---> how to store X previous backups?
+---> alternative is export in the format we are uploading from at the moment?
 ## questions
 - should all templates go either all into the common templates folder? Or all be in their own area?
 ## security

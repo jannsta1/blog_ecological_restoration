@@ -51,8 +51,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2025, 10, 9))
-    end_date = options.get("end_date", date(2025, 10, 11))
+    start_date = options.get("start_date", date(2026, 2, 20))
+    end_date = options.get("end_date", date(2026, 2, 28))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -197,7 +197,7 @@ def process_video_data(
             caption=video_detail["caption"],
         )
         videos.append(video_obj)
-
+    logger.info(f"Processing {len(videos)} videos for post '{post.title}'")
     for video_data in videos:
         # check if an Videos object already exists for this post and filename
 
@@ -248,6 +248,13 @@ def process_photo_data(
     )
     photo_names = {p["name"]: p for p in photos_data}
     selected_photos = [p for p in photo_files if p.stem in photo_names.keys()]
+    print("***")
+    print(photo_names)
+    print("***")
+    print(photo_files)
+    print("***")
+    print(selected_photos)
+    print("***")
     # TODO: warn if photos in details.yaml are missing from folder
 
     photos = []
@@ -260,6 +267,7 @@ def process_photo_data(
         )
         photos.append(photo_obj)
 
+    logger.info(f"Processing {len(photos)} photos for post '{post.title}'")
     for photo_data in photos:
         # check if an Images object already exists for this post and filename
 

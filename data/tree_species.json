@@ -14,6 +14,11 @@
         "genus": "Quercus",
         "specific_epithet": "robur"
     },
+    "Quercus petraea": {
+        "common_name": "Sessile Oak",
+        "genus": "Quercus",
+        "specific_epithet": "petraea"
+    },
     "Betula nana": {
         "common_name": "Dwarf Birch",
         "genus": "Betula",
@@ -28,6 +33,11 @@
         "common_name": "Downy Birch",
         "genus": "Betula",
         "specific_epithet": "pubescens"
+    },
+    "Crataegus monogyna": {
+        "common_name": "Hawthorn",
+        "genus": "Crataegus",
+        "specific_epithet": "monogyna"
     },
     "Alnus glutinosa": {
         "common_name": "Black Alder",
@@ -53,6 +63,16 @@
         "common_name": "Goat Willow",
         "genus": "Salix",
         "specific_epithet": "caprea"
+    },
+    "Salix cinerea": {
+        "common_name": "Grey Willow",
+        "genus": "Salix",
+        "specific_epithet": "cinerea"
+    },
+    "Salix spp": {
+        "common_name": "Willow - unspecified",
+        "genus": "Salix",
+        "specific_epithet": "spp"
     },
     "Corylus avellana": {
         "common_name": "Common Hazel",
