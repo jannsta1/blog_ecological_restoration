@@ -34,6 +34,10 @@ class Location(models.TextChoices):
         "DU",
         "Dundreggan",
     )
+    PEEBLES_GOLF_COURSE = (
+        "PGC",
+        "Peebles Golf Course",
+    )
 
 
 class Activity(PolymorphicModel):
@@ -51,7 +55,7 @@ class Activity(PolymorphicModel):
     post = models.ForeignKey(
         Post, null=True, on_delete=models.PROTECT, related_name="activities"
     )
-    location = models.CharField(max_length=2, null=True, choices=Location.choices)
+    location = models.CharField(max_length=3, null=True, choices=Location.choices)
 
     activity_type = ActivityType.GENERIC
     hours_spent = models.FloatField(
@@ -128,6 +132,11 @@ class ActivitySurveying(Activity):
 ################################################################
 # Transport Models
 ################################################################
+# talla: 46.6
+# corehead: 74.8
+# carrifran: 56.6
+
+
 class Transport(models.Model):
     # activity = models.ForeignKey(Activity, on_delete=models.CASCADE, related_name='transport')
     activity = models.ForeignKey(Activity, on_delete=models.CASCADE)
@@ -157,3 +166,7 @@ class TransportPublic(Transport):
         TRAIN = "T", "Train"
 
     type = models.CharField(max_length=1, choices=Type.choices, default=Type.BUS)
+
+
+class TransportWalking(Transport):
+    pass  # no additional fields needed for walking, but we can easily add some in the future if needed (e.g. terrain type, elevation gain, etc.)

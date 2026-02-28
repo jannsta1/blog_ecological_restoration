@@ -11,10 +11,12 @@ from activities.models import ActivityTreePlantingSession
 from activities.models import ActivityVoleGuardRemoval
 from activities.models import TransportCar
 from activities.models import TransportPublic
+from activities.models import TransportWalking
 from activities.models import TreePlanting
 from activities.models import TreeSpecies
 from blog.models import GpsCoordinates
 from blog.models import Images
+from blog.models import Videos
 from blog.models import Organisation
 from blog.models import Post
 from django.core.files import File
@@ -29,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class PhotoData:
+class PhotoData:  # TODO - rename to "MediaData" and use for videos as well
     full_path: Path
     caption: str = ""
     is_main_image: bool = False
@@ -49,8 +51,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    # start_date = options.get("start_date", date(2025, 9, 25))
-    # end_date = options.get("end_date", date(2025, 9, 30))
+    start_date = options.get("start_date", date(2026, 2, 20))
+    end_date = options.get("end_date", date(2026, 2, 28))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -113,6 +115,7 @@ def run(*args, **options):
         # # Harvest the 'post' field from details.yaml and update the Post model
         process_post_data(post, details_data["post"])
         process_photo_data(details_data=details_data, data_dir=day_dir, post=post)
+        process_video_data(details_data=details_data, data_dir=day_dir, post=post)
         process_transport_data(details_data=details_data, post=post)
 
 
@@ -150,8 +153,80 @@ def process_transport_data(details_data: dict, post: Post):
             logger.info(
                 f"Added public transport: {distance} km, carbon offset: {carbon_offset}"
             )
+        elif mode == "walk":
+            TransportWalking.objects.create(
+                activity=post.activities.first(),  # assuming one activity per post for simplicity
+                distance=distance,
+                carbon_offset=carbon_offset,
+            )
+            logger.info(
+                f"Added walking transport: {distance} km, carbon offset: {carbon_offset}"
+            )
         else:
             logger.warning(f"Unknown transport mode: {mode}")
+
+
+def process_video_data(
+    details_data: dict, data_dir: Path, post: Post
+) -> list[PhotoData]:
+    """
+    Process video data from YAML and return a list of VideoData objects.
+    """
+
+    videos_data = details_data.get("videos")
+    if videos_data is None:
+        return []
+
+    # # load videos from the folder - look for video files that are also in details.yaml
+    video_files = (
+        list(data_dir.glob("*.mp4"))
+        + list(data_dir.glob("*.mov"))
+        + list(data_dir.glob("*.avi"))
+        + list(data_dir.glob("*.webm"))
+        + list(data_dir.glob("*.mkv"))
+    )
+    video_names = {v["name"]: v for v in videos_data}
+    selected_videos = [v for v in video_files if v.stem in video_names.keys()]
+    # TODO: warn if videos in details.yaml are missing from folder
+
+    videos = []
+    for video in selected_videos:
+        video_detail = video_names.get(video.stem)
+        video_obj = PhotoData(
+            full_path=video,
+            caption=video_detail["caption"],
+        )
+        videos.append(video_obj)
+    logger.info(f"Processing {len(videos)} videos for post '{post.title}'")
+    for video_data in videos:
+        # check if an Videos object already exists for this post and filename
+
+        # if video_file.stem not in video_names:
+        #     logger.warning(f"Video file {video_file.name} not listed in details.yaml for post '{post.title}'. Skipping.")
+        #     continue
+
+        existing_video = Videos.objects.filter(
+            post=post, video__icontains=video_data.name
+        ).first()
+        if existing_video:
+            logger.warning(
+                f"Video already exists for post '{post.title}': {video_data.name}. Skipping."
+            )
+            continue
+
+        try:
+            with open(video_data.full_path, "rb") as img_file:
+                video = Videos.objects.create(
+                    post=post,
+                    caption=video_data.caption,
+                )
+                video.video.save(video_data.name, File(img_file), save=True)
+                logger.info(f"Added video to post '{post.title}': {video_data.name}")
+
+        except Exception as e:
+            logger.error(
+                f"Error adding video {video_data.name} to post '{post.title}': {e}"
+            )
 
 
 def process_photo_data(
@@ -173,6 +248,13 @@ def process_photo_data(
     )
     photo_names = {p["name"]: p for p in photos_data}
     selected_photos = [p for p in photo_files if p.stem in photo_names.keys()]
+    print("***")
+    print(photo_names)
+    print("***")
+    print(photo_files)
+    print("***")
+    print(selected_photos)
+    print("***")
     # TODO: warn if photos in details.yaml are missing from folder
 
     photos = []
@@ -185,6 +267,7 @@ def process_photo_data(
         )
         photos.append(photo_obj)
 
+    logger.info(f"Processing {len(photos)} photos for post '{post.title}'")
     for photo_data in photos:
         # check if an Images object already exists for this post and filename
 

@@ -48,6 +48,7 @@ We recommend the use of the `direnv` package to store your envs in a local file 
 - saleor: https://github.com/saleor/saleor (pytest, celery)
 - jewly: https://github.com/m1ndvortex/jewely (pytest, celery, redis, documentation)
 - some guys blog: https://github.com/gurmessa/my-portfolio/tree/main?tab=readme-ov-file and deployed: https://gurmessa.dev/
+- physionet: https://github.com/MIT-LCP/physionet-build deployed: https://physionet.org/
 
 # setting up postgres on qnap
 https://rexbytes.com/2023/12/11/qnap-container-station-docker-setup-postgres/
@@ -75,39 +76,50 @@ dependencies: graphviz ||
 
 
 # TODO
+## new pages
+- add "about the author" page
+- add the "how tos" page
 ## essential features
-- create proper account(s) for the blog login and postgresdb 
---> add a dev database as well?
 - evaluate what happens on a fresh install - how do we create .env files? Where are the passwords stored?
 ## desirable features
+- ingest - allow multiple transports to be ingested per trip
+- overhaul blog upload page
+- how organise blog, campaign, activity, travel
+- ability to add links (e.g. to images) in blog? Also inline images?
+- landing page photo? The one here is a nice example: https://www.wildlifetrusts.org/wildlife-explorer/wildflowers/ragged-robin
 - article pagination?
-- add "about the author" page
-- add the "how toos" page
 - establish how to backup the data
 ---> pgdump to google bucket, weekly task?
 ---> how to store X previous backups?
+---> alternative is export in the format we are uploading from at the moment?
 ## questions
 - should all templates go either all into the common templates folder? Or all be in their own area?
 ## security
+- update cors.json to remove localhost? Document what is needed for MEDIA in production
 - upgrade to MFA login for blog admin. Use allauth?: https://docs.allauth.org/en/latest/introduction/index.html
 - create non-root user for .prod Docker file
 - review all TODOs
+## Devops
+- add coverage for github actions
+- don't allow merge to main branch until pipeline passes
+## testing
+- selenium testing?
 ## tasks
 - setup celery or similar for periodic tasks
 - periodic task to remove empty folders on gcloud (e.g. if we've deleted blog records - the image folders persist)
 ## Low priority
-- take a look at: https://github.com/m1ndvortex/jewely/tree/main?tab=readme-ov-file
+- aria labels added
 - make our own .svg icons for favicon.ico and website logo
 - markdown preview added on upload post form
 - optimise docker build further - multi stage build, Nuitka
 - ensure that the cache is cleared when we update .css files
 - handle image upload failure scenario
-- flowbite alternative, shadcn: https://github.com/shadcn-ui/ui?tab=readme-ov-file
+- rename SECRET_KEY -> DJANGO_SECRET_KEY
+- interface with the tree species database: https://www.forestresearch.gov.uk/tools-and-resources/tree-species-database/
 ## refactoring
 ## Getting us on the internet
-- get a url
-- setup reverse proxy for our webapp: https://github.com/jlesage/docker-nginx-proxy-manager - see https://www.reddit.com/r/qnap/comments/1937gak/nginx_proxy_manager_on_qnap_nas/ for a tip how to do it
-- expose webserver to the internet
+- verify postmaster: https://postmaster.google.com/managedomains?pli=1
+
 
 ## handle warning about GCP API error
 /home/jan/dev/blog_ecological_restoration/.venv/lib/python3.13/site-packages/google/auth/_default.py:108: UserWarning: Your application has authenticated using end user credentials from Google Cloud SDK without a quota project. You might receive a "quota exceeded" or "API not enabled" error. See the following page for troubleshooting: https://cloud.google.com/docs/authentication/adc-troubleshooting/user-creds. 

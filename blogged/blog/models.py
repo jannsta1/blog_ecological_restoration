@@ -9,6 +9,7 @@ from imagekit.processors import ResizeToFill
 from storages.backends.gcloud import GoogleCloudStorage
 from taggit.managers import TaggableManager
 from django_cleanup import cleanup
+from django.core.validators import FileExtensionValidator
 # from gdstorage.storage import GoogleDriveStorage
 
 # Define Google Drive Storage
@@ -114,7 +115,9 @@ class Post(models.Model):
     #     return list(locations)
 
 
-def get_image_filename(instance, filename):
+def get_image_filename(
+    instance, filename
+):  # TODO - this is also used for videos - should we rename it to get_media_filename?
     id = instance.post.id
     database_tag = os.environ.get("PROJECT_DB_TAG")
     if database_tag is None:
@@ -134,7 +137,12 @@ class Images(models.Model):
 
     post = models.ForeignKey(Post, default=None, on_delete=models.CASCADE)
     image = models.ImageField(
-        upload_to=get_image_filename, storage=gc_storage, verbose_name="Image"
+        upload_to=get_image_filename,
+        storage=gc_storage,
+        verbose_name="Image",
+        validators=[
+            FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "gif"])
+        ],
     )
     thumbnail = ImageSpecField(
         source="image",
@@ -148,6 +156,7 @@ class Images(models.Model):
     attribution = models.CharField(
         max_length=255, null=True, blank=True, default="Jan Stankiewicz"
     )
+    media_type = "IMAGE"  # TODO - this is a way to distinguish between images and videos in templates - could use a more principled method like having a Media parent class that both Images and Videos inherit from
 
     @property
     def public_thumbnail_url(self):
@@ -170,6 +179,43 @@ class Images(models.Model):
         """
 
         url = self.image.url
+        return url.replace(
+            "https://storage.googleapis.com", "https://storage.cloud.google.com"
+        )
+
+
+@cleanup.select
+class Videos(models.Model):
+    # TODO - we may also want to embed form other sources like youtube?
+    # TODO - should we make a Media abstract class and have Images and Videos inherit from it? (since they share some fields like caption, attribution, is_featured)
+    post = models.ForeignKey(Post, default=None, on_delete=models.CASCADE)
+    video = models.FileField(
+        upload_to=get_image_filename,
+        storage=gc_storage,
+        verbose_name="Video",
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=["MOV", "avi", "mp4", "webm", "mkv"]
+            )
+        ],
+    )  # TODO - 1) add further validation to ensure only video files are uploaded 2) keep these extensions in a variable for use elsewhere
+    is_featured = models.BooleanField(default=False)
+    caption = models.TextField(null=True, blank=True)
+    attribution = models.CharField(
+        max_length=255, null=True, blank=True, default="Jan Stankiewicz"
+    )
+    media_type = "VIDEO"
+
+    @property
+    def public_url(self):
+        """
+        For the google cloud API there is the 'public' and 'authenticated' address for videos.
+
+        Experiments showed that the authenticated API is stored by django-storage but only the public address is accessible.
+        This properties provides a way to access the working public address.
+
+        """
+        url = self.video.url
         return url.replace(
             "https://storage.googleapis.com", "https://storage.cloud.google.com"
         )

@@ -1,6 +1,7 @@
 from activities.models import Activity
 from activities.models import TransportCar
 from activities.models import TransportPublic
+from activities.models import TransportWalking
 from activities.models import TreePlanting
 from blog.models import GpsCoordinates
 from common.utils import get_secret
@@ -43,6 +44,9 @@ def upload_location(request):
     for t in TransportPublic.objects.all():
         category = "Public Transport - " + TransportPublic.Type(t.type).label
         transport_dict[category] = t.distance
+
+    for t in TransportWalking.objects.all():
+        transport_dict["Walking"] = t.distance
 
     trees_planted_dict = {}
     for tp in TreePlanting.objects.all():

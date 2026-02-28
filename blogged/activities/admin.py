@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Activity
+from .models import Activity, TransportWalking
 from .models import ActivityInvasiveSpeciesRemoval
 from .models import ActivityTreePlantingSession
 from .models import ActivityVoleGuardRemoval
@@ -17,3 +17,4 @@ admin.site.register(ActivityVoleGuardRemoval)
 admin.site.register(ActivityInvasiveSpeciesRemoval)
 admin.site.register(TransportCar)
 admin.site.register(TransportPublic)
+admin.site.register(TransportWalking)
