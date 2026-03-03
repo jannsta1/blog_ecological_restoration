@@ -22,6 +22,9 @@ def resize_images(
     for path in image_paths:
         print(f"Resizing image: {path}")
         with Image.open(path) as img:
+            # Preserve raw EXIF bytes (includes GPSInfo) before any transformation
+            exif_data = img.info.get("exif", b"")
+
             width, height = img.size
             is_landscape = width > height
 
@@ -49,7 +52,7 @@ def resize_images(
             )
 
             resized_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
-            resized_img.save(path)
+            resized_img.save(path, exif=exif_data)
 
 
 def resize_images_from_path(
