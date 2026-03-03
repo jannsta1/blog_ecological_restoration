@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 import yaml
 from activities.models import Activity
@@ -26,8 +27,50 @@ from scripts.resize_images import (
     DEFAULT_LARGEST_DIMENSION_SIZE,
 )
 
-logging.basicConfig(level=logging.INFO)
+
+# Custom formatter with color support for console output
+class ColoredConsoleFormatter(logging.Formatter):
+    """Custom formatter that adds ANSI color codes to log messages"""
+
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+
+    COLORS = {
+        "WARNING": RED,
+        "ERROR": RED,
+        "CRITICAL": RED,
+    }
+
+    def format(self, record):
+        log_color = self.COLORS.get(record.levelname, "")
+        if log_color:
+            record.levelname = f"{log_color}{record.levelname}{self.RESET}"
+            record.msg = f"{log_color}{record.msg}{self.RESET}"
+        return super().format(record)
+
+
+# Configure logger to write all logs to file and INFO+ to console
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Capture all log levels
+
+# File handler - logs everything to ingest_data.log
+file_handler = logging.FileHandler("ingest_data.log")
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+file_handler.setFormatter(file_formatter)
+
+# Console handler - logs INFO and above to console with color
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_formatter = ColoredConsoleFormatter("%(levelname)s - %(message)s")
+console_handler.setFormatter(console_formatter)
+
+# Add handlers to logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 @dataclass
@@ -35,6 +78,7 @@ class PhotoData:  # TODO - rename to "MediaData" and use for videos as well
     full_path: Path
     caption: str = ""
     is_main_image: bool = False
+    attribution: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -51,8 +95,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     start_date = options.get("start_date", date(2000, 1, 1))
     end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2026, 2, 20))
-    end_date = options.get("end_date", date(2026, 2, 28))
+    start_date = options.get("start_date", date(2025, 9, 30))
+    end_date = options.get("end_date", date(2025, 10, 4))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -243,19 +287,20 @@ def process_photo_data(
     # # load photos from the folder - look for image files that are also in details.yaml
     photo_files = (
         list(data_dir.glob("*.jpg"))
+        + list(data_dir.glob("*MP.jpg"))
         + list(data_dir.glob("*.jpeg"))
         + list(data_dir.glob("*.png"))
     )
     photo_names = {p["name"]: p for p in photos_data}
+    photo_names_in_config_file = len(photo_names)
     selected_photos = [p for p in photo_files if p.stem in photo_names.keys()]
-    print("***")
-    print(photo_names)
-    print("***")
-    print(photo_files)
-    print("***")
-    print(selected_photos)
-    print("***")
-    # TODO: warn if photos in details.yaml are missing from folder
+
+    if len(selected_photos) < photo_names_in_config_file:
+        logger.warning(
+            f"Only found {len(selected_photos)} photos in folder {data_dir} for post '{post.title}', but {photo_names_in_config_file} listed in details.yaml."
+        )
+        logger.info(f"Found photos: {[p.name for p in selected_photos]}")
+        logger.info(f"Expected photos: {list(photo_names.keys())}")
 
     photos = []
     for photo in selected_photos:
@@ -264,6 +309,7 @@ def process_photo_data(
             full_path=photo,
             caption=photo_detail["caption"],
             is_main_image=photo_detail.get("is_main_image", False),
+            attribution=photo_detail.get("attribution", None),
         )
         photos.append(photo_obj)
 
@@ -291,10 +337,13 @@ def process_photo_data(
                     caption=photo_data.caption,
                     is_main_image=photo_data.is_main_image,
                 )
+                if photo_data.attribution is not None:
+                    image.attribution = photo_data.attribution
+                    image.save()
                 try:
                     create_gps_coordinates(post=post, image_path=photo_data.full_path)
                 except LookupError:
-                    logger.info(
+                    logger.warning(
                         f"No GPS data found in image {photo_data.name} for post '{post.title}' - saving anyway."
                     )
                 image.image.save(photo_data.name, File(img_file), save=True)

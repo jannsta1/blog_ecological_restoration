@@ -148,3 +148,8 @@ Quota project "django-blog-data" was added to ADC which can be used by Google cl
 ### Active urls
 - www.jansweb.co.uk
 - https://eco-blog-a5505b400183.herokuapp.com/
+
+# deployment
+
+## deploy main branch to heroku
+git push heroku main
