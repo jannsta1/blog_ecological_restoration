@@ -93,10 +93,10 @@ def run(*args, **options):
     # Base directory for photos
     base_photo_dir = Path("/mnt/c/Users/janns/OneDrive/EcoBlogData/photos")
     dry_run = options.get("dry_run", False)
-    start_date = options.get("start_date", date(2000, 1, 1))
-    end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2025, 9, 30))
-    end_date = options.get("end_date", date(2025, 10, 4))
+    # start_date = options.get("start_date", date(2000, 1, 1))
+    # end_date = options.get("end_date", date(2200, 1, 1))
+    start_date = options.get("start_date", date(2026, 4, 1))
+    end_date = options.get("end_date", date(2026, 4, 4))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -287,11 +287,12 @@ def process_photo_data(
     # # load photos from the folder - look for image files that are also in details.yaml
     photo_files = (
         list(data_dir.glob("*.jpg"))
-        + list(data_dir.glob("*MP.jpg"))
         + list(data_dir.glob("*.jpeg"))
         + list(data_dir.glob("*.png"))
     )
     photo_names = {p["name"]: p for p in photos_data}
+    # remove file extensions from photo_names keys for matching with photo_files that have extensions
+    photo_names = {Path(name).stem: details for name, details in photo_names.items()}
     photo_names_in_config_file = len(photo_names)
     selected_photos = [p for p in photo_files if p.stem in photo_names.keys()]
 
