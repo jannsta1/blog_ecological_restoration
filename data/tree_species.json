@@ -49,6 +49,11 @@
         "genus": "Populus",
         "specific_epithet": "Tremula"
     },
+    "Salix aurita": {
+        "common_name": "Eared willow",
+        "genus": "Salix",
+        "specific_epithet": "aurita"
+    },
     "Salix lapponum": {
         "common_name": "Downy Willow",
         "genus": "Salix",
@@ -88,5 +93,10 @@
         "common_name": "Bird cherry",
         "genus": "Prunus",
         "specific_epithet": "padus"
+    },
+    "Populus tremula": {
+        "common_name": "Aspen",
+        "genus": "Populus",
+        "specific_epithet": "tremula"
     }
 }
