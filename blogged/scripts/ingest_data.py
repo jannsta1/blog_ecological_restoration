@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 
 import yaml
-from activities.models import Activity
+from activities.models import DEFAULT_TREE_WEIGHT_G, Activity, ActivityTreeGuardRemoval
 from activities.models import ActivityInvasiveSpeciesRemoval
 from activities.models import ActivitySurveying
 from activities.models import ActivityTreePlantingSession
@@ -95,8 +95,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     # start_date = options.get("start_date", date(2000, 1, 1))
     # end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2026, 4, 1))
-    end_date = options.get("end_date", date(2026, 4, 4))
+    start_date = options.get("start_date", date(2026, 3, 17))
+    end_date = options.get("end_date", date(2026, 3, 19))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -477,6 +477,8 @@ def process_activity_data(post: Post, activity_data: dict):
         activity = process_invasive_species_removal(post, activity_data)
     elif "survey" in activity_data:
         activity = process_survey_activity(post, activity_data)
+    elif "tree_guard_removal" in activity_data:
+        activity = process_tree_guard_removal(post, activity_data)
     else:
         activity = process_generic_activity(post, activity_data)
 
@@ -589,6 +591,25 @@ def process_vole_guard_removal(post: Post, activity_data: dict):
         area_covered=area_covered,
         plastic_removed=plastic_removed,
         trees_liberated=trees_liberated,
+        gps_track=gps_track,
+    )
+
+
+def process_tree_guard_removal(post: Post, activity_data: dict):
+    """
+    Create ActivityTreeGuardRemoval object.
+    """
+
+    removal_data = activity_data["tree_guard_removal"]
+    tubes_removed = removal_data.get("tubes_removed")
+    tube_weight_g = removal_data.get("tube_weight_g", DEFAULT_TREE_WEIGHT_G)
+    gps_track = removal_data.get("gps_track")
+
+    logger.info("Added tree guard removal activity")
+    return ActivityTreeGuardRemoval.objects.create(
+        post=post,
+        tubes_removed=tubes_removed,
+        tube_weight_g=tube_weight_g,
         gps_track=gps_track,
     )
 

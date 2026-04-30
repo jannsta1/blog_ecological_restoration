@@ -1,3 +1,6 @@
+import markdown
+from pathlib import Path
+
 from activities.models import Activity
 from activities.models import TransportCar
 from activities.models import TransportPublic
@@ -6,6 +9,7 @@ from activities.models import TreePlanting
 from blog.models import GpsCoordinates
 from common.utils import get_secret
 from django.shortcuts import render
+from django.utils.safestring import mark_safe
 # Create your views here.
 
 
@@ -56,11 +60,20 @@ def upload_location(request):
         trees_planted_dict[species] += tp.quantity
     trees_planted_total = sum(trees_planted_dict.values())
 
+    md_path = (
+        Path(__file__).parent
+        / "templates"
+        / "impact_maps"
+        / "impact-summary-background.md"
+    )
+    impact_summary_html = mark_safe(markdown.markdown(md_path.read_text()))
+
     return render(
         request,
         "impact_maps/impact-map.html",
         {
             "gps_coordinates": gps_coordinates,
+            "impact_summary_html": impact_summary_html,
             "GOOGLE_MAPS_API_KEY": GOOGLE_MAPS_API_KEY_DEVELOPMENT,
             "activity_hours_dict": activity_hours_dict,
             "activity_hours_total": activity_hours_total,

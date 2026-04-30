@@ -84,7 +84,7 @@
         "genus": "Corylus",
         "specific_epithet": "avellana"
     },
-    "Vibernum opulus": {
+    "Viburnum opulus": {
         "common_name": "Geulder rose",
         "genus": "Viburnum",
         "specific_epithet": "opulus"
@@ -98,5 +98,20 @@
         "common_name": "Aspen",
         "genus": "Populus",
         "specific_epithet": "tremula"
+    },
+    "Malus sylvestris": {
+        "common_name": "European crab apple",
+        "genus": "Malus",
+        "specific_epithet": "sylvestris"
+    },
+    "Sorbus aucuparia": {
+        "common_name": "Rowan",
+        "genus": "Sorbus",
+        "specific_epithet": "aucuparia"
+    },
+    "Sambucas nigra": {
+        "common_name": "Common Elder",
+        "genus": "Sambucas",
+        "specific_epithet": "nigra"
     }
 }

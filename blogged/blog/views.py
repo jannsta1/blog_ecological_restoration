@@ -1,6 +1,6 @@
 import json
 
-from activities.models import Activity
+from activities.models import Activity, ActivityTreeGuardRemoval
 from activities.models import ActivityInvasiveSpeciesRemoval
 from activities.models import ActivitySurveying
 from activities.models import ActivityTraining
@@ -65,6 +65,8 @@ def blog_listing(request):
             candidates = ActivityWorkshop.objects.all()
         elif activity_id == str(Activity.ActivityType.SURVEY):
             candidates = ActivitySurveying.objects.all()
+        elif activity_id == str(Activity.ActivityType.TREE_GUARD_REMOVAL):
+            candidates = ActivityTreeGuardRemoval.objects.all()
         else:
             candidates = Activity.objects.all()
 
