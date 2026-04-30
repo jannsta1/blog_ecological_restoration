@@ -6,6 +6,8 @@ from polymorphic.models import PolymorphicModel
 # Tree Models
 ################################################################
 
+DEFAULT_TREE_WEIGHT_G = 90.0  # in grams, based on the weight of a typical tree guard (https://www.forestresearch.gov.uk/tools-and-resources/tree-species-database/)
+
 
 class TreeSpecies(models.Model):
     # TODO: make primary key a letter code?: https://www.forestresearch.gov.uk/tools-and-resources/tree-species-database/
@@ -49,6 +51,7 @@ class Activity(PolymorphicModel):
         TRAINING = 4, "Training Exercise"
         WORKSHOP = 5, "Workshop"
         SURVEY = 6, "Surveying"
+        TREE_GUARD_REMOVAL = 7, "Tree Guard Removal"
 
     # Note: Using PROTECT on Post to avoid accidental deletion of posts with activities
     #       also tried "SET_DEFAULT" but this lead to a lot of dangling activities - at least during development
@@ -103,6 +106,19 @@ class ActivityVoleGuardRemoval(Activity):
     area_covered = models.FloatField()  # in square meters
     plastic_removed = models.FloatField(null=True)  # in kilograms
     trees_liberated = models.IntegerField(null=True)
+    gps_track = models.JSONField(
+        null=True
+    )  # TODO: define a GPS data model - JSON for flexibility or create a lat/lon/alt model?
+
+
+class ActivityTreeGuardRemoval(Activity):
+    activity_type = Activity.ActivityType.TREE_GUARD_REMOVAL
+    tubes_removed = models.IntegerField(
+        null=True
+    )  # number of tree guards touched (removed or adjusted)
+    tube_weight_g = models.FloatField(
+        default=DEFAULT_TREE_WEIGHT_G
+    )  # weight of each tree guard in grams
     gps_track = models.JSONField(
         null=True
     )  # TODO: define a GPS data model - JSON for flexibility or create a lat/lon/alt model?

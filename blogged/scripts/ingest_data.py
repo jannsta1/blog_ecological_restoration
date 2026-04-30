@@ -2,9 +2,10 @@ import logging
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Optional
 
 import yaml
-from activities.models import Activity
+from activities.models import DEFAULT_TREE_WEIGHT_G, Activity, ActivityTreeGuardRemoval
 from activities.models import ActivityInvasiveSpeciesRemoval
 from activities.models import ActivitySurveying
 from activities.models import ActivityTreePlantingSession
@@ -26,8 +27,50 @@ from scripts.resize_images import (
     DEFAULT_LARGEST_DIMENSION_SIZE,
 )
 
-logging.basicConfig(level=logging.INFO)
+
+# Custom formatter with color support for console output
+class ColoredConsoleFormatter(logging.Formatter):
+    """Custom formatter that adds ANSI color codes to log messages"""
+
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    RESET = "\033[0m"
+
+    COLORS = {
+        "WARNING": RED,
+        "ERROR": RED,
+        "CRITICAL": RED,
+    }
+
+    def format(self, record):
+        log_color = self.COLORS.get(record.levelname, "")
+        if log_color:
+            record.levelname = f"{log_color}{record.levelname}{self.RESET}"
+            record.msg = f"{log_color}{record.msg}{self.RESET}"
+        return super().format(record)
+
+
+# Configure logger to write all logs to file and INFO+ to console
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)  # Capture all log levels
+
+# File handler - logs everything to ingest_data.log
+file_handler = logging.FileHandler("ingest_data.log")
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+file_handler.setFormatter(file_formatter)
+
+# Console handler - logs INFO and above to console with color
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_formatter = ColoredConsoleFormatter("%(levelname)s - %(message)s")
+console_handler.setFormatter(console_formatter)
+
+# Add handlers to logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 
 @dataclass
@@ -35,6 +78,7 @@ class PhotoData:  # TODO - rename to "MediaData" and use for videos as well
     full_path: Path
     caption: str = ""
     is_main_image: bool = False
+    attribution: Optional[str] = None
 
     @property
     def name(self) -> str:
@@ -49,10 +93,10 @@ def run(*args, **options):
     # Base directory for photos
     base_photo_dir = Path("/mnt/c/Users/janns/OneDrive/EcoBlogData/photos")
     dry_run = options.get("dry_run", False)
-    start_date = options.get("start_date", date(2000, 1, 1))
-    end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2026, 2, 20))
-    end_date = options.get("end_date", date(2026, 2, 28))
+    # start_date = options.get("start_date", date(2000, 1, 1))
+    # end_date = options.get("end_date", date(2200, 1, 1))
+    start_date = options.get("start_date", date(2026, 3, 17))
+    end_date = options.get("end_date", date(2026, 3, 19))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -247,15 +291,17 @@ def process_photo_data(
         + list(data_dir.glob("*.png"))
     )
     photo_names = {p["name"]: p for p in photos_data}
+    # remove file extensions from photo_names keys for matching with photo_files that have extensions
+    photo_names = {Path(name).stem: details for name, details in photo_names.items()}
+    photo_names_in_config_file = len(photo_names)
     selected_photos = [p for p in photo_files if p.stem in photo_names.keys()]
-    print("***")
-    print(photo_names)
-    print("***")
-    print(photo_files)
-    print("***")
-    print(selected_photos)
-    print("***")
-    # TODO: warn if photos in details.yaml are missing from folder
+
+    if len(selected_photos) < photo_names_in_config_file:
+        logger.warning(
+            f"Only found {len(selected_photos)} photos in folder {data_dir} for post '{post.title}', but {photo_names_in_config_file} listed in details.yaml."
+        )
+        logger.info(f"Found photos: {[p.name for p in selected_photos]}")
+        logger.info(f"Expected photos: {list(photo_names.keys())}")
 
     photos = []
     for photo in selected_photos:
@@ -264,6 +310,7 @@ def process_photo_data(
             full_path=photo,
             caption=photo_detail["caption"],
             is_main_image=photo_detail.get("is_main_image", False),
+            attribution=photo_detail.get("attribution", None),
         )
         photos.append(photo_obj)
 
@@ -291,10 +338,13 @@ def process_photo_data(
                     caption=photo_data.caption,
                     is_main_image=photo_data.is_main_image,
                 )
+                if photo_data.attribution is not None:
+                    image.attribution = photo_data.attribution
+                    image.save()
                 try:
                     create_gps_coordinates(post=post, image_path=photo_data.full_path)
                 except LookupError:
-                    logger.info(
+                    logger.warning(
                         f"No GPS data found in image {photo_data.name} for post '{post.title}' - saving anyway."
                     )
                 image.image.save(photo_data.name, File(img_file), save=True)
@@ -427,6 +477,8 @@ def process_activity_data(post: Post, activity_data: dict):
         activity = process_invasive_species_removal(post, activity_data)
     elif "survey" in activity_data:
         activity = process_survey_activity(post, activity_data)
+    elif "tree_guard_removal" in activity_data:
+        activity = process_tree_guard_removal(post, activity_data)
     else:
         activity = process_generic_activity(post, activity_data)
 
@@ -539,6 +591,25 @@ def process_vole_guard_removal(post: Post, activity_data: dict):
         area_covered=area_covered,
         plastic_removed=plastic_removed,
         trees_liberated=trees_liberated,
+        gps_track=gps_track,
+    )
+
+
+def process_tree_guard_removal(post: Post, activity_data: dict):
+    """
+    Create ActivityTreeGuardRemoval object.
+    """
+
+    removal_data = activity_data["tree_guard_removal"]
+    tubes_removed = removal_data.get("tubes_removed")
+    tube_weight_g = removal_data.get("tube_weight_g", DEFAULT_TREE_WEIGHT_G)
+    gps_track = removal_data.get("gps_track")
+
+    logger.info("Added tree guard removal activity")
+    return ActivityTreeGuardRemoval.objects.create(
+        post=post,
+        tubes_removed=tubes_removed,
+        tube_weight_g=tube_weight_g,
         gps_track=gps_track,
     )
 

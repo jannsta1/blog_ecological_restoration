@@ -49,6 +49,11 @@
         "genus": "Populus",
         "specific_epithet": "Tremula"
     },
+    "Salix aurita": {
+        "common_name": "Eared willow",
+        "genus": "Salix",
+        "specific_epithet": "aurita"
+    },
     "Salix lapponum": {
         "common_name": "Downy Willow",
         "genus": "Salix",
@@ -79,7 +84,7 @@
         "genus": "Corylus",
         "specific_epithet": "avellana"
     },
-    "Vibernum opulus": {
+    "Viburnum opulus": {
         "common_name": "Geulder rose",
         "genus": "Viburnum",
         "specific_epithet": "opulus"
@@ -88,5 +93,25 @@
         "common_name": "Bird cherry",
         "genus": "Prunus",
         "specific_epithet": "padus"
+    },
+    "Populus tremula": {
+        "common_name": "Aspen",
+        "genus": "Populus",
+        "specific_epithet": "tremula"
+    },
+    "Malus sylvestris": {
+        "common_name": "European crab apple",
+        "genus": "Malus",
+        "specific_epithet": "sylvestris"
+    },
+    "Sorbus aucuparia": {
+        "common_name": "Rowan",
+        "genus": "Sorbus",
+        "specific_epithet": "aucuparia"
+    },
+    "Sambucas nigra": {
+        "common_name": "Common Elder",
+        "genus": "Sambucas",
+        "specific_epithet": "nigra"
     }
 }
