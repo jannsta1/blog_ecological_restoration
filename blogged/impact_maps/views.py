@@ -9,6 +9,7 @@ from activities.models import TreePlanting
 from blog.models import GpsCoordinates
 from common.utils import get_secret
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 # Create your views here.
 
@@ -21,7 +22,17 @@ def upload_location(request):
     if request.method == "POST":
         pass
 
-    gps_coordinates = list(GpsCoordinates.objects.values("latitude", "longitude"))
+    gps_coordinates = [
+        {
+            "latitude": point.latitude,
+            "longitude": point.longitude,
+            "post_title": point.post.title,
+            "post_url": reverse(
+                "detail", kwargs={"slug": point.post.slug, "id": point.post.id}
+            ),
+        }
+        for point in GpsCoordinates.objects.select_related("post")
+    ]
 
     activity_hours_dict = {}
     for a in Activity.objects.all():
