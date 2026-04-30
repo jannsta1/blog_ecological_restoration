@@ -151,5 +151,8 @@ Quota project "django-blog-data" was added to ADC which can be used by Google cl
 
 # deployment
 
+## login to heroku (if not logged in already)
+heroku git:remote -a eco-blog
+
 ## deploy main branch to heroku
 git push heroku main

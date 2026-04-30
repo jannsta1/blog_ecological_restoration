@@ -19,7 +19,7 @@
   </div>
 
   <h2 class="dark:text-[var(--color-accent)]">{{ post.title|safe|title|truncatechars:50 }}</h2>
-  <p>{{ post.content|render_markdown|safe|truncatechars:100 }}</p>
+  <p>{{ post.content|render_markdown|safe|truncatechars_html:100 }}</p>
 
   <div class="clear-right">
     {% if post.organisation_tags.all %}
