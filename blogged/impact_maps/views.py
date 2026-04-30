@@ -24,7 +24,7 @@ def upload_location(request):
 
     gps_coordinates = []
     for point in GpsCoordinates.objects.select_related("post").prefetch_related(
-        "post__activities"
+        "post__activities", "post__images_set"
     ):
         pin_style = Activity.get_pin_style()
         for activity in point.post.activities.all():
@@ -32,6 +32,12 @@ def upload_location(request):
             if activity_pin_style != pin_style:
                 pin_style = activity_pin_style
                 break
+
+        main_image = next(
+            (img for img in point.post.images_set.all() if img.is_main_image),
+            point.post.images_set.first(),
+        )
+        thumbnail_url = main_image.public_url if main_image else None
 
         gps_coordinates.append(
             {
@@ -42,6 +48,7 @@ def upload_location(request):
                     "detail", kwargs={"slug": point.post.slug, "id": point.post.id}
                 ),
                 "pin_style": pin_style,
+                "thumbnail_url": thumbnail_url,
             }
         )
 

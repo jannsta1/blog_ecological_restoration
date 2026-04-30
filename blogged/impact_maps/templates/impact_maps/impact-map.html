@@ -220,6 +220,17 @@
 
         overlayContent.append(overlayTitle, overlayLink);
 
+        if (item["thumbnail_url"]) {
+          const overlayImg = document.createElement('img');
+          overlayImg.src = item["thumbnail_url"];
+          overlayImg.alt = item["post_title"] || 'Activity post';
+          overlayImg.style.width = '80px';
+          overlayImg.style.borderRadius = '4px';
+          overlayImg.style.marginTop = '6px';
+          overlayImg.style.display = 'block';
+          overlayContent.append(overlayImg);
+        }
+
         const scheduleOverlayClose = () => {
           if (closeOverlayTimeout) {
             clearTimeout(closeOverlayTimeout);
