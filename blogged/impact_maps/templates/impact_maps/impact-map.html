@@ -185,7 +185,7 @@
         // for the icon see: https://developers.google.com/maps/documentation/javascript/advanced-markers/graphic-markers
         const thisPin = new PinElement({
           scale: 1.1,
-          glyph: '🌳',
+          glyphText: '🌳',
           glyphColor: 'white',
           background: 'green',
           borderColor: 'green'
@@ -269,12 +269,12 @@
         if (typeof thisMarker.addListener === 'function') {
           thisMarker.addListener('mouseover', openOverlay);
           thisMarker.addListener('mouseout', closeOverlay);
-          thisMarker.addListener('click', pinOverlay);
         } else {
           thisMarker.addEventListener('mouseenter', openOverlay);
           thisMarker.addEventListener('mouseleave', closeOverlay);
-          thisMarker.addEventListener('click', pinOverlay);
         }
+
+        thisMarker.addEventListener('gmp-click', pinOverlay);
 
         // TODO - add a link from the marker to the blog activity as an overlay
         // see: https://developers.google.com/maps/documentation/javascript/advanced-markers/overview
