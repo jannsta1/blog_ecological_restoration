@@ -93,10 +93,10 @@ def run(*args, **options):
     # Base directory for photos
     base_photo_dir = Path("/mnt/c/Users/janns/OneDrive/EcoBlogData/photos")
     dry_run = options.get("dry_run", False)
-    # start_date = options.get("start_date", date(2000, 1, 1))
-    # end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2026, 3, 17))
-    end_date = options.get("end_date", date(2026, 3, 19))
+    start_date = options.get("start_date", date(2000, 1, 1))
+    end_date = options.get("end_date", date(2200, 1, 1))
+    # start_date = options.get("start_date", date(2026, 3, 17))
+    # end_date = options.get("end_date", date(2026, 3, 19))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -514,6 +514,10 @@ def process_tree_planting_session(post: Post, activity_data: dict):
     # Extract location if provided
 
     session_data = activity_data["tree_planting_session"]
+    if session_data is None:
+        logger.warning("Missing tree planting session data")
+        return
+
     notes = session_data.get("notes")
 
     # Create the tree planting session

@@ -22,17 +22,28 @@ def upload_location(request):
     if request.method == "POST":
         pass
 
-    gps_coordinates = [
-        {
-            "latitude": point.latitude,
-            "longitude": point.longitude,
-            "post_title": point.post.title,
-            "post_url": reverse(
-                "detail", kwargs={"slug": point.post.slug, "id": point.post.id}
-            ),
-        }
-        for point in GpsCoordinates.objects.select_related("post")
-    ]
+    gps_coordinates = []
+    for point in GpsCoordinates.objects.select_related("post").prefetch_related(
+        "post__activities"
+    ):
+        pin_style = Activity.get_pin_style()
+        for activity in point.post.activities.all():
+            activity_pin_style = activity.get_pin_style()
+            if activity_pin_style != pin_style:
+                pin_style = activity_pin_style
+                break
+
+        gps_coordinates.append(
+            {
+                "latitude": point.latitude,
+                "longitude": point.longitude,
+                "post_title": point.post.title,
+                "post_url": reverse(
+                    "detail", kwargs={"slug": point.post.slug, "id": point.post.id}
+                ),
+                "pin_style": pin_style,
+            }
+        )
 
     activity_hours_dict = {}
     for a in Activity.objects.all():

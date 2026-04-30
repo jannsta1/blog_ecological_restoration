@@ -61,6 +61,20 @@ class Activity(PolymorphicModel):
     location = models.CharField(max_length=3, null=True, choices=Location.choices)
 
     activity_type = ActivityType.GENERIC
+    marker_background_color = "green"
+    marker_border_color = "green"
+    marker_glyph_color = "white"
+    marker_glyph_text = "🌳"
+
+    @classmethod
+    def get_pin_style(cls):
+        return {
+            "background": cls.marker_background_color,
+            "borderColor": cls.marker_border_color,
+            "glyphColor": cls.marker_glyph_color,
+            "glyphText": cls.marker_glyph_text,
+        }
+
     hours_spent = models.FloatField(
         null=True, default=0.0
     )  # TODO : we don't want null here, remove it
@@ -103,6 +117,10 @@ class TreePlanting(models.Model):
 
 class ActivityVoleGuardRemoval(Activity):
     activity_type = Activity.ActivityType.VOLE_GUARD_REMOVAL
+    marker_background_color = "#2563eb"
+    marker_border_color = "#1d4ed8"
+    marker_glyph_color = "white"
+    marker_glyph_text = "♻️"
     area_covered = models.FloatField()  # in square meters
     plastic_removed = models.FloatField(null=True)  # in kilograms
     trees_liberated = models.IntegerField(null=True)
@@ -113,6 +131,10 @@ class ActivityVoleGuardRemoval(Activity):
 
 class ActivityTreeGuardRemoval(Activity):
     activity_type = Activity.ActivityType.TREE_GUARD_REMOVAL
+    marker_background_color = "#2563eb"
+    marker_border_color = "#1d4ed8"
+    marker_glyph_color = "white"
+    marker_glyph_text = "♻️"
     tubes_removed = models.IntegerField(
         null=True
     )  # number of tree guards touched (removed or adjusted)
@@ -126,6 +148,10 @@ class ActivityTreeGuardRemoval(Activity):
 
 class ActivityInvasiveSpeciesRemoval(Activity):
     activity_type = Activity.ActivityType.INVASIVE_SPECIES_REMOVAL
+    marker_background_color = "#eb4d25"
+    marker_border_color = "#d8331d"
+    marker_glyph_color = "white"
+    marker_glyph_text = "🌱"
     species_removed = models.ForeignKey(TreeSpecies, on_delete=models.PROTECT)
     quantity_removed = models.FloatField()
     gps_track = models.JSONField(

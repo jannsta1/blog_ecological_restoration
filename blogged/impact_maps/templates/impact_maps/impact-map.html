@@ -7,6 +7,10 @@
   <style>
     gmp-map {
       height: 100%;
+      cursor: default;
+    }
+    gmp-map * {
+      cursor: default;
     }
     html,
     body {
@@ -181,14 +185,16 @@
       jsondata.forEach((item, i) => {
         // console.log('item', i, item);
 
+        const pinStyle = item["pin_style"] || {};
+
         // TODO - set color according to the activity - e.g. tree planting green. Parhaps add an icon also?
         // for the icon see: https://developers.google.com/maps/documentation/javascript/advanced-markers/graphic-markers
         const thisPin = new PinElement({
           scale: 1.1,
-          glyphText: '🌳',
-          glyphColor: 'white',
-          background: 'green',
-          borderColor: 'green'
+          glyphText: pinStyle.glyphText || '🌳',
+          glyphColor: pinStyle.glyphColor || 'white',
+          background: pinStyle.background || 'green',
+          borderColor: pinStyle.borderColor || 'green'
         });
 
         const thisMarker = new AdvancedMarkerElement({
@@ -266,14 +272,8 @@
 
         const pinOverlay = () => openOverlay(true);
 
-        if (typeof thisMarker.addListener === 'function') {
-          thisMarker.addListener('mouseover', openOverlay);
-          thisMarker.addListener('mouseout', closeOverlay);
-        } else {
-          thisMarker.addEventListener('mouseenter', openOverlay);
-          thisMarker.addEventListener('mouseleave', closeOverlay);
-        }
-
+        thisMarker.addEventListener('mouseenter', openOverlay);
+        thisMarker.addEventListener('mouseleave', closeOverlay);
         thisMarker.addEventListener('gmp-click', pinOverlay);
 
         // TODO - add a link from the marker to the blog activity as an overlay
