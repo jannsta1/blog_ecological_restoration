@@ -93,10 +93,10 @@ def run(*args, **options):
     # Base directory for photos
     base_photo_dir = Path("/mnt/c/Users/janns/OneDrive/EcoBlogData/photos")
     dry_run = options.get("dry_run", False)
-    start_date = options.get("start_date", date(2000, 1, 1))
-    end_date = options.get("end_date", date(2200, 1, 1))
-    # start_date = options.get("start_date", date(2026, 3, 17))
-    # end_date = options.get("end_date", date(2026, 3, 19))
+    # start_date = options.get("start_date", date(2000, 1, 1))
+    # end_date = options.get("end_date", date(2200, 1, 1))
+    start_date = options.get("start_date", date(2026, 5, 1))
+    end_date = options.get("end_date", date(2026, 5, 3))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?
@@ -547,9 +547,12 @@ def process_tree_planting_session(post: Post, activity_data: dict):
             parts = trees_planted_name.split()
             if len(parts) >= 2:
                 genus = parts[0]
-                specific_epithet = " ".join(parts[1:])
+                specific_epithet = parts[1]
+                subspecies = parts[2] if len(parts) > 2 else None
                 species = TreeSpecies.objects.filter(
-                    genus__iexact=genus, specific_epithet__iexact=specific_epithet
+                    genus__iexact=genus,
+                    specific_epithet__iexact=specific_epithet,
+                    subspecies__iexact=subspecies,
                 ).first()
 
         if not species:

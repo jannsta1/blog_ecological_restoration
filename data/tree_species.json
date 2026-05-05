@@ -34,6 +34,12 @@
         "genus": "Betula",
         "specific_epithet": "pubescens"
     },
+    "Betula pubescens tortuosa": {
+        "common_name": "Mountain Birch",
+        "genus": "Betula",
+        "specific_epithet": "pubescens",
+        "subspecies": "tortuosa"
+    },
     "Crataegus monogyna": {
         "common_name": "Hawthorn",
         "genus": "Crataegus",
