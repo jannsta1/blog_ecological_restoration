@@ -13,7 +13,7 @@
     </div>
 
     <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-      <form action="{% url 'login' %}" method="post" class="space-y-6">
+      <form action="{% url 'login' %}" method="post" class="space-y-6" data-testid="login-form">
         {% csrf_token %}
         <div>
           <label for="email" class="block text-sm/6 font-medium ">{{ form.username.label_tag }}</label>
@@ -36,7 +36,7 @@
         {% endif %}
 
         <div>
-          <button type="submit" class="flex w-full btn-primary">Sign in</button>
+          <button type="submit" class="flex w-full btn-primary" data-testid="login-submit">Sign in</button>
         {% comment %}   focus-visible:outline-emerald-600 dark:bg-emerald-500 dark:shadow-none dark:hover:bg-emerald-400 dark:focus-visible:outline-emerald-500 {% endcomment %}
         </div>
       </form>

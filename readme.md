@@ -63,6 +63,47 @@ https://docs.docker.com/engine/swarm/secrets/
 Docker, nginx, postgres and nginx: https://testdriven.io/blog/dockerizing-django-with-postgres-gunicorn-and-nginx/
 
 
+# Testing
+
+## Running all unit and integration tests
+
+```bash
+uv run pytest -m "not selenium"
+```
+
+## Running Selenium end-to-end tests
+
+Selenium tests are marked with `@pytest.mark.selenium` and run in a separate step from the rest of the suite.
+They require a Chrome or Firefox binary to be available.
+
+**Chrome (headless, default)**
+```bash
+uv run pytest -m selenium --browser=chrome
+```
+
+If Chrome is not on your PATH, provide the binary path explicitly:
+```bash
+uv run pytest -m selenium --browser=chrome --chrome-binary /path/to/google-chrome
+```
+
+**Firefox (headless)**
+```bash
+uv run pytest -m selenium --browser=firefox
+```
+
+**Visible browser (useful for debugging)**
+```bash
+uv run pytest -m selenium --browser=chrome --headed
+```
+
+If no matching browser binary is found, affected tests are skipped with a clear reason rather than erroring.
+
+## Failure artifacts
+
+On test failure, a screenshot is saved to `test-artifacts/screenshots/`. In CI this folder is uploaded as the `selenium-artifacts` GitHub Actions artifact.
+
+---
+
 # Database management
 
 ## clear postgres DB

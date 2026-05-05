@@ -26,4 +26,41 @@ jobs:
     - name: Run tests
       env:
         GOOGLE_MAPS_API_KEY_DEVELOPMENT: ${{ secrets.GOOGLE_MAPS_API_KEY_DEVELOPMENT }}
-      run: uv run pytest
+      run: uv run pytest -m "not selenium"
+
+  selenium-e2e:
+    # Only run Selenium tests for pull requests targeting the main branch to save resources
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install system dependencies
+      run: sudo apt-get update && sudo apt-get install -y graphviz graphviz-dev
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Chrome
+      uses: browser-actions/setup-chrome@v1
+
+    - name: Export Chrome path
+      run: echo "CHROME_BIN=$(which chrome || which google-chrome || which google-chrome-stable)" >> $GITHUB_ENV
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+
+    - name: Install dependencies
+      run: uv sync
+
+    - name: Run selenium tests
+      env:
+        GOOGLE_MAPS_API_KEY_DEVELOPMENT: ${{ secrets.GOOGLE_MAPS_API_KEY_DEVELOPMENT }}
+      run: uv run pytest -m selenium --browser=chrome --chrome-binary "$CHROME_BIN"
+
+    - name: Upload Selenium artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: selenium-artifacts
+        path: test-artifacts/
+        if-no-files-found: ignore
