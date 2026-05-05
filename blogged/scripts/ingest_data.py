@@ -514,6 +514,10 @@ def process_tree_planting_session(post: Post, activity_data: dict):
     # Extract location if provided
 
     session_data = activity_data["tree_planting_session"]
+    if session_data is None:
+        logger.warning("Missing tree planting session data")
+        return
+
     notes = session_data.get("notes")
 
     # Create the tree planting session

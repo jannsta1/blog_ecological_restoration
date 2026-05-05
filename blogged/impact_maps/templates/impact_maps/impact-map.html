@@ -158,8 +158,20 @@
     async function initMap() {
 
     // Request needed libraries.
-      const { map } = await google.maps.importLibrary("maps");
+      await google.maps.importLibrary("maps");
       const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+      const mapInstance = mapElement.innerMap;
+      const infoWindow = new google.maps.InfoWindow();
+      let hoveredMarker = null;
+      let pinnedMarker = null;
+      let hoveringInfoWindow = false;
+      let closeOverlayTimeout = null;
+
+      infoWindow.addListener('closeclick', () => {
+        pinnedMarker = null;
+        hoveredMarker = null;
+        hoveringInfoWindow = false;
+      });
     // Each PinElement is paired with a marker to demonstrate setting each parameter.
     // Default marker with title text (no PinElement).
 
@@ -169,27 +181,106 @@
       jsondata.forEach((item, i) => {
         // console.log('item', i, item);
 
+        const pinStyle = item["pin_style"] || {};
+
         // TODO - set color according to the activity - e.g. tree planting green. Parhaps add an icon also?
         // for the icon see: https://developers.google.com/maps/documentation/javascript/advanced-markers/graphic-markers
         const thisPin = new PinElement({
           scale: 1.1,
-          glyphColor: 'green',
-          background: 'green',
-          borderColor: 'green'
+          glyphText: pinStyle.glyphText || '🌳',
+          glyphColor: pinStyle.glyphColor || 'white',
+          background: pinStyle.background || 'green',
+          borderColor: pinStyle.borderColor || 'green'
         });
 
         const thisMarker = new AdvancedMarkerElement({
-          map,
+          map: mapInstance,
           position: { lat: item["latitude"], lng: item["longitude"] },
-          title: 'Title text for the marker at lat: 37.419, lng: -122.03',
-
+          title: item["post_title"] || 'Activity post',
         });
+        thisMarker.element.style.cursor = 'default';
         thisMarker.append(thisPin);
-        // TODO - add a link from the marker to the blog activity as an overlay
-        // see: https://developers.google.com/maps/documentation/javascript/advanced-markers/overview
-        // this video might be helpful too: https://www.youtube.com/watch?v=sasx2ppol5c
 
-        mapElement.append(thisMarker);
+        const overlayContent = document.createElement('div');
+        overlayContent.style.padding = '8px 10px';
+        overlayContent.style.maxWidth = '220px';
+
+        const overlayTitle = document.createElement('div');
+        overlayTitle.textContent = item["post_title"] || 'Activity post';
+        overlayTitle.style.fontWeight = '600';
+        overlayTitle.style.marginBottom = '6px';
+
+        const overlayLink = document.createElement('a');
+        overlayLink.href = item["post_url"];
+        overlayLink.textContent = 'Open activity post';
+
+        overlayContent.append(overlayTitle, overlayLink);
+
+        if (item["thumbnail_url"]) {
+          const overlayImg = document.createElement('img');
+          overlayImg.src = item["thumbnail_url"];
+          overlayImg.alt = item["post_title"] || 'Activity post';
+          overlayImg.style.width = '80px';
+          overlayImg.style.borderRadius = '4px';
+          overlayImg.style.marginTop = '6px';
+          overlayImg.style.display = 'block';
+          overlayContent.append(overlayImg);
+        }
+
+        const scheduleOverlayClose = () => {
+          if (closeOverlayTimeout) {
+            clearTimeout(closeOverlayTimeout);
+          }
+
+          closeOverlayTimeout = setTimeout(() => {
+            if (!pinnedMarker && !hoveringInfoWindow && !hoveredMarker) {
+              infoWindow.close();
+            }
+          }, 160);
+        };
+
+        overlayContent.addEventListener('mouseenter', () => {
+          hoveringInfoWindow = true;
+          if (closeOverlayTimeout) {
+            clearTimeout(closeOverlayTimeout);
+            closeOverlayTimeout = null;
+          }
+        });
+
+        overlayContent.addEventListener('mouseleave', () => {
+          hoveringInfoWindow = false;
+          scheduleOverlayClose();
+        });
+
+        const openOverlay = (pinMarker = false) => {
+          if (!pinMarker && pinnedMarker && pinnedMarker !== thisMarker) {
+            return;
+          }
+
+          if (pinMarker) {
+            pinnedMarker = thisMarker;
+          }
+
+          hoveredMarker = thisMarker;
+          if (closeOverlayTimeout) {
+            clearTimeout(closeOverlayTimeout);
+            closeOverlayTimeout = null;
+          }
+          infoWindow.setContent(overlayContent);
+          infoWindow.open({ anchor: thisMarker, map: mapInstance });
+        };
+
+        const closeOverlay = () => {
+          if (hoveredMarker === thisMarker) {
+            hoveredMarker = null;
+          }
+          scheduleOverlayClose();
+        };
+
+        const pinOverlay = () => openOverlay(true);
+
+        // thisMarker.element.addEventListener('gmp-click', pinOverlay);
+        thisMarker.addEventListener('click', pinOverlay);
       });
 
     }
