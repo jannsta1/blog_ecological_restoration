@@ -1,8 +1,8 @@
 {% load static %}
 {% load markdown_filters %}
 
-<article class="card p-4 rounded-md relative">
-  <a href="{% url 'detail' post.slug post.pk %}" class="absolute inset-0 z-0" aria-label="Read full post">
+<article class="card p-4 rounded-md relative" data-testid="post-card">
+  <a href="{% url 'detail' post.slug post.pk %}" class="absolute inset-0 z-0" aria-label="Read full post" data-testid="post-detail-link">
   </a>
 
       {% comment %} iterate through images until we find the main image - since there is no continue/break in templates we do the following: {% endcomment %}
@@ -18,7 +18,7 @@
     <span class="text-xs">{{ post.date }}</span>
   </div>
 
-  <h2 class="dark:text-[var(--color-accent)]">{{ post.title|safe|title|truncatechars:50 }}</h2>
+  <h2 class="dark:text-[var(--color-accent)]" data-testid="post-title">{{ post.title|safe|title|truncatechars:50 }}</h2>
   <p>{{ post.content|render_markdown|safe|truncatechars_html:100 }}</p>
 
   <div class="clear-right">

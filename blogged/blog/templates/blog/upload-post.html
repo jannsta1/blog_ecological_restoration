@@ -4,7 +4,7 @@
 
 {% block content %}
 
-  <form id="overall_form" method="post" enctype="multipart/form-data">
+  <form id="overall_form" method="post" enctype="multipart/form-data" data-testid="upload-post-form">
 
     {% csrf_token %}
 
@@ -38,7 +38,7 @@
         <button type="button" id="remove-gps-btn" class="remove-gps-btn focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Remove</button>
       </div>
     </div>
-    <button type="button" id="add-gps-btn" class="btn-primary">+ Add another location</button>
+    <button type="button" id="add-gps-btn" data-testid="add-gps-btn" class="btn-primary">+ Add another location</button>
     <button type="button" id="extract-gps-from-images-btn" class="btn-primary">Extract coordinates from images</button>
 
 
@@ -47,7 +47,7 @@
     {{ image_formset.management_form }}
     <!-- Hidden multiple file picker -->
     <input type="file" id="global-image-upload" accept="image/*" multiple style="display:none;">
-    <button type="button" id="trigger-global-upload" class="btn-primary">+ Add image(s)</button>
+    <button type="button" id="trigger-global-upload" data-testid="trigger-global-upload" class="btn-primary">+ Add image(s)</button>
 
     <div id="image-form-list" class="flex flex-col gap-3">
     </div>
@@ -84,7 +84,7 @@
     </div>
 
     <div class="py-6 px-2">
-      <input type="submit" name="submit" value="Submit" class="btn-primary" />
+      <input type="submit" name="submit" value="Submit" class="btn-primary" data-testid="upload-submit" />
     </div>
 
   </form>

@@ -37,6 +37,8 @@ dev = [
     "pre-commit>=4.5.0",
     "pytest>=9.0.2",
     "pytest-django>=4.11.1",
+    "selenium>=4.36.0",
+    "webdriver-manager>=4.0.2",
     "ruff>=0.14.9",
     "django-extensions>=4.1",
     "pydot>=4.0.1",
@@ -54,4 +56,7 @@ DJANGO_SETTINGS_MODULE = "settings.test"
 #     # "--create-db",
 # ]
 testpaths = "tests"
-markers = ["asyncio: asyncio mark"] # https://github.com/jonghwanhyeon/python-ffmpeg/issues/21
+markers = [
+    "asyncio: asyncio mark",
+    "selenium: browser end-to-end tests",
+] # https://github.com/jonghwanhyeon/python-ffmpeg/issues/21

@@ -4,14 +4,14 @@
 
 {% block content %}
 
-  <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Blog Posts</h1>
+  <h1 class="text-center text-3xl mb-6 mt-2 font-semibold" data-testid="blog-listing-title">Blog Posts</h1>
 
-  <form action="{% url 'blog_listing' %}" method="get">
+  <form action="{% url 'blog_listing' %}" method="get" data-testid="blog-filter-form">
     <div class="flex flex-wrap justify-center gap-2 mb-4">
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="org-select">Filter by Organisation:</label>
-          <select name="org-select" id="org-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
+          <select name="org-select" id="org-select" data-testid="org-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
             <option value={{ select_all_option_val }} > {{ select_all_option_str }} </option>
             {% for org_tag in organisation_tags %}
               <option value="{{ org_tag.id }}" {% if current_organisation_id == org_tag.id %} selected{% endif %}>{{ org_tag.name }}</option>
@@ -22,7 +22,7 @@
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="activity-select">Filter by Activity:</label>
-          <select name="activity-select" id="activity-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
+          <select name="activity-select" id="activity-select" data-testid="activity-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
             {% for activity_id, activity_label in activity_tags.items %}
               <option value="{{ activity_id }}" {% if current_activity_id == activity_id %} selected{% endif %}>{{ activity_label }}</option>
             {% endfor %}
@@ -32,7 +32,7 @@
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="location-select">Filter by Location:</label>
-          <select name="location-select" id="location-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
+          <select name="location-select" id="location-select" data-testid="location-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
             <option value={{ select_all_option_val }} > {{ select_all_option_str }} </option>
             {% for location in location_select_options %}
               <option value="{{ location|first }}" {% if current_location_id == location|first %} selected{% endif %}>{{ location|last }}</option>
@@ -43,7 +43,7 @@
     </div>
   </form>
 
-  <div id="post-grid" class="grid [grid-template-columns:repeat(auto-fit,minmax(var(--card-min),1fr))] gap-[var(--grid-gap)] px-[var(--grid-padding)]" >
+  <div id="post-grid" data-testid="post-grid" class="grid [grid-template-columns:repeat(auto-fit,minmax(var(--card-min),1fr))] gap-[var(--grid-gap)] px-[var(--grid-padding)]" >
     {% for post in posts|dictsortreversed:"date" %}
       {% include "blog/partials/post.html" %}
     {% endfor %}

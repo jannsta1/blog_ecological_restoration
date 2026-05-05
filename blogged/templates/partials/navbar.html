@@ -10,10 +10,10 @@
 
         <div class="hidden sm:ml-6 sm:block">
           <div class="flex space-x-4">
-            <a href="{% url 'landing_page' %}" aria-current="page" class="navbar-content" data-url-name="landing_page">Home</a>
-            <a href="{% url 'blog_listing' %}" aria-current="page" class="navbar-content" data-url-name="blog_listing">Blog Posts</a>
-            <a href="{% url 'impact-map' %}" class="navbar-content" data-url-name="impact-map">Impact</a>
-            <a href="{% url 'contact' %}" class="navbar-content" data-url-name="contact">Contact</a>
+            <a href="{% url 'landing_page' %}" aria-current="page" class="navbar-content" data-url-name="landing_page" data-testid="nav-home">Home</a>
+            <a href="{% url 'blog_listing' %}" aria-current="page" class="navbar-content" data-url-name="blog_listing" data-testid="nav-blog-posts">Blog Posts</a>
+            <a href="{% url 'impact-map' %}" class="navbar-content" data-url-name="impact-map" data-testid="nav-impact">Impact</a>
+            <a href="{% url 'contact' %}" class="navbar-content" data-url-name="contact" data-testid="nav-contact">Contact</a>
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
         <!-- Desktop menu items -->
         <div class="hidden sm:flex items-center space-x-4">
           {% if user.is_authenticated %}
-            <a href="{% url 'upload-post' %}" class="navbar-content" data-url-name="upload-post">Upload Post</a>
+            <a href="{% url 'upload-post' %}" class="navbar-content" data-url-name="upload-post" data-testid="nav-upload-post">Upload Post</a>
           {% endif %}
 
           {% if user.is_authenticated %}
@@ -30,6 +30,7 @@
               href="#"
               class="navbar-content"
               data-url-name="logout"
+              data-testid="nav-logout"
               onClick="document.getElementById('logoutform').submit()"
             >Logout</a>
             <form id="logoutform" method="post" action="{% url 'logout' %}">
@@ -37,7 +38,7 @@
               <input type="hidden">
             </form>
           {% else %}
-            <a href="{% url 'login' %}" class="navbar-content" data-url-name="login">Login</a>
+            <a href="{% url 'login' %}" class="navbar-content" data-url-name="login" data-testid="nav-login">Login</a>
           {% endif %}
 
           <a href="{% url 'change-theme' %}" class="px-2 py-2 rounded-xl navbar-content" data-url-name="change-theme">
