@@ -34,8 +34,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # - name: Install system dependencies
-    #  run: sudo apt-get update && sudo apt-get install -y graphviz graphviz-dev
+    - name: Install system dependencies
+      run: sudo apt-get update && sudo apt-get install -y graphviz graphviz-dev
 
     - name: Checkout code
       uses: actions/checkout@v6
