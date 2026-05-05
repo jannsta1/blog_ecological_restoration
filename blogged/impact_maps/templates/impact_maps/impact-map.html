@@ -7,10 +7,6 @@
   <style>
     gmp-map {
       height: 100%;
-      cursor: default;
-    }
-    gmp-map * {
-      cursor: default;
     }
     html,
     body {
@@ -201,8 +197,8 @@
           map: mapInstance,
           position: { lat: item["latitude"], lng: item["longitude"] },
           title: item["post_title"] || 'Activity post',
-
         });
+        thisMarker.element.style.cursor = 'default';
         thisMarker.append(thisPin);
 
         const overlayContent = document.createElement('div');
@@ -283,13 +279,8 @@
 
         const pinOverlay = () => openOverlay(true);
 
-        thisMarker.addEventListener('mouseenter', openOverlay);
-        thisMarker.addEventListener('mouseleave', closeOverlay);
-        thisMarker.addEventListener('gmp-click', pinOverlay);
-
-        // TODO - add a link from the marker to the blog activity as an overlay
-        // see: https://developers.google.com/maps/documentation/javascript/advanced-markers/overview
-        // this video might be helpful too: https://www.youtube.com/watch?v=sasx2ppol5c
+        // thisMarker.element.addEventListener('gmp-click', pinOverlay);
+        thisMarker.addEventListener('click', pinOverlay);
       });
 
     }
