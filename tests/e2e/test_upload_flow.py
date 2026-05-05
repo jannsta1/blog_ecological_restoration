@@ -2,8 +2,9 @@ import pytest
 
 from tests.e2e.page_objects.upload_post_page import UploadPostPage
 
+pytestmark = pytest.mark.selenium  # Mark all tests in this module as Selenium tests
 
-@pytest.mark.selenium
+
 @pytest.mark.django_db(transaction=True)
 def test_upload_requires_login(selenium_driver, live_server_url):
     upload_page = UploadPostPage(selenium_driver, live_server_url)

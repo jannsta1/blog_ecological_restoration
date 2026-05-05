@@ -9,8 +9,9 @@ from tests.e2e.page_objects.blog_page import BlogPage
 from tests.e2e.page_objects.contact_page import ContactPage
 from tests.e2e.page_objects.nav_bar import NavBar
 
+pytestmark = pytest.mark.selenium  # Mark all tests in this module as Selenium tests
 
-@pytest.mark.selenium
+
 @pytest.mark.django_db(transaction=True)
 def test_nav_go_to_contact(selenium_driver, live_server_url):
     nav = NavBar(selenium_driver, live_server_url)
@@ -23,7 +24,6 @@ def test_nav_go_to_contact(selenium_driver, live_server_url):
     assert contact_page.text_of(contact_page.CONTACT_TITLE) == "Contact"
 
 
-@pytest.mark.selenium
 @pytest.mark.django_db(transaction=True)
 def test_nav_go_to_login(selenium_driver, live_server_url):
     nav = NavBar(selenium_driver, live_server_url)
@@ -34,7 +34,6 @@ def test_nav_go_to_login(selenium_driver, live_server_url):
     assert "/login/" in selenium_driver.current_url
 
 
-@pytest.mark.selenium
 @pytest.mark.django_db(transaction=True)
 def test_nav_go_to_upload_unauthenticated(selenium_driver, live_server_url):
     nav = NavBar(selenium_driver, live_server_url)
@@ -44,7 +43,6 @@ def test_nav_go_to_upload_unauthenticated(selenium_driver, live_server_url):
     assert not nav.is_visible(nav.UPLOAD_LINK)
 
 
-@pytest.mark.selenium
 @pytest.mark.django_db(transaction=True)
 def test_nav_go_to_upload_authenticated(
     selenium_driver, live_server_url, authenticated_user
@@ -77,7 +75,6 @@ def test_nav_go_to_upload_authenticated(
     assert "/upload-post/" in selenium_driver.current_url
 
 
-@pytest.mark.selenium
 @pytest.mark.django_db(transaction=True)
 def test_blog_listing_and_detail_navigation(
     selenium_driver, live_server_url, seeded_post
@@ -97,7 +94,7 @@ def test_blog_listing_and_detail_navigation(
     assert "Selenium Seed Post" in detail_title
 
 
-# @pytest.mark.selenium
+#
 # @pytest.mark.django_db(transaction=True)
 # def test_contact_form_submission_success(selenium_driver, live_server_url):
 #     contact_page = ContactPage(selenium_driver, live_server_url)
