@@ -14,6 +14,7 @@ class TreeSpecies(models.Model):
     common_name = models.CharField(max_length=100)
     genus = models.CharField(max_length=100)
     specific_epithet = models.CharField(max_length=100)
+    subspecies = models.CharField(max_length=100, null=True, blank=True)
 
 
 ################################################################

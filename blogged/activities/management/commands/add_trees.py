@@ -17,13 +17,14 @@ class Command(BaseCommand):
             species, created = TreeSpecies.objects.get_or_create(
                 genus=species_info["genus"],
                 specific_epithet=species_info["specific_epithet"],
+                subspecies=species_info.get("subspecies", None),
                 defaults={"common_name": species_info["common_name"]},
             )
             if created:
                 print(
-                    f"Added new species: {species.common_name} ({species.genus} {species.specific_epithet})"
+                    f"Added new species: {species.common_name} ({species.genus} {species.specific_epithet} {species.subspecies if species.subspecies else ''})"
                 )
             else:
                 print(
-                    f"Species already exists: {species.common_name} ({species.genus} {species.specific_epithet})"
+                    f"Species already exists: {species.common_name} ({species.genus} {species.specific_epithet} {species.subspecies if species.subspecies else ''})"
                 )
