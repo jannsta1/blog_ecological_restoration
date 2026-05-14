@@ -119,5 +119,10 @@
         "common_name": "Common Elder",
         "genus": "Sambucas",
         "specific_epithet": "nigra"
+    },
+    "Ilex aquifolium": {
+        "common_name": "Holly",
+        "genus": "Ilex",
+        "specific_epithet": "aquifolium"
     }
 }

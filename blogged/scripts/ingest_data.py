@@ -95,8 +95,8 @@ def run(*args, **options):
     dry_run = options.get("dry_run", False)
     # start_date = options.get("start_date", date(2000, 1, 1))
     # end_date = options.get("end_date", date(2200, 1, 1))
-    start_date = options.get("start_date", date(2026, 5, 1))
-    end_date = options.get("end_date", date(2026, 5, 3))
+    start_date = options.get("start_date", date(2026, 5, 12))
+    end_date = options.get("end_date", date(2026, 5, 15))
 
     # resize all images in the photos folder to a maximum dimension of 1200px before processing
     # TODO - we should provide a warning before doing this - perhaps change to an interactive click utility?

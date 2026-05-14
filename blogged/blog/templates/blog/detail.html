@@ -6,95 +6,97 @@
 
 {% block content %}
 
-  <h1 class="text-3xl mt-2 font-semibold text-center" data-testid="detail-title">{{ post.title }}</h1>
-  <span class="text-sm text-gray-500">
+  <div class="px-[clamp(0.1rem,12vw,19rem)] my-8">
+
+    <h1 class="text-3xl mt-2  md:mb-8 font-semibold text-center" data-testid="detail-title">{{ post.title }}</h1>
+    <span class="text-sm text-gray-500">
       {% comment %} <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11h14M8 7V3m8 4V3m-9 8h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
       </svg> {% endcomment %}
-    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline w-4 h-4 mr-1 align-middle">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-    </svg>
-    <span class="align-middle">{{ post.date |date:'d.m.Y' }}</span>
-  </span>
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="inline w-4 h-4 mr-1 align-middle">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+      </svg>
+      <span class="align-middle">{{ post.date |date:'d.m.Y' }}</span>
+    </span>
 
-  <div class="text-lg mt-4">
-    {{ post.content|render_markdown }}
-  </div>
-
-  <h1 class="text-3xl mt-2 font-semibold text-center mb-4">Image Gallery</h1>
-
-  {% if post_images %}
-    <div id="main-image-canvas" class="relative w-full h-96 lg:h-115 flex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-4 border-gray-900">
-      {% for media in all_media %}
-        <div id="mySlides" class="mySlides w-full h-full my-4 items-center justify-center"> <!-- we set flex/hidden in the JS depending on if the image is selected or not -->
-          <div class="absolute top-0 left-0 text-[var(--color-text)] font-bold px-3 py-2 z-20">{{ forloop.counter }} / {{ post_images|length }}</div>
-          <div class="relative inline-block h-full">
-            {% if media.media_type == "IMAGE" %}
-              <img class="h-full block" src="{{ media.public_url }}" alt="{{ post.title }}">
-              {% if media.attribution %}
-                <div class="absolute bottom-2 left-0">
-                  <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ media.attribution }}</span>
-                </div>
-              {% endif %}
-            {% else %}
-              <video
-                class="block w-full h-full object-contain rounded-lg bg-black"
-                controls
-                preload="metadata"
-                playsinline
-              >
-                <source src="{{ media.public_url }}" type="video/mp4" alt="{{ post.title }}">
-                Your browser does not support the video tag.
-              </video>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-      <!-- Navigation buttons -->
-      <button class="prev absolute top-1/2 -translate-y-1/2 left-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-r hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(-1)">❮</button>
-      <button class="next absolute top-1/2 -translate-y-1/2 right-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-l hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(1)">❯</button>
+    <div class="text-lg mt-4">
+      {{ post.content|render_markdown }}
     </div>
+
+    <h1 class="text-3xl my-8 font-semibold text-center">Image Gallery</h1>
+
+    {% if post_images %}
+      <div id="main-image-canvas" class="relative w-full h-[clamp(12rem,40vw,40rem)] flex items-center justify-center overflow-hidden mx-auto rounded-t-2xl border-1 border-gray-900">
+        {% for media in all_media %}
+          <div id="mySlides" class="mySlides w-full h-full my-4 items-center justify-center"> <!-- we set flex/hidden in the JS depending on if the image is selected or not -->
+            <div class="absolute top-0 left-0 text-[var(--color-text)] font-bold px-3 py-2 z-20">{{ forloop.counter }} / {{ post_images|length }}</div>
+            <div class="relative inline-block h-full">
+              {% if media.media_type == "IMAGE" %}
+                <img class="h-full block" src="{{ media.public_url }}" alt="{{ post.title }}">
+                {% if media.attribution %}
+                  <div class="absolute bottom-2 left-0">
+                    <span id="attribution-block" class="p-1 text-sm text-white bg-gray-800 rounded-sm">Attribution: {{ media.attribution }}</span>
+                  </div>
+                {% endif %}
+              {% else %}
+                <video
+                  class="block w-full h-full object-contain rounded-lg bg-black"
+                  controls
+                  preload="metadata"
+                  playsinline
+                >
+                  <source src="{{ media.public_url }}" type="video/mp4" alt="{{ post.title }}">
+                  Your browser does not support the video tag.
+                </video>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      <!-- Navigation buttons -->
+        <button class="prev absolute top-1/2 -translate-y-1/2 left-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-r hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(-1)">❮</button>
+        <button class="next absolute top-1/2 -translate-y-1/2 right-0 cursor-pointer px-4 py-4 text-[var(--color-text)] font-bold text-3xl rounded-l hover:bg-[var(--color-text-muted)] hover:bg-opacity-80 transition z-10" onclick="plusSlides(1)">❯</button>
+      </div>
 
     <!-- Caption container -->
-    <div class="bg-gray-900 text-center  px-4 ">
-      <p id="caption"></p>
-    </div>
+      <div class="bg-gray-900 text-center  px-4 ">
+        <p id="caption"></p>
+      </div>
 
-    <div class="flex overflow-x-auto gap-2 p-2 rounded-b-2xl border-4 border-gray-900 text-white">
-      {% for media in all_media %}
-        <div class="flex-shrink-0">
-          {% if media.media_type == "IMAGE" %}
-            <img id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" src="{{ media.public_url }}" onclick="currentSlide({{ forloop.counter }})" alt="{{ media.caption|default:"no caption" }}" title="{{ media.caption|default:"no caption" }}" width="96" height="96">
-          {% elif media.media_type == "VIDEO"  %}
+      <div class="flex overflow-x-auto gap-2 p-2 rounded-b-2xl border-1 border-gray-900 text-white">
+        {% for media in all_media %}
+          <div class="flex-shrink-0">
+            {% if media.media_type == "IMAGE" %}
+              <img id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" src="{{ media.public_url }}" onclick="currentSlide({{ forloop.counter }})" alt="{{ media.caption|default:"no caption" }}" title="{{ media.caption|default:"no caption" }}" width="96" height="96">
+            {% elif media.media_type == "VIDEO"  %}
             <!-- Draw a "play" symbol to denote that its a video -->
-            <svg id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" onclick="currentSlide({{ forloop.counter }})" width="96" height="96" viewBox="0 0 24 24" stroke="var(--color-primary)">
-              <title>{{ media.caption|default:"Video" }}</title>
-              <circle cx="12" cy="12" r="11" fill="none" stroke="var(--color-primary)" stroke-width="1.5"/>
-              <path stroke="var(--color-primary)" fill="var(--color-primary)" d="M10 8.5c0-.706.756-1.149 1.311-.646l4.5 3.75a.75.75 0 0 1 0 1.192l-4.5 3.75c-.555.503-1.311.06-1.311-.646V8.5Z" />
-            </svg>
-          {% endif %}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <h1 class="text-3xl mb-2 mt-2 font-semibold text-center">Impact Analysis</h1>
-  {% for activity in post.activities.all %}
-    {% if activity.activitytreeplantingsession %}
-      {% include "activities/partials/tree-planting-detail.html" %}
+              <svg id="gallery-image" class="cursor-pointer h-24 opacity-60 hover:opacity-100 rounded-sm transition" onclick="currentSlide({{ forloop.counter }})" width="96" height="96" viewBox="0 0 24 24" stroke="var(--color-primary)">
+                <title>{{ media.caption|default:"Video" }}</title>
+                <circle cx="12" cy="12" r="11" fill="none" stroke="var(--color-primary)" stroke-width="1.5"/>
+                <path stroke="var(--color-primary)" fill="var(--color-primary)" d="M10 8.5c0-.706.756-1.149 1.311-.646l4.5 3.75a.75.75 0 0 1 0 1.192l-4.5 3.75c-.555.503-1.311.06-1.311-.646V8.5Z" />
+              </svg>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
     {% endif %}
 
-    {% if activity.activityvoleguardremoval %}
-      {% include "activities/partials/vole-guard-removal-detail.html" %}
-    {% endif %}
+    <h1 class="text-3xl my-8 font-semibold text-center">Impact Analysis</h1>
+    {% for activity in post.activities.all %}
+      {% if activity.activitytreeplantingsession %}
+        {% include "activities/partials/tree-planting-detail.html" %}
+      {% endif %}
+
+      {% if activity.activityvoleguardremoval %}
+        {% include "activities/partials/vole-guard-removal-detail.html" %}
+      {% endif %}
 
     {% comment %} Now deal with transport {% endcomment %}
-    {% if activity.transportcar_set.exists or activity.transportpublic_set.exists or activity.transportwalking_set.exists %}
-      {% include "activities/partials/activity-transport-detail.html" %}
-    {% endif %}
-  {% endfor %}
+      {% if activity.transportcar_set.exists or activity.transportpublic_set.exists or activity.transportwalking_set.exists %}
+        {% include "activities/partials/activity-transport-detail.html" %}
+      {% endif %}
+    {% endfor %}
 
-
+  </div>
 
   <script>
 
