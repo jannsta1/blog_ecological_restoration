@@ -69,7 +69,7 @@ class Post(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse("article_detail", kwargs={"slug": self.slug, "id": self.pk})
+        return reverse("detail", kwargs={"slug": self.slug, "id": self.pk})
 
     class Meta:
         ordering = [

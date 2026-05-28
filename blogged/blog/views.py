@@ -12,20 +12,24 @@ from blog.forms import GpsCoordinates
 from blog.forms import GpsFormSet
 from blog.forms import ImageFormSet
 from blog.forms import PostForm
+from blog.forms import PostContentForm
+from blog.forms import PostStageOneForm
 from blog.models import Images, Videos
 from blog.models import Organisation
 from blog.models import Post
 from dal import autocomplete
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import BadRequest
+from django.http import Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.utils.html import format_html
+from django.db import transaction
 from hitcount.views import track_hit_count
 from image_processing.meta_data_processing import get_gps_coordinates_from_meta_data
+from django.urls import reverse
 
 SELECT_ALL_OPTION_STR = "-- All --"
 SELECT_ALL_OPTION_VAL = "All"
@@ -33,7 +37,7 @@ SELECT_ALL_OPTION_VAL = "All"
 
 @track_hit_count
 def blog_listing(request):
-    posts = Post.objects.all()
+    posts = Post.objects.filter(status=Post.ArticleStatus.PUBLISHED)
     organisation_tags = Organisation.objects.all()
     activity_tags = {c[0]: c[1] for c in Activity.ActivityType.choices}
     activity_tags[0] = (
@@ -108,6 +112,9 @@ def blog_listing(request):
 @track_hit_count
 def detail(request, slug, id):
     post = get_object_or_404(Post, slug=slug, id=id)
+    if post.status != Post.ArticleStatus.PUBLISHED:
+        raise Http404("Draft posts are not publicly visible.")
+
     post_images = Images.objects.all().filter(post=post)
     post_videos = Videos.objects.all().filter(post=post)
     all_media = list(post_images) + list(post_videos)
@@ -176,54 +183,209 @@ class ActivityAutocomplete(autocomplete.Select2QuerySetView):
 
 
 @login_required
+def draft_posts(request):
+    drafts = []
+    for draft in Post.objects.filter(status=Post.ArticleStatus.DRAFT):
+        drafts.append(
+            {
+                "post": draft,
+                "resume_stage": "3" if draft.content.strip() else "2",
+                "can_publish": bool(draft.content.strip()),
+            }
+        )
+
+    return render(request, "blog/draft_posts.html", {"drafts": drafts})
+
+
+@login_required
+def publish_post(request, id):
+    if request.method != "POST":
+        return redirect("draft_posts")
+
+    post = get_object_or_404(Post, id=id, status=Post.ArticleStatus.DRAFT)
+    if not post.title or not post.date or not post.content.strip():
+        messages.error(request, "Complete the post content before publishing.")
+        stage = "2" if not post.content.strip() else "3"
+        return redirect(f"{reverse('upload-post')}?draft={post.pk}&stage={stage}")
+
+    post.status = Post.ArticleStatus.PUBLISHED
+    post.save(update_fields=["status"])
+    messages.success(request, "Post published.")
+    return redirect(post.get_absolute_url())
+
+
+@login_required
 def upload_post(request):
+    draft_id = request.POST.get("draft_id") or request.GET.get("draft")
+    draft_post = get_object_or_404(Post, pk=draft_id) if draft_id else None
+    active_stage = request.POST.get("stage") or request.GET.get("stage") or "1"
+
+    def upload_url(post_id: int | None = None, stage: str | None = None) -> str:
+        url = reverse("upload-post")
+        query_string = []
+        if post_id is not None:
+            query_string.append(f"draft={post_id}")
+        if stage is not None:
+            query_string.append(f"stage={stage}")
+        return f"{url}?{'&'.join(query_string)}" if query_string else url
+
+    def build_context(
+        *,
+        active_stage_value: str | None = None,
+        stage_one_form=None,
+        stage_two_form=None,
+        gps_formset=None,
+        image_formset=None,
+        stage_message: str | None = None,
+    ):
+        context = {
+            "draft_post": draft_post,
+            "active_stage": active_stage_value or active_stage,
+            "stage_one_form": stage_one_form or PostStageOneForm(instance=draft_post),
+            "stage_two_form": stage_two_form or PostContentForm(instance=draft_post),
+            "gps_formset": gps_formset
+            or GpsFormSet(
+                queryset=GpsCoordinates.objects.filter(post=draft_post)
+                if draft_post
+                else GpsCoordinates.objects.none(),
+                prefix="gps",
+                instance=draft_post,
+            ),
+            "image_formset": image_formset
+            or ImageFormSet(
+                queryset=Images.objects.filter(post=draft_post)
+                if draft_post
+                else Images.objects.none(),
+                prefix="images",
+                instance=draft_post,
+            ),
+        }
+
+        if stage_message is not None:
+            context["stage_message"] = stage_message
+
+        return context
+
+    if request.method == "POST" and active_stage == "1":
+        stage_one_form = PostStageOneForm(request.POST, instance=draft_post)
+        if stage_one_form.is_valid():
+            post = stage_one_form.save(commit=False)
+            post.status = Post.ArticleStatus.DRAFT
+            post.save()
+            stage_one_form.save_m2m()
+            messages.success(request, "Stage 1 saved. Continue with the content step.")
+            return redirect(upload_url(post.pk, "2"))
+
+        return render(
+            request,
+            "blog/upload-post.html",
+            build_context(stage_one_form=stage_one_form, active_stage_value="1"),
+        )
+
+    if request.method == "POST" and active_stage == "2":
+        if draft_post is None:
+            messages.error(request, "Save stage 1 first before entering content.")
+            return redirect(upload_url(stage="1"))
+
+        stage_two_form = PostContentForm(request.POST, instance=draft_post)
+        if stage_two_form.is_valid():
+            stage_two_form.save()
+            messages.success(request, "Stage 2 saved. Add photos and GPS data next.")
+            return redirect(upload_url(draft_post.pk, "3"))
+
+        return render(
+            request,
+            "blog/upload-post.html",
+            build_context(stage_two_form=stage_two_form, active_stage_value="2"),
+        )
+
+    if request.method == "POST" and active_stage == "3":
+        if draft_post is None:
+            messages.error(
+                request, "Save stage 1 first before adding media or GPS data."
+            )
+            return redirect(upload_url(stage="1"))
+
+        publish_after_save = request.POST.get("action") == "publish"
+
+        gps_formset = GpsFormSet(request.POST, prefix="gps", instance=draft_post)
+        image_formset = ImageFormSet(
+            request.POST,
+            request.FILES,
+            prefix="images",
+            instance=draft_post,
+        )
+
+        if gps_formset.is_valid() and image_formset.is_valid():
+            with transaction.atomic():
+                gps_formset.save()
+                image_formset.save()
+
+                if publish_after_save:
+                    if not draft_post.content.strip():
+                        messages.error(
+                            request, "Complete the content step before publishing."
+                        )
+                        return redirect(upload_url(draft_post.pk, "2"))
+
+                    draft_post.status = Post.ArticleStatus.PUBLISHED
+                    draft_post.save(update_fields=["status"])
+                    messages.success(request, "Post published.")
+                    return redirect(draft_post.get_absolute_url())
+
+            messages.success(request, "Stage 3 saved. Your draft is ready for review.")
+            return redirect(upload_url(draft_post.pk, "3"))
+
+        return render(
+            request,
+            "blog/upload-post.html",
+            build_context(
+                gps_formset=gps_formset,
+                image_formset=image_formset,
+                active_stage_value="3",
+            ),
+        )
+
     if request.method == "POST":
-        post_form = PostForm(request.POST)
+        post_form = PostForm(request.POST, instance=draft_post)
         gps_formset = GpsFormSet(
-            request.POST, prefix="gps"
-        )  # TODO - "gps-form" would be a better prefix
-        image_formset = ImageFormSet(request.POST, request.FILES, prefix="images")
+            request.POST,
+            prefix="gps",
+            instance=draft_post,
+        )
+        image_formset = ImageFormSet(
+            request.POST,
+            request.FILES,
+            prefix="images",
+            instance=draft_post,
+        )
 
         if post_form.is_valid() and gps_formset.is_valid() and image_formset.is_valid():
-            try:
-                post = post_form.save()
+            with transaction.atomic():
+                post = post_form.save(commit=False)
+                post.status = Post.ArticleStatus.DRAFT
+                post.save()
+                post_form.save_m2m()
                 gps_formset.instance = post
                 gps_formset.save()
                 image_formset.instance = post
                 image_formset.save()
-                messages.info(request, "Post succesfully added")
-                print(request, "Post succesfully added")
-            except Exception as e:
-                # TODO - remove any partially saved data? e.g. if form saving gps_formset fails after post is saved
-                messages.error(request, f"Error saving post: {e}")
-                print(request, f"Error saving post: {e}")
-                raise BadRequest(f"Error saving post: {e}")
 
+            messages.success(request, "Post successfully saved.")
         else:
             if not post_form.is_valid():
                 messages.error(request, f"Post form errors: {post_form.errors}")
-                print(request, f"Post form errors: {post_form.errors}")
             if not gps_formset.is_valid():
                 messages.error(request, f"GPS form errors: {gps_formset.errors}")
-                print(request, f"GPS form errors: {gps_formset.errors}")
             if not image_formset.is_valid():
                 messages.error(request, f"Image form errors: {image_formset.errors}")
-                print(request, f"Image form errors: {image_formset.errors}")
 
-        return redirect("upload-post")  # TODO - redirect to the new post detail page
-
-    post_form = PostForm()
-    gps_formset = GpsFormSet(queryset=GpsCoordinates.objects.none(), prefix="gps")
-    image_formset = ImageFormSet(queryset=Images.objects.none(), prefix="images")
+        return redirect("upload-post")
 
     return render(
         request,
         "blog/upload-post.html",
-        {
-            "post_form": post_form,
-            "image_formset": image_formset,
-            "gps_formset": gps_formset,
-        },
+        build_context(active_stage_value=active_stage),
     )
 
 

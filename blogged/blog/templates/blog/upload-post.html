@@ -1,341 +1,459 @@
 {% extends 'base.html' %}
 {% load static %}
 
-
 {% block content %}
+  <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+      <div class="border-b border-slate-200 bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 px-6 py-8 text-white sm:px-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div class="space-y-2">
+            <p class="text-xs uppercase tracking-[0.3em] text-emerald-200">Post editor</p>
+            <h1 class="text-3xl font-semibold sm:text-4xl">Upload blog post</h1>
+            <p class="max-w-2xl text-sm text-slate-200 sm:text-base">
+              Save each stage independently, then return later to finish the draft.
+            </p>
+          </div>
 
-  <form id="overall_form" method="post" enctype="multipart/form-data" data-testid="upload-post-form">
-
-    {% csrf_token %}
-
-    <h1 class="text-center text-3xl mb-6 mt-2 font-semibold">Upload blog Post</h1>
-
-    {% for hidden in post_form.hidden_fields %}
-      {{ hidden }}
-    {% endfor %}
-
-   <!-- Main Post form  -->
-    {% for form in post_form %}
-      <div>
-        <label for="form.id_for_label">{{ form.label }}</label>
-        {{ form }}
-      </div>
-      <br />
-    {% endfor %}
-
-    <!-- Images -->
-    <h1>GPS coordinates</h1>
-
-    {{ gps_formset.management_form }}
-    <div id="gps-form-list" class="flex flex-col gap-3">
-    </div>
-
-    <div id="empty-gps-form" class="hidden">
-      <div class="gps-form flex items-center gap-4 p-2">
-        {{ gps_formset.empty_form.latitude.as_field_group }}
-        {{ gps_formset.empty_form.longitude.as_field_group }}
-        {{ gps_formset.empty_form.altitude.as_field_group }}
-        <button type="button" id="remove-gps-btn" class="remove-gps-btn focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Remove</button>
-      </div>
-    </div>
-    <button type="button" id="add-gps-btn" data-testid="add-gps-btn" class="btn-primary">+ Add another location</button>
-    <button type="button" id="extract-gps-from-images-btn" class="btn-primary">Extract coordinates from images</button>
-
-
-    <!-- Images -->
-    <h1>Blog Post Photos</h1>
-    {{ image_formset.management_form }}
-    <!-- Hidden multiple file picker -->
-    <input type="file" id="global-image-upload" accept="image/*" multiple style="display:none;">
-    <button type="button" id="trigger-global-upload" data-testid="trigger-global-upload" class="btn-primary">+ Add image(s)</button>
-
-    <div id="image-form-list" class="flex flex-col gap-3">
-    </div>
-
-    <!-- Hidden empty form template -->
-    <div id="empty-form-template" data-empty-form class="hidden ">
-
-      <div class="flex items-center gap-4 p-2 rounded-lg bg-white shadow-sm image-form-entry">
-        <div class="image-preview w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                {% comment %} <span class="text-gray-400 text-xs">Preview</span> {% endcomment %}
+          {% if draft_post %}
+            <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm text-slate-100 backdrop-blur">
+              Draft <span class="font-semibold">#{{ draft_post.pk }}</span> is in progress.
+            </div>
+          {% endif %}
         </div>
 
-        <label>Image Caption:</label>
-        {{ image_formset.empty_form.caption }}
-        {{ image_formset.empty_form.image }}
-
-        <label>Is main image:</label>
-        {{ image_formset.empty_form.is_main_image }}
-
-            {% comment %} <div class="image-preview" style="margin-top:5px;">
-            </div> {% endcomment %}
-
-        <button type="button"
-                class="remove-image px-3 py-1 text-sm font-medium bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-          Delete
-        </button>
+        <div class="mt-6 grid gap-3 sm:grid-cols-3" data-stepper>
+          <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="1">
+            <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 1</span>
+            <span>Title, date, organisation tags</span>
+          </button>
+          <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="2" {% if not draft_post %}disabled{% endif %}>
+            <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 2</span>
+            <span>Content</span>
+          </button>
+          <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="3" {% if not draft_post %}disabled{% endif %}>
+            <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 3</span>
+            <span>Photos and GPS coordinates</span>
+          </button>
+        </div>
       </div>
+
+      <form id="overall_form" method="post" enctype="multipart/form-data" data-testid="upload-post-form" data-active-stage="{{ active_stage }}" data-draft-ready="{% if draft_post %}true{% else %}false{% endif %}">
+        {% csrf_token %}
+        <input type="hidden" name="draft_id" value="{{ draft_post.pk|default:'' }}">
+
+        <div class="space-y-8 px-6 py-8 sm:px-8">
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm" data-stage-panel="1">
+            <div class="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 1</p>
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">Title, date, organisation tags</h2>
+              </div>
+              <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Draft-safe</span>
+            </div>
+
+            {{ stage_one_form.non_field_errors }}
+            <div class="grid gap-6 lg:grid-cols-2">
+              <div>{{ stage_one_form.title.as_field_group }}</div>
+              <div>{{ stage_one_form.date.as_field_group }}</div>
+            </div>
+            <div class="mt-6">{{ stage_one_form.organisation_tags.as_field_group }}</div>
+
+            <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-sm text-slate-600">Save this step now and come back later without losing progress.</p>
+              <button type="submit" name="stage" value="1" class="btn-primary" data-testid="upload-stage-1-submit">
+                {% if draft_post %}Update stage 1{% else %}Save stage 1{% endif %}
+              </button>
+            </div>
+          </section>
+
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="2" {% if active_stage != '2' %}hidden{% endif %}>
+            <div class="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 2</p>
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">Content</h2>
+              </div>
+              <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="1">Back to stage 1</button>
+            </div>
+
+            {% if draft_post %}
+              {{ stage_two_form.non_field_errors }}
+              <div>{{ stage_two_form.content.as_field_group }}</div>
+
+              <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-slate-600">Content can be revised independently of images and GPS.</p>
+                <button type="submit" name="stage" value="2" class="btn-primary" data-testid="upload-stage-2-submit">Save content</button>
+              </div>
+            {% else %}
+              <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                Save stage 1 first to unlock the content step.
+              </div>
+            {% endif %}
+          </section>
+
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="3" {% if active_stage != '3' %}hidden{% endif %}>
+            <div class="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 3</p>
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">Photos and GPS coordinates</h2>
+              </div>
+              <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="2">Back to stage 2</button>
+            </div>
+
+            {% if draft_post %}
+              <div class="grid gap-8 xl:grid-cols-2">
+                <div class="space-y-6">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <h3 class="text-lg font-semibold text-slate-900">GPS coordinates</h3>
+                        <p class="text-sm text-slate-600">Add one or more coordinate entries for the post.</p>
+                      </div>
+                      <button type="button" id="extract-gps-from-images-btn" class="btn-primary">Extract coordinates from images</button>
+                    </div>
+
+                    {{ gps_formset.management_form }}
+                    <div id="gps-form-list" class="space-y-4">
+                      {% for form in gps_formset.forms %}
+                        <div class="gps-form rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                          {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                          {% endfor %}
+                          <div class="grid gap-4 md:grid-cols-3">
+                            <div>{{ form.latitude.as_field_group }}</div>
+                            <div>{{ form.longitude.as_field_group }}</div>
+                            <div>{{ form.altitude.as_field_group }}</div>
+                          </div>
+                          <div class="mt-4 hidden">{{ form.DELETE }}</div>
+                          <div class="mt-4 flex justify-end">
+                            <button type="button" class="remove-gps-btn rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Remove</button>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+
+                    <div id="empty-gps-form" class="hidden">
+                      <div class="gps-form rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="grid gap-4 md:grid-cols-3">
+                          <div>{{ gps_formset.empty_form.latitude.as_field_group }}</div>
+                          <div>{{ gps_formset.empty_form.longitude.as_field_group }}</div>
+                          <div>{{ gps_formset.empty_form.altitude.as_field_group }}</div>
+                        </div>
+                        <div class="mt-4 hidden">{{ gps_formset.empty_form.DELETE }}</div>
+                        <div class="mt-4 flex justify-end">
+                          <button type="button" class="remove-gps-btn rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-4">
+                      <button type="button" id="add-gps-btn" data-testid="add-gps-btn" class="btn-primary">+ Add another location</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-6">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Blog post photos</h3>
+                        <p class="text-sm text-slate-600">Attach one or more images and optionally mark the main image.</p>
+                      </div>
+                      <button type="button" id="trigger-global-upload" data-testid="trigger-global-upload" class="btn-primary">+ Add image(s)</button>
+                    </div>
+
+                    {{ image_formset.management_form }}
+                    <input type="file" id="global-image-upload" accept="image/*" multiple class="hidden">
+
+                    <div id="image-form-list" class="space-y-4">
+                      {% for form in image_formset.forms %}
+                        <div class="image-form-entry rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                          {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                          {% endfor %}
+                          <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
+                            <div class="image-preview flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                              {% if form.instance.pk and form.instance.image %}
+                                <img src="{{ form.instance.image.url }}" alt="{{ form.instance.caption|default:'Uploaded image' }}" loading="lazy" class="h-full w-full object-cover">
+                              {% else %}
+                                <span class="text-xs text-slate-400">Preview</span>
+                              {% endif %}
+                            </div>
+
+                            <div class="grid flex-1 gap-4 lg:grid-cols-2">
+                              <div>{{ form.caption.as_field_group }}</div>
+                              <div class="space-y-3">
+                                <div class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+                                  {{ form.is_main_image }}
+                                  <label class="text-sm font-medium text-slate-700" for="{{ form.is_main_image.id_for_label }}">Main image</label>
+                                </div>
+                                <div class="hidden">{{ form.DELETE }}</div>
+                              </div>
+                            </div>
+
+                            <div class="hidden">{{ form.image }}</div>
+
+                            <button type="button" class="remove-image self-start rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Delete</button>
+                          </div>
+                        </div>
+                      {% endfor %}
+                    </div>
+
+                    <div id="empty-form-template" data-empty-form class="hidden">
+                      <div class="image-form-entry rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-start">
+                          <div class="image-preview flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                            <span class="text-xs text-slate-400">Preview</span>
+                          </div>
+
+                          <div class="grid flex-1 gap-4 lg:grid-cols-2">
+                            <div>{{ image_formset.empty_form.caption.as_field_group }}</div>
+                            <div class="space-y-3">
+                              <div class="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3">
+                                {{ image_formset.empty_form.is_main_image }}
+                                <label class="text-sm font-medium text-slate-700" for="{{ image_formset.empty_form.is_main_image.id_for_label }}">Main image</label>
+                              </div>
+                              <div class="hidden">{{ image_formset.empty_form.DELETE }}</div>
+                            </div>
+                          </div>
+
+                          <div class="hidden">{{ image_formset.empty_form.image }}</div>
+
+                          <button type="button" class="remove-image self-start rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-slate-600">This final stage can still be saved as a draft and completed later.</p>
+                <div class="flex flex-col gap-3 sm:flex-row">
+                  <button type="submit" name="stage" value="3" class="btn-primary" data-testid="upload-stage-3-submit">Save photos and GPS</button>
+                  <input type="hidden" name="stage" value="3">
+                  <button type="submit" name="action" value="publish" class="rounded-full border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100" data-testid="upload-stage-3-publish">
+                    Publish post
+                  </button>
+                </div>
+              </div>
+            {% else %}
+              <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                Save stage 1 first to unlock photos and location data.
+              </div>
+            {% endif %}
+          </section>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Progress Bar -->
-    <div id="progress-wrapper" style="display:none; margin-top:10px;">
-      <progress id="upload-progress" value="0" max="100" style="width:100%;"></progress>
-      <span id="progress-text">0%</span>
-    </div>
-
-    <div class="py-6 px-2">
-      <input type="submit" name="submit" value="Submit" class="btn-primary" data-testid="upload-submit" />
-    </div>
-
-  </form>
-
-<!-- Image preview modal -->
   <div id="image-preview-modal">
     <img id="image-preview-modal-img" src="" alt="Preview">
   </div>
 
-
-
-
   <script src="{% static 'blog/js/hello.js' %}"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.js"></script>
-  {{ post_form.media }}
+  {{ stage_one_form.media }}
 
   <script>
-
-    const EXTRACTING_IMAGE_COORDS_BTN_TEXT = "Extract coordinates from images"
-    const EXTRACT_IMAGE_COORDS_BTN_TEXT = "Extracting"
-
-
-
-
+    const EXTRACTING_IMAGE_COORDS_BTN_TEXT = 'Extract coordinates from images';
+    const EXTRACT_IMAGE_COORDS_BTN_TEXT = 'Extracting';
 
     function showImageModal(src) {
-      console.log("showing image modal")
       const modal = document.getElementById('image-preview-modal');
       const modalImg = document.getElementById('image-preview-modal-img');
       modalImg.src = src;
-
       modal.style.display = 'flex';
-      modal.style.cursor = "default"
+      modal.style.cursor = 'default';
       requestAnimationFrame(() => modal.classList.add('show'));
-
     }
-// Close modal on click
-    document.addEventListener('DOMContentLoaded', function () {
-      const modal = document.getElementById('image-preview-modal');
-      modal.addEventListener('click', function () {
-        setTimeout(() => {
-          modal.style.display = 'none';
-          document.getElementById('image-preview-modal-img').src = '';
-        }, 250); // matches CSS transition
+
+    function setDeleted(entry) {
+      const deleteInput = entry.querySelector('input[name$="-DELETE"]');
+      if (deleteInput) {
+        deleteInput.checked = true;
+      }
+      entry.hidden = true;
+    }
+
+    function showStage(stage) {
+      const form = document.getElementById('overall_form');
+      const draftReady = form.dataset.draftReady === 'true';
+      let nextStage = stage;
+
+      if (!draftReady && nextStage !== '1') {
+        nextStage = '1';
+      }
+
+      document.querySelectorAll('[data-stage-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.stagePanel !== nextStage;
       });
-    });
 
+      document.querySelectorAll('[data-stage-target]').forEach((button) => {
+        const isActive = button.dataset.stageTarget === nextStage;
+        button.classList.toggle('ring-2', isActive);
+        button.classList.toggle('ring-emerald-300', isActive);
+        button.classList.toggle('bg-white/20', isActive);
+      });
+    }
 
-    function addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=null) {
-      console.log("adding gps row")
-      const formIndex = parseInt(gpsTotalForms.value);
+    function addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict = null) {
+      const formIndex = parseInt(gpsTotalForms.value, 10);
       gpsTotalForms.value = formIndex + 1;
 
-    // Clone template HTML
       const newGpsFormHtml = emptyGpsFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
-      const GpsWrapper = document.createElement("div");
-      GpsWrapper.innerHTML = newGpsFormHtml.trim();
-      const newForm = GpsWrapper.firstChild;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = newGpsFormHtml.trim();
+      const newForm = wrapper.firstElementChild;
 
-    // Make GPS coordinates required fields
-      newForm.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]').forEach(input => {
+      newForm.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]').forEach((input) => {
         input.required = true;
       });
 
-      gpsFormset.appendChild(newForm);
-      console.log("gps row added")
-
-    // Fill in values from gps_dict
       if (gps_dict) {
         newForm.querySelector(`[name="gps-${formIndex}-latitude"]`).value = gps_dict.lat;
         newForm.querySelector(`[name="gps-${formIndex}-longitude"]`).value = gps_dict.lon;
         newForm.querySelector(`[name="gps-${formIndex}-altitude"]`).value = gps_dict.alt;
       }
+
+      gpsFormset.appendChild(newForm);
     }
 
     function extractGpsFromImagesCallback(response) {
-
-      console.log("Extracted GPS coordinates received from the server")
-
-      const json_response = JSON.parse(response);
-      const gpsDataFound = Boolean(json_response.gps_data_found);
-      console.log("gps data found boolean:", gpsDataFound);
-
-      if (gpsDataFound){
-
-        json_gps_array = json_response.gps_array
-
-        // Iterate through json_gps_array, which is a list of dictionaries
-        json_gps_array.forEach(function(gps_dict) {
-
+      const jsonResponse = JSON.parse(response);
+      if (jsonResponse.gps_data_found) {
+        jsonResponse.gps_array.forEach((gps_dict) => {
           const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
-          const gpsFormset = document.getElementById("gps-form-list");
+          const gpsFormset = document.getElementById('gps-form-list');
           const emptyGpsFormTemplate = document.getElementById('empty-gps-form');
-          console.log("processing image with data: ", gps_dict.lat, gps_dict.lon, gps_dict.alt);
-          addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=gps_dict);
-
-            {% comment %} console.log("processing image with data: ", gps_dict.lat, gps_dict.lon, gps_dict.alt)
-            const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
-            const formsetDiv = document.getElementById('gps-form-list');
-            const emptyForm = document.getElementById('empty-gps-form').innerHTML;            
-            
-            const formIndex = parseInt(gpsTotalForms.value, 10);
-            gpsTotalForms.value = formIndex + 1;
-            
-            const newFormHtml = emptyForm.replace(/__prefix__/g, formIndex);
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = newFormHtml.trim();
-
-            const newForm = wrapper.firstChild;
-
-            // Make GPS coordinates required fields
-            newForm.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]').forEach(input => {
-                input.required = true;
-            });
-                        
-            formsetDiv.appendChild(newForm);
-
-            // Fill in values from gps_dict
-            newForm.querySelector(`[name="gps-${formIndex}-latitude"]`).value = gps_dict.lat;
-            newForm.querySelector(`[name="gps-${formIndex}-longitude"]`).value = gps_dict.lon;
-            newForm.querySelector(`[name="gps-${formIndex}-altitude"]`).value = gps_dict.alt; {% endcomment %}
+          addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict);
         });
-
       }
 
-      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT;
     }
 
-    function extractGpsFromImagesErrorCallback(response) {
-      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+    function extractGpsFromImagesErrorCallback() {
+      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT;
       alert('Could not extract all image coordinates');
     }
 
-    function trigger_gps_handler()
-    {
-      console.log("Triggered trigger_gps_handler")
-      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT
+    function trigger_gps_handler() {
+      document.getElementById('extract-gps-from-images-btn').innerHTML = EXTRACT_IMAGE_COORDS_BTN_TEXT;
 
-    // Get the file path of each file input in the image form list
-      const imageFiles = [];
-      var formData = new FormData();
-      document.querySelectorAll('#image-form-list input[type="file"]').forEach(function(input) {
-        console.log("Adding ", input.files.length, " images to the formData")
+      const formData = new FormData();
+      document.querySelectorAll('#image-form-list input[type="file"]').forEach((input) => {
         if (input.files.length > 0) {
           for (let i = 0; i < input.files.length; i++) {
-            console.log("Acting on image ", i);
-            imageFiles.push(input.files[i]); // add file object to array
             formData.append(input.files[i].name, input.files[i]);
           }
         }
       });
 
-      formData.append("csrfmiddlewaretoken",  '{{ csrf_token }}')
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
       $.ajax({
-        url:'/extract-gps-coordinates-script/',
+        url: '/extract-gps-coordinates-script/',
         type: 'POST',
         data: formData,
-        success: function gps_response(response){
+        success(response) {
           extractGpsFromImagesCallback(response);
         },
-        failed: function gps_extraction_failed(){
+        error() {
           extractGpsFromImagesErrorCallback();
         },
         cache: false,
         contentType: false,
         processData: false,
       });
-
     }
 
-
-
     document.addEventListener('DOMContentLoaded', function () {
-      console.log("Reloading page")
+      const form = document.getElementById('overall_form');
+      const modal = document.getElementById('image-preview-modal');
+      const activeStage = form.dataset.activeStage || '1';
 
-    //////////////////////////////////////////////////////////////////////
-    // GPS
-    //////////////////////////////////////////////////////////////////////
+      modal.addEventListener('click', function () {
+        setTimeout(() => {
+          modal.style.display = 'none';
+          document.getElementById('image-preview-modal-img').src = '';
+        }, 250);
+      });
 
-      document.getElementById('extract-gps-from-images-btn').addEventListener('click', () => trigger_gps_handler());
+      document.querySelectorAll('[data-stage-target]').forEach((button) => {
+        button.addEventListener('click', () => showStage(button.dataset.stageTarget));
+      });
 
-    // GPS STUFF
-      const addGpsButton = document.getElementById("add-gps-btn");
-      const gpsFormset = document.getElementById("gps-form-list");
+      showStage(activeStage);
+
+      const extractButton = document.getElementById('extract-gps-from-images-btn');
+      if (extractButton) {
+        extractButton.addEventListener('click', () => trigger_gps_handler());
+      }
+
+      const addGpsButton = document.getElementById('add-gps-btn');
+      const gpsFormset = document.getElementById('gps-form-list');
       const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyGpsFormTemplate = document.getElementById('empty-gps-form');
 
-      addGpsButton.addEventListener("click", () => addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate, gps_dict=null));
-    // add listener to GPS formset for each form delete button
-    // TODO - here we are checking every time any button is pressed - would be better if it was just when the delete button itself was pressed.
-      gpsFormset.addEventListener("click", function(e) {
+      if (addGpsButton && gpsFormset) {
+        addGpsButton.addEventListener('click', () => addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate));
+      }
 
-        console.log("checking if we should remove the gps btn")
-        if (e.target.id === "remove-gps-btn") {
-          const entry = e.target.closest(".gps-form");
-          console.log("removing gps btn - for entry:", entry.id)
-          entry.remove();
-          gpsTotalForms.value = parseInt(gpsTotalForms.value) - 1;
-        }
+      if (gpsFormset) {
+        gpsFormset.addEventListener('click', function (e) {
+          if (e.target.classList.contains('remove-gps-btn')) {
+            const entry = e.target.closest('.gps-form');
+            setDeleted(entry);
+          }
+        });
+      }
 
-      });
-
-    //////////////////////////////////////////////////////////////////////
-    // Images
-    //////////////////////////////////////////////////////////////////////
-      const globalUpload = document.getElementById("global-image-upload");
-      const triggerButton = document.getElementById("trigger-global-upload");
-      const imageFormset = document.getElementById("image-form-list");
+      const globalUpload = document.getElementById('global-image-upload');
+      const triggerButton = document.getElementById('trigger-global-upload');
+      const imageFormset = document.getElementById('image-form-list');
       const totalFormsInput = document.querySelector('#id_' + '{{ image_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyFormTemplate = document.querySelector('[data-empty-form]');
 
-      triggerButton.addEventListener("click", () => globalUpload.click());
+      if (triggerButton && globalUpload) {
+        triggerButton.addEventListener('click', () => globalUpload.click());
+      }
 
-
-      globalUpload.addEventListener("change", function() {
-        Array.from(this.files).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            addImageRow(e.target.result, file);
-          };
-          reader.readAsDataURL(file);
+      if (globalUpload) {
+        globalUpload.addEventListener('change', function () {
+          Array.from(this.files).forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              addImageRow(e.target.result, file);
+            };
+            reader.readAsDataURL(file);
+          });
+          this.value = '';
         });
-        this.value = "";
-      });
+      }
 
       function addImageRow(src, file) {
-        const formIndex = parseInt(totalFormsInput.value);
+        const formIndex = parseInt(totalFormsInput.value, 10);
         totalFormsInput.value = formIndex + 1;
 
-        // Clone template HTML
         const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
-        const wrapper = document.createElement("div");
+        const wrapper = document.createElement('div');
         wrapper.innerHTML = newFormHtml.trim();
-        const newForm = wrapper.firstChild;
+        const newForm = wrapper.firstElementChild;
 
-        const previewContainer = newForm.querySelector(".image-preview");
-        var img = document.createElement("img");
+        const previewContainer = newForm.querySelector('.image-preview');
+        const img = document.createElement('img');
         img.src = src;
-        img.className = "object-cover w-full h-full";
-        img.alt = file.name
-        img.loading = "lazy"
+        img.className = 'h-full w-full object-cover';
+        img.alt = file.name;
+        img.loading = 'lazy';
         img.style.cursor = 'pointer';
-        previewContainer.appendChild(img)
+        previewContainer.replaceChildren(img);
 
         img.addEventListener('click', function () {
-          console.log("image clicked");
           showImageModal(src);
         });
 
-        // Set the file to the file input (so Django gets it on submit)
         const fileInput = newForm.querySelector('input[type="file"]');
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
@@ -344,61 +462,14 @@
         imageFormset.appendChild(newForm);
       }
 
-      imageFormset.addEventListener("click", function(e) {
-        if (e.target.classList.contains("remove-image")) {
-          const entry = e.target.closest(".image-form-entry");
-          entry.remove();
-          totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
-        }
-      });
-
-
-    // Form submission with progress bar
-      const form = document.getElementById('overall_form');
-      const progressWrapper = document.getElementById('progress-wrapper');
-      const progressBar = document.getElementById('upload-progress');
-      const progressText = document.getElementById('progress-text');
-
-    // TODO 1 - this doesn't seem to work properly - shows 100% while images are still being uploaded and the form is stuck
-    //          this is because of  const form = document.getElementById('post_form'); - we want image_formset
-    // TODO 2 - there should be an overlay, rather than a progress bar just at the bottom of the screen   
-      form.addEventListener('submit', function (e) {
-        e.preventDefault(); // Stop normal form submit
-        const formData = new FormData(form);
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', form.action);
-
-        // Show progress bar
-        progressWrapper.style.display = 'block';
-        progressBar.value = 0;
-        progressText.textContent = '0%';
-
-        xhr.upload.addEventListener('progress', function (e) {
-          if (e.lengthComputable) {
-            const percent = Math.round((e.loaded / e.total) * 100);
-            progressBar.value = percent;
-            progressText.textContent = percent + '%';
+      if (imageFormset) {
+        imageFormset.addEventListener('click', function (e) {
+          if (e.target.classList.contains('remove-image')) {
+            const entry = e.target.closest('.image-form-entry');
+            setDeleted(entry);
           }
         });
-
-        xhr.onload = function () {
-          if (xhr.status === 200) {
-                // You could redirect or show a success message here
-            console.log('Image upload complete!');
-            window.location.reload();
-          } else {
-            console.log('Image apload failed!');
-          }
-        };
-
-        xhr.send(formData);
-      });
-
+      }
     });
   </script>
-
-
-
 {% endblock %}
-
-

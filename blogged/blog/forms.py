@@ -35,7 +35,8 @@ class PostForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.initial["date"] = datetime.today().date()
+        if not self.is_bound and not self.initial.get("date") and not self.instance.pk:
+            self.initial["date"] = datetime.today().date()
 
     class Meta:
         model = Post
@@ -51,6 +52,16 @@ class PostForm(ModelForm):
             "content": Textarea(attrs={"class": "form-text-field block w-full"}),
         }
         required_fields = ["title", "date", "content"]
+
+
+class PostStageOneForm(PostForm):
+    class Meta(PostForm.Meta):
+        fields = ("title", "date", "organisation_tags")
+
+
+class PostContentForm(PostForm):
+    class Meta(PostForm.Meta):
+        fields = ("content",)
 
 
 class MultipleFileInput(ClearableFileInput):
