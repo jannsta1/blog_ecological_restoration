@@ -216,6 +216,17 @@ def publish_post(request, id):
 
 
 @login_required
+def delete_draft(request, id):
+    if request.method != "POST":
+        return redirect("draft_posts")
+
+    post = get_object_or_404(Post, id=id, status=Post.ArticleStatus.DRAFT)
+    post.delete()
+    messages.success(request, "Draft deleted.")
+    return redirect("draft_posts")
+
+
+@login_required
 def upload_post(request):
     draft_id = request.POST.get("draft_id") or request.GET.get("draft")
     draft_post = get_object_or_404(Post, pk=draft_id) if draft_id else None

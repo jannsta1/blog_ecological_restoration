@@ -349,6 +349,21 @@ def test_publish_post_view_publishes_draft(authenticated_client):
 
 
 @pytest.mark.django_db
+def test_delete_draft_view_deletes_draft(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Ready to delete",
+        slug="draft-title-delete",
+    )
+
+    response = authenticated_client.post(reverse("delete_draft", args=[draft.pk]))
+
+    assert response.status_code == 302
+    assert not Post.objects.filter(pk=draft.pk).exists()
+
+
+@pytest.mark.django_db
 def test_blog_listing_hides_drafts(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
