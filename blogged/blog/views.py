@@ -15,6 +15,7 @@ from activities.models import Location
 from blog.forms import GpsCoordinates
 from blog.forms import GpsFormSet
 from blog.forms import ImageFormSet
+from blog.forms import VideoFormSet
 from blog.forms import PostForm
 from blog.forms import PostContentForm
 from blog.forms import PostTransportForm
@@ -258,6 +259,7 @@ def upload_post(request):
         stage_two_transport_form=None,
         gps_formset=None,
         image_formset=None,
+        video_formset=None,
         stage_message: str | None = None,
     ):
         transport_initial = {}
@@ -315,6 +317,14 @@ def upload_post(request):
                 if draft_post
                 else Images.objects.none(),
                 prefix="images",
+                instance=draft_post,
+            ),
+            "video_formset": video_formset
+            or VideoFormSet(
+                queryset=Videos.objects.filter(post=draft_post)
+                if draft_post
+                else Videos.objects.none(),
+                prefix="videos",
                 instance=draft_post,
             ),
         }
@@ -408,18 +418,41 @@ def upload_post(request):
 
         publish_after_save = request.POST.get("action") == "publish"
 
-        gps_formset = GpsFormSet(request.POST, prefix="gps", instance=draft_post)
+        post_data = request.POST.copy()
+        # Backward compatibility for requests/tests that predate video management fields.
+        if "videos-TOTAL_FORMS" not in post_data:
+            post_data.update(
+                {
+                    "videos-TOTAL_FORMS": "0",
+                    "videos-INITIAL_FORMS": "0",
+                    "videos-MIN_NUM_FORMS": "0",
+                    "videos-MAX_NUM_FORMS": "1000",
+                }
+            )
+
+        gps_formset = GpsFormSet(post_data, prefix="gps", instance=draft_post)
         image_formset = ImageFormSet(
-            request.POST,
+            post_data,
             request.FILES,
             prefix="images",
             instance=draft_post,
         )
+        video_formset = VideoFormSet(
+            post_data,
+            request.FILES,
+            prefix="videos",
+            instance=draft_post,
+        )
 
-        if gps_formset.is_valid() and image_formset.is_valid():
+        if (
+            gps_formset.is_valid()
+            and image_formset.is_valid()
+            and video_formset.is_valid()
+        ):
             with transaction.atomic():
                 gps_formset.save()
                 image_formset.save()
+                video_formset.save()
 
                 if publish_after_save:
                     if not draft_post.content.strip():
@@ -442,6 +475,7 @@ def upload_post(request):
             build_context(
                 gps_formset=gps_formset,
                 image_formset=image_formset,
+                video_formset=video_formset,
                 active_stage_value="3",
             ),
         )

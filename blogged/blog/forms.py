@@ -20,6 +20,7 @@ from .models import GpsCoordinates
 from .models import Images
 from .models import Organisation
 from .models import Post
+from .models import Videos
 
 
 class PostForm(ModelForm):
@@ -225,4 +226,17 @@ ImageFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
     formset=ImageInlineFormSet,
+)
+
+
+VideoFormSet = inlineformset_factory(
+    Post,
+    Videos,
+    fields=["video", "caption"],
+    widgets={
+        "caption": Textarea(attrs={"class": "form-text-field", "rows": 3}),
+        "video": FileInput(attrs={"class": "hidden", "accept": "video/*"}),
+    },
+    extra=1,
+    can_delete=True,
 )

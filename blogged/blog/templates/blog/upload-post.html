@@ -224,6 +224,82 @@
                   <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
                     <div class="mb-4 flex items-center justify-between gap-3">
                       <div>
+                        <h3 class="text-lg font-semibold text-slate-900">Post videos</h3>
+                        <p class="text-sm text-slate-600">Attach one or more videos for this post.</p>
+                      </div>
+                      <button type="button" id="trigger-global-video-upload" class="btn-primary">+ Add video(s)</button>
+                    </div>
+
+                    {{ video_formset.management_form }}
+                    <input type="file" id="global-video-upload" accept="video/*" multiple class="hidden">
+
+                    <div id="video-form-list" class="space-y-4">
+                      {% for form in video_formset.forms %}
+                        {% if form.instance.pk %}
+                          <div class="video-form-entry rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" data-video-name="{{ form.instance.video.name|default:'' }}">
+                            {% for hidden in form.hidden_fields %}
+                              {{ hidden }}
+                            {% endfor %}
+                            <div class="flex flex-col gap-4 md:flex-row md:items-center">
+                              <div class="flex h-28 w-40 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-xs text-slate-500">
+                                Video
+                              </div>
+
+                              <div class="grid flex-1 gap-4 lg:grid-cols-2">
+                                <div class="space-y-2">
+                                  {% if form.instance.video %}
+                                    <span class="video-source-pill inline-flex items-center rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800">{{ form.instance.video.name }}</span>
+                                  {% endif %}
+                                  <label class="block text-sm font-medium text-slate-700" for="{{ form.caption.id_for_label }}">Caption</label>
+                                  {{ form.caption }}
+                                  {% if form.caption.errors %}
+                                    <div class="text-sm text-rose-700">{{ form.caption.errors }}</div>
+                                  {% endif %}
+                                </div>
+                              </div>
+
+                              <div class="hidden">{{ form.video }}</div>
+                              <div class="hidden">{{ form.DELETE }}</div>
+
+                              <button type="button" class="remove-video rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Delete</button>
+                            </div>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+
+                    <div id="empty-video-form-template" data-empty-video-form class="hidden">
+                      <div class="video-form-entry rounded-2xl border border-slate-200 bg-white p-4 shadow-sm" data-video-name="">
+                        <div class="flex flex-col gap-4 md:flex-row md:items-center">
+                          <div class="flex h-28 w-40 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 text-xs text-slate-500">
+                            Video
+                          </div>
+
+                          <div class="grid flex-1 gap-4 lg:grid-cols-2">
+                            <div class="space-y-2">
+                              <span class="video-source-pill hidden items-center rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800"></span>
+                              <label class="block text-sm font-medium text-slate-700" for="{{ video_formset.empty_form.caption.id_for_label }}">Caption</label>
+                              {{ video_formset.empty_form.caption }}
+                              {% if video_formset.empty_form.caption.errors %}
+                                <div class="text-sm text-rose-700">{{ video_formset.empty_form.caption.errors }}</div>
+                              {% endif %}
+                            </div>
+                          </div>
+
+                          <div class="hidden">{{ video_formset.empty_form.video }}</div>
+                          <div class="hidden">{{ video_formset.empty_form.DELETE }}</div>
+
+                          <button type="button" class="remove-video rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="space-y-6">
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                      <div>
                         <h3 class="text-lg font-semibold text-slate-900">GPS coordinates</h3>
                         <p class="text-sm text-slate-600">Add one or more coordinate entries for the post.</p>
                       </div>
@@ -455,6 +531,19 @@
       );
     }
 
+    function getVisibleVideoNames(videoFormset) {
+      if (!videoFormset) {
+        return new Set();
+      }
+
+      return new Set(
+        Array.from(videoFormset.querySelectorAll('.video-form-entry'))
+          .filter((entry) => !entry.hidden)
+          .map((entry) => normalizeImageName(entry.dataset.videoName))
+          .filter((name) => name.length > 0)
+      );
+    }
+
     function validateMainImageSelected(imageFormset) {
       const validationMessage = document.getElementById('stage3-image-validation-error');
 
@@ -513,6 +602,27 @@
 
         entry.dataset.imageName = normalizeImageName(currentName);
         const pill = entry.querySelector('.image-source-pill');
+        if (pill) {
+          pill.textContent = displayImageName(currentName);
+          pill.classList.remove('hidden');
+          pill.classList.add('inline-flex');
+        }
+      });
+    }
+
+    function syncExistingVideoNamePills(videoFormset) {
+      if (!videoFormset) {
+        return;
+      }
+
+      videoFormset.querySelectorAll('.video-form-entry').forEach((entry) => {
+        const currentName = entry.dataset.videoName;
+        if (!currentName) {
+          return;
+        }
+
+        entry.dataset.videoName = normalizeImageName(currentName);
+        const pill = entry.querySelector('.video-source-pill');
         if (pill) {
           pill.textContent = displayImageName(currentName);
           pill.classList.remove('hidden');
@@ -666,9 +776,15 @@
       const imageFormset = document.getElementById('image-form-list');
       const totalFormsInput = document.querySelector('#id_' + '{{ image_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyFormTemplate = document.querySelector('[data-empty-form]');
+      const globalVideoUpload = document.getElementById('global-video-upload');
+      const triggerVideoButton = document.getElementById('trigger-global-video-upload');
+      const videoFormset = document.getElementById('video-form-list');
+      const videoTotalFormsInput = document.querySelector('#id_' + '{{ video_formset.prefix }}' + '-TOTAL_FORMS');
+      const emptyVideoFormTemplate = document.querySelector('[data-empty-video-form]');
       const stageThreePublishButton = document.querySelector('[data-testid="upload-stage-3-publish"]');
 
       syncExistingImageNamePills(imageFormset);
+      syncExistingVideoNamePills(videoFormset);
 
       if (triggerButton && globalUpload) {
         triggerButton.addEventListener('click', () => globalUpload.click());
@@ -692,6 +808,29 @@
             };
             reader.readAsDataURL(file);
           });
+          this.value = '';
+        });
+      }
+
+      if (triggerVideoButton && globalVideoUpload) {
+        triggerVideoButton.addEventListener('click', () => globalVideoUpload.click());
+      }
+
+      if (globalVideoUpload) {
+        globalVideoUpload.addEventListener('change', function () {
+          const existingVideoNames = getVisibleVideoNames(videoFormset);
+
+          Array.from(this.files).forEach((file) => {
+            const normalizedName = normalizeImageName(file.name);
+            if (existingVideoNames.has(normalizedName)) {
+              alert(`Video "${displayImageName(file.name)}" is already loaded.`);
+              return;
+            }
+
+            existingVideoNames.add(normalizedName);
+            addVideoRow(file);
+          });
+
           this.value = '';
         });
       }
@@ -734,6 +873,31 @@
         imageFormset.appendChild(newForm);
       }
 
+      function addVideoRow(file) {
+        const formIndex = parseInt(videoTotalFormsInput.value, 10);
+        videoTotalFormsInput.value = formIndex + 1;
+
+        const newFormHtml = emptyVideoFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = newFormHtml.trim();
+        const newForm = wrapper.firstElementChild;
+
+        const fileInput = newForm.querySelector('input[type="file"]');
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        newForm.dataset.videoName = normalizeImageName(file.name);
+        const sourcePill = newForm.querySelector('.video-source-pill');
+        if (sourcePill) {
+          sourcePill.textContent = displayImageName(file.name);
+          sourcePill.classList.remove('hidden');
+          sourcePill.classList.add('inline-flex');
+        }
+
+        videoFormset.appendChild(newForm);
+      }
+
       if (imageFormset) {
         imageFormset.addEventListener('click', function (e) {
           if (e.target.classList.contains('remove-image')) {
@@ -749,6 +913,15 @@
               validationMessage.textContent = '';
               validationMessage.classList.add('hidden');
             }
+          }
+        });
+      }
+
+      if (videoFormset) {
+        videoFormset.addEventListener('click', function (e) {
+          if (e.target.classList.contains('remove-video')) {
+            const entry = e.target.closest('.video-form-entry');
+            setDeleted(entry);
           }
         });
       }
