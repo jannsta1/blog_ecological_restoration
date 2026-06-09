@@ -218,7 +218,12 @@ def publish_post(request, id):
 def upload_post(request):
     draft_id = request.POST.get("draft_id") or request.GET.get("draft")
     draft_post = get_object_or_404(Post, pk=draft_id) if draft_id else None
-    active_stage = request.POST.get("stage") or request.GET.get("stage") or "1"
+    active_stage = (
+        request.POST.get("stage")
+        or request.POST.get("publish_stage")
+        or request.GET.get("stage")
+        or "1"
+    )
 
     def upload_url(post_id: int | None = None, stage: str | None = None) -> str:
         url = reverse("upload-post")

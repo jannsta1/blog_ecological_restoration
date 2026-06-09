@@ -157,6 +157,38 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
 
 
 @pytest.mark.django_db
+def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-stage-two-marker",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "publish_stage": "3",
+            "draft_id": str(draft.pk),
+            "content": "Stage two content",
+            "gps-TOTAL_FORMS": "0",
+            "gps-INITIAL_FORMS": "0",
+            "gps-MIN_NUM_FORMS": "0",
+            "gps-MAX_NUM_FORMS": "1000",
+            "images-TOTAL_FORMS": "0",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+        },
+    )
+
+    assert response.status_code == 302
+    draft.refresh_from_db()
+    assert draft.content == "Stage two content"
+
+
+@pytest.mark.django_db
 def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
@@ -199,6 +231,37 @@ def test_upload_post_stage_three_publishes_post(authenticated_client):
         reverse("upload-post"),
         {
             "stage": "3",
+            "action": "publish",
+            "draft_id": str(draft.pk),
+            "gps-TOTAL_FORMS": "0",
+            "gps-INITIAL_FORMS": "0",
+            "gps-MIN_NUM_FORMS": "0",
+            "gps-MAX_NUM_FORMS": "1000",
+            "images-TOTAL_FORMS": "0",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+        },
+    )
+
+    assert response.status_code == 302
+    draft.refresh_from_db()
+    assert draft.status == Post.ArticleStatus.PUBLISHED
+
+
+@pytest.mark.django_db
+def test_upload_post_publish_uses_publish_stage_marker(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Stage two content",
+        slug="draft-title-publish-marker",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "publish_stage": "3",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
