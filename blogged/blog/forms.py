@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from activities.models import TransportCar
+from activities.models import TransportPublic
+from django import forms
 from dal import autocomplete
 from django.forms import BaseInlineFormSet
 from django.forms import ClearableFileInput
@@ -62,6 +65,70 @@ class PostStageOneForm(PostForm):
 class PostContentForm(PostForm):
     class Meta(PostForm.Meta):
         fields = ("content",)
+
+
+class PostTransportForm(forms.Form):
+    TRAVEL_OPTION_CAR = "car"
+    TRAVEL_OPTION_PUBLIC = "public"
+    TRAVEL_OPTION_WALKING = "walking"
+
+    TRAVEL_OPTION_CHOICES = (
+        ("", "Select travel option"),
+        (TRAVEL_OPTION_CAR, "Car"),
+        (TRAVEL_OPTION_PUBLIC, "Public transport"),
+        (TRAVEL_OPTION_WALKING, "Walking"),
+    )
+
+    travel_option = forms.ChoiceField(
+        choices=TRAVEL_OPTION_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    distance = forms.FloatField(
+        required=False,
+        min_value=0,
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    carbon_offset = forms.BooleanField(required=False)
+    powertrain = forms.ChoiceField(
+        choices=TransportCar.Powertrain.choices,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    passengers = forms.IntegerField(
+        required=False,
+        min_value=0,
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    public_type = forms.ChoiceField(
+        choices=TransportPublic.Type.choices,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        travel_option = cleaned_data.get("travel_option")
+        distance = cleaned_data.get("distance")
+
+        if not travel_option:
+            return cleaned_data
+
+        if distance is None:
+            self.add_error("distance", "Distance is required for transport entries.")
+
+        if travel_option == self.TRAVEL_OPTION_CAR:
+            if not cleaned_data.get("powertrain"):
+                self.add_error("powertrain", "Select a powertrain for car travel.")
+            if cleaned_data.get("passengers") is None:
+                self.add_error("passengers", "Enter passenger count for car travel.")
+
+        if travel_option == self.TRAVEL_OPTION_PUBLIC and not cleaned_data.get(
+            "public_type"
+        ):
+            self.add_error("public_type", "Select a public transport type.")
+
+        return cleaned_data
 
 
 class MultipleFileInput(ClearableFileInput):

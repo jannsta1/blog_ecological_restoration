@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pytest
+from activities.models import TransportCar
 from blog.forms import PostForm
 from blog import views as blog_views
 from blog.models import Post
@@ -157,6 +158,45 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
     assert response.status_code == 302
     draft.refresh_from_db()
     assert draft.content == "Stage two content"
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_two_saves_car_transport_details(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-transport",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "draft_id": str(draft.pk),
+            "content": "Stage two content",
+            "travel_option": "car",
+            "distance": "21.5",
+            "carbon_offset": "on",
+            "powertrain": "G",
+            "passengers": "3",
+            "gps-TOTAL_FORMS": "0",
+            "gps-INITIAL_FORMS": "0",
+            "gps-MIN_NUM_FORMS": "0",
+            "gps-MAX_NUM_FORMS": "1000",
+            "images-TOTAL_FORMS": "0",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+        },
+    )
+
+    assert response.status_code == 302
+    transport = TransportCar.objects.get(activity__post=draft)
+    assert transport.distance == 21.5
+    assert transport.carbon_offset is True
+    assert transport.powertrain == "G"
+    assert transport.passengers == 3
 
 
 @pytest.mark.django_db

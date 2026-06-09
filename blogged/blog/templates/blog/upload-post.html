@@ -83,6 +83,30 @@
               {{ stage_two_form.non_field_errors }}
               <div>{{ stage_two_form.content.as_field_group }}</div>
 
+              <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div class="mb-4">
+                  <h3 class="text-lg font-semibold text-slate-900">Transport details</h3>
+                  <p class="text-sm text-slate-600">Capture how travel was completed for this post.</p>
+                </div>
+
+                {{ stage_two_transport_form.non_field_errors }}
+                <div>{{ stage_two_transport_form.travel_option.as_field_group }}</div>
+
+                <div id="transport-common-fields" class="mt-4 grid gap-4 sm:grid-cols-2" hidden>
+                  <div>{{ stage_two_transport_form.distance.as_field_group }}</div>
+                  <div>{{ stage_two_transport_form.carbon_offset.as_field_group }}</div>
+                </div>
+
+                <div id="transport-car-fields" class="mt-4 grid gap-4 sm:grid-cols-2" hidden>
+                  <div>{{ stage_two_transport_form.powertrain.as_field_group }}</div>
+                  <div>{{ stage_two_transport_form.passengers.as_field_group }}</div>
+                </div>
+
+                <div id="transport-public-fields" class="mt-4" hidden>
+                  <div>{{ stage_two_transport_form.public_type.as_field_group }}</div>
+                </div>
+              </div>
+
               <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-slate-600">Content can be revised independently of images and GPS.</p>
                 <button type="submit" name="stage" value="2" class="btn-primary" data-testid="upload-stage-2-submit">Save content</button>
@@ -556,6 +580,22 @@
       });
     }
 
+    function toggleTransportFields() {
+      const travelOptionSelect = document.getElementById('id_travel_option');
+      const commonFields = document.getElementById('transport-common-fields');
+      const carFields = document.getElementById('transport-car-fields');
+      const publicFields = document.getElementById('transport-public-fields');
+
+      if (!travelOptionSelect || !commonFields || !carFields || !publicFields) {
+        return;
+      }
+
+      const selected = travelOptionSelect.value;
+      commonFields.hidden = !selected;
+      carFields.hidden = selected !== 'car';
+      publicFields.hidden = selected !== 'public';
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       const form = document.getElementById('overall_form');
       const modal = document.getElementById('image-preview-modal');
@@ -580,6 +620,12 @@
       const extractButton = document.getElementById('extract-gps-from-images-btn');
       if (extractButton) {
         extractButton.addEventListener('click', () => trigger_gps_handler());
+      }
+
+      const travelOptionSelect = document.getElementById('id_travel_option');
+      if (travelOptionSelect) {
+        travelOptionSelect.addEventListener('change', toggleTransportFields);
+        toggleTransportFields();
       }
 
       const addGpsButton = document.getElementById('add-gps-btn');
