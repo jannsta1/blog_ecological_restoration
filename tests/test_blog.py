@@ -305,7 +305,7 @@ def test_extract_gps_coords_handles_ifd_rational_altitude(
     assert response.status_code == 200
     assert (
         response.json()
-        == '{"gps_data_found": true, "gps_array": [{"lat": 55.1234, "lon": -3.1234, "alt": 1.5}]}'
+        == '{"gps_data_found": true, "gps_array": [{"lat": 55.1234, "lon": -3.1234, "alt": 1.5, "source_name": "gps.jpg"}]}'
     )
 
 

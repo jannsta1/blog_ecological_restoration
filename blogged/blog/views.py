@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from activities.models import Activity, ActivityTreeGuardRemoval
 from activities.models import ActivityInvasiveSpeciesRemoval
@@ -413,8 +414,14 @@ def handle_extract_gps_coords(request):
         try:
             image_path = getattr(im.file, "name", None) or im.file
             lat, lon, alt = get_gps_coordinates_from_meta_data(image_path=image_path)
+            source_name = Path(getattr(im, "name", "")).name
             gps_data["gps_array"].append(
-                {"lat": float(lat), "lon": float(lon), "alt": float(alt)}
+                {
+                    "lat": float(lat),
+                    "lon": float(lon),
+                    "alt": float(alt),
+                    "source_name": source_name,
+                }
             )
         except LookupError:
             gps_data["gps_data_found"] = False
