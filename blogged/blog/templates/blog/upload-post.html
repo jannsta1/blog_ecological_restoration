@@ -255,6 +255,7 @@
               <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-slate-600">This final stage can still be saved as a draft and completed later.</p>
                 <div class="flex flex-col gap-3 sm:flex-row">
+                  <p id="stage3-image-validation-error" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700" role="alert"></p>
                   <button type="submit" name="stage" value="3" class="btn-primary" data-testid="upload-stage-3-submit">Save photos and GPS</button>
                   <input type="hidden" name="publish_stage" value="3">
                   <button type="submit" name="action" value="publish" class="rounded-full border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100" data-testid="upload-stage-3-publish">
@@ -430,6 +431,51 @@
       );
     }
 
+    function validateMainImageSelected(imageFormset) {
+      const validationMessage = document.getElementById('stage3-image-validation-error');
+
+      const showValidationMessage = (message) => {
+        if (!validationMessage) {
+          return;
+        }
+
+        validationMessage.textContent = message;
+        validationMessage.classList.remove('hidden');
+      };
+
+      const clearValidationMessage = () => {
+        if (!validationMessage) {
+          return;
+        }
+
+        validationMessage.textContent = '';
+        validationMessage.classList.add('hidden');
+      };
+
+      if (!imageFormset) {
+        return true;
+      }
+
+      const visibleImageRows = Array.from(imageFormset.querySelectorAll('.image-form-entry')).filter((entry) => !entry.hidden);
+      const mainImageCheckboxes = visibleImageRows
+        .map((entry) => entry.querySelector('input[name$="-is_main_image"]'))
+        .filter((checkbox) => checkbox);
+
+      if (mainImageCheckboxes.length === 0) {
+        showValidationMessage('Add at least one image and choose a main image.');
+        return false;
+      }
+
+      const hasMainImage = mainImageCheckboxes.some((checkbox) => checkbox.checked);
+      if (hasMainImage) {
+        clearValidationMessage();
+        return true;
+      }
+
+      showValidationMessage('Select at least one main image before saving or publishing.');
+      return false;
+    }
+
     function syncExistingImageNamePills(imageFormset) {
       if (!imageFormset) {
         return;
@@ -574,6 +620,7 @@
       const imageFormset = document.getElementById('image-form-list');
       const totalFormsInput = document.querySelector('#id_' + '{{ image_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyFormTemplate = document.querySelector('[data-empty-form]');
+      const stageThreePublishButton = document.querySelector('[data-testid="upload-stage-3-publish"]');
 
       syncExistingImageNamePills(imageFormset);
 
@@ -646,6 +693,32 @@
           if (e.target.classList.contains('remove-image')) {
             const entry = e.target.closest('.image-form-entry');
             setDeleted(entry);
+          }
+        });
+
+        imageFormset.addEventListener('change', function (e) {
+          if (e.target.matches('input[name$="-is_main_image"]') && e.target.checked) {
+            const validationMessage = document.getElementById('stage3-image-validation-error');
+            if (validationMessage) {
+              validationMessage.textContent = '';
+              validationMessage.classList.add('hidden');
+            }
+          }
+        });
+      }
+
+      if (stageThreeSubmitButton && imageFormset) {
+        stageThreeSubmitButton.addEventListener('click', function (event) {
+          if (!validateMainImageSelected(imageFormset)) {
+            event.preventDefault();
+          }
+        });
+      }
+
+      if (stageThreePublishButton && imageFormset) {
+        stageThreePublishButton.addEventListener('click', function (event) {
+          if (!validateMainImageSelected(imageFormset)) {
+            event.preventDefault();
           }
         });
       }
