@@ -411,8 +411,11 @@ def handle_extract_gps_coords(request):
     gps_data = {"gps_data_found": True, "gps_array": []}
     for im in request.FILES.values():
         try:
-            lat, lon, alt = get_gps_coordinates_from_meta_data(image_path=im.file.name)
-            gps_data["gps_array"].append({"lat": lat, "lon": lon, "alt": alt})
+            image_path = getattr(im.file, "name", None) or im.file
+            lat, lon, alt = get_gps_coordinates_from_meta_data(image_path=image_path)
+            gps_data["gps_array"].append(
+                {"lat": float(lat), "lon": float(lon), "alt": float(alt)}
+            )
         except LookupError:
             gps_data["gps_data_found"] = False
             # TODO - display this in the app

@@ -2,8 +2,11 @@ from datetime import datetime
 
 import pytest
 from blog.forms import PostForm
+from blog import views as blog_views
 from blog.models import Post
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from PIL.TiffImagePlugin import IFDRational
 # from blogged.blog.forms import PostForm
 
 
@@ -278,6 +281,32 @@ def test_upload_post_publish_uses_publish_stage_marker(authenticated_client):
     assert response.status_code == 302
     draft.refresh_from_db()
     assert draft.status == Post.ArticleStatus.PUBLISHED
+
+
+@pytest.mark.django_db
+def test_extract_gps_coords_handles_ifd_rational_altitude(
+    authenticated_client, monkeypatch
+):
+    monkeypatch.setattr(
+        blog_views,
+        "get_gps_coordinates_from_meta_data",
+        lambda image_path: (55.1234, -3.1234, IFDRational(3, 2)),
+    )
+
+    response = authenticated_client.post(
+        "/extract-gps-coordinates-script/",
+        {
+            "image": SimpleUploadedFile(
+                "gps.jpg", b"fake-image", content_type="image/jpeg"
+            )
+        },
+    )
+
+    assert response.status_code == 200
+    assert (
+        response.json()
+        == '{"gps_data_found": true, "gps_array": [{"lat": 55.1234, "lon": -3.1234, "alt": 1.5}]}'
+    )
 
 
 @pytest.mark.django_db
