@@ -570,12 +570,18 @@
       }
 
       const visibleImageRows = Array.from(imageFormset.querySelectorAll('.image-form-entry')).filter((entry) => !entry.hidden);
+
+      if (visibleImageRows.length === 0) {
+        clearValidationMessage();
+        return true;
+      }
+
       const mainImageCheckboxes = visibleImageRows
         .map((entry) => entry.querySelector('input[name$="-is_main_image"]'))
         .filter((checkbox) => checkbox);
 
       if (mainImageCheckboxes.length === 0) {
-        showValidationMessage('Add at least one image and choose a main image.');
+        showValidationMessage('Select at least one main image before saving or publishing.');
         return false;
       }
 
