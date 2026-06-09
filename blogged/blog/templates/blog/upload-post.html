@@ -205,20 +205,22 @@
                     {{ gps_formset.management_form }}
                     <div id="gps-form-list" class="space-y-4">
                       {% for form in gps_formset.forms %}
-                        <div class="gps-form rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                          {% for hidden in form.hidden_fields %}
-                            {{ hidden }}
-                          {% endfor %}
-                          <div class="grid gap-4 md:grid-cols-3">
-                            <div>{{ form.latitude.as_field_group }}</div>
-                            <div>{{ form.longitude.as_field_group }}</div>
-                            <div>{{ form.altitude.as_field_group }}</div>
+                        {% if form.instance.pk or form.latitude.value or form.longitude.value or form.altitude.value or form.errors %}
+                          <div class="gps-form rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                            {% for hidden in form.hidden_fields %}
+                              {{ hidden }}
+                            {% endfor %}
+                            <div class="grid gap-4 md:grid-cols-3">
+                              <div>{{ form.latitude.as_field_group }}</div>
+                              <div>{{ form.longitude.as_field_group }}</div>
+                              <div>{{ form.altitude.as_field_group }}</div>
+                            </div>
+                            <div class="mt-4 hidden">{{ form.DELETE }}</div>
+                            <div class="mt-4 flex justify-end">
+                              <button type="button" class="remove-gps-btn rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Remove</button>
+                            </div>
                           </div>
-                          <div class="mt-4 hidden">{{ form.DELETE }}</div>
-                          <div class="mt-4 flex justify-end">
-                            <button type="button" class="remove-gps-btn rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100">Remove</button>
-                          </div>
-                        </div>
+                        {% endif %}
                       {% endfor %}
                     </div>
 
@@ -349,6 +351,28 @@
       gpsFormset.appendChild(newForm);
     }
 
+    function validateGpsEntries(gpsFormset) {
+      if (!gpsFormset) {
+        return true;
+      }
+
+      const visibleGpsForms = Array.from(gpsFormset.querySelectorAll('.gps-form')).filter((entry) => !entry.hidden);
+
+      for (const gpsEntry of visibleGpsForms) {
+        const gpsInputs = gpsEntry.querySelectorAll('[name^="gps-"][name$="-latitude"], [name^="gps-"][name$="-longitude"], [name^="gps-"][name$="-altitude"]');
+
+        for (const input of gpsInputs) {
+          input.required = true;
+          if (!input.value.trim()) {
+            input.reportValidity();
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
     function extractGpsFromImagesCallback(response) {
       const jsonResponse = JSON.parse(response);
       if (jsonResponse.gps_data_found) {
@@ -428,9 +452,24 @@
       const gpsFormset = document.getElementById('gps-form-list');
       const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyGpsFormTemplate = document.getElementById('empty-gps-form');
+      const stageThreeSubmitButton = document.querySelector('[data-testid="upload-stage-3-submit"]');
 
       if (addGpsButton && gpsFormset) {
-        addGpsButton.addEventListener('click', () => addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate));
+        addGpsButton.addEventListener('click', () => {
+          if (!validateGpsEntries(gpsFormset)) {
+            return;
+          }
+
+          addGpsRowFunc(gpsTotalForms, gpsFormset, emptyGpsFormTemplate);
+        });
+      }
+
+      if (stageThreeSubmitButton && gpsFormset) {
+        stageThreeSubmitButton.addEventListener('click', function (event) {
+          if (!validateGpsEntries(gpsFormset)) {
+            event.preventDefault();
+          }
+        });
       }
 
       if (gpsFormset) {
