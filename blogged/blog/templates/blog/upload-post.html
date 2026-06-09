@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block content %}
@@ -129,7 +129,7 @@
                             <div class="flex items-center gap-4">
                               <div class="image-preview flex h-28 w-28 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
                                 {% if form.instance.pk and form.instance.image %}
-                                  <img src="{{ form.instance.image.url }}" alt="{{ form.instance.caption|default:'Uploaded image' }}" loading="lazy" class="h-full w-full object-cover">
+                                  <img src="{{ form.instance.image.url }}" alt="{{ form.instance.caption|default:'Uploaded image' }}" loading="lazy" width="112" height="112" class="h-full w-full object-cover">
                                 {% else %}
                                   <span class="text-xs text-slate-400">Preview</span>
                                 {% endif %}
@@ -265,7 +265,7 @@
   </div>
 
   <div id="image-preview-modal">
-    <img id="image-preview-modal-img" src="" alt="Preview">
+    <img id="image-preview-modal-img" src="" alt="Preview" width="1200" height="800" class="w-auto h-auto max-w-[min(800px,90vw)] max-h-[90vh] object-contain">
   </div>
 
   <script src="{% static 'blog/js/hello.js' %}"></script>
@@ -283,6 +283,19 @@
       modal.style.display = 'flex';
       modal.style.cursor = 'default';
       requestAnimationFrame(() => modal.classList.add('show'));
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById('image-preview-modal');
+      if (!modal) {
+        return;
+      }
+
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+        document.getElementById('image-preview-modal-img').src = '';
+      }, 250);
     }
 
     function setDeleted(entry) {
@@ -391,10 +404,13 @@
       const activeStage = form.dataset.activeStage || '1';
 
       modal.addEventListener('click', function () {
-        setTimeout(() => {
-          modal.style.display = 'none';
-          document.getElementById('image-preview-modal-img').src = '';
-        }, 250);
+        closeImageModal();
+      });
+
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.style.display === 'flex') {
+          closeImageModal();
+        }
       });
 
       document.querySelectorAll('[data-stage-target]').forEach((button) => {
@@ -489,4 +505,4 @@
       }
     });
   </script>
-{% endblock %}
+{% endblock content %}
