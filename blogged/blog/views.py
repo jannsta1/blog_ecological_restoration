@@ -234,7 +234,11 @@ def delete_draft(request, id):
 @login_required
 def upload_post(request):
     draft_id = request.POST.get("draft_id") or request.GET.get("draft")
-    draft_post = get_object_or_404(Post, pk=draft_id) if draft_id else None
+    draft_post = (
+        get_object_or_404(Post, pk=draft_id, status=Post.ArticleStatus.DRAFT)
+        if draft_id
+        else None
+    )
     active_stage = (
         request.POST.get("stage")
         or request.POST.get("publish_stage")
