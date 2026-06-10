@@ -45,7 +45,7 @@
 
         <div class="space-y-8 px-6 py-8 sm:px-8">
           <!-- Stage 1: Title, date, organisation tags -->
-          <section class="stage-panel rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm" data-stage-panel="1">
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm" data-stage-panel="1" {% if active_stage != '1' %}hidden{% endif %}>
             <div class="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 1</p>

@@ -379,6 +379,54 @@ def test_draft_posts_view_lists_only_drafts(authenticated_client):
 
 
 @pytest.mark.django_db
+def test_draft_posts_view_uses_publish_validation_for_resume_stage(
+    authenticated_client,
+):
+    incomplete_stage_one_draft = Post.objects.create(
+        title="Incomplete draft",
+        date=datetime.today().date(),
+        content="Ready content",
+        slug="incomplete-draft",
+    )
+    Post.objects.filter(pk=incomplete_stage_one_draft.pk).update(title="")
+
+    ready_draft = Post.objects.create(
+        title="Ready draft",
+        date=datetime.today().date(),
+        content="Ready to publish",
+        slug="ready-draft",
+    )
+
+    response = authenticated_client.get(reverse("draft_posts"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert f"?draft={incomplete_stage_one_draft.pk}&stage=1" in content
+    assert f"publish-draft-{incomplete_stage_one_draft.pk}" not in content
+    assert f"?draft={ready_draft.pk}&stage=3" in content
+    assert f"publish-draft-{ready_draft.pk}" in content
+
+
+@pytest.mark.django_db
+def test_upload_post_view_hides_stage_one_panel_when_stage_two_is_active(
+    authenticated_client,
+):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Stage two content",
+        slug="draft-title-stage-two-visible",
+    )
+
+    response = authenticated_client.get(
+        f"{reverse('upload-post')}?draft={draft.pk}&stage=2"
+    )
+
+    assert response.status_code == 200
+    assert 'data-stage-panel="1" hidden' in response.content.decode()
+
+
+@pytest.mark.django_db
 def test_publish_post_view_publishes_draft(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",

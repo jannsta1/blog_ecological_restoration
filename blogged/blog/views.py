@@ -191,11 +191,12 @@ class ActivityAutocomplete(autocomplete.Select2QuerySetView):
 def draft_posts(request):
     drafts = []
     for draft in Post.objects.filter(status=Post.ArticleStatus.DRAFT):
+        incomplete_stage, _ = get_publish_incomplete_stage(draft)
         drafts.append(
             {
                 "post": draft,
-                "resume_stage": "3" if draft.content.strip() else "2",
-                "can_publish": bool(draft.content.strip()),
+                "resume_stage": incomplete_stage or "3",
+                "can_publish": incomplete_stage is None,
             }
         )
 
