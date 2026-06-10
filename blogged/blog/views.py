@@ -226,8 +226,9 @@ def delete_draft(request, id):
         return redirect("draft_posts")
 
     post = get_object_or_404(Post, id=id, status=Post.ArticleStatus.DRAFT)
-    post.delete()
-    messages.success(request, "Draft deleted.")
+    with transaction.atomic():
+        Activity.objects.filter(post=post).delete()
+        post.delete()
     return redirect("draft_posts")
 
 
