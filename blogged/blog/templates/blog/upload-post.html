@@ -429,7 +429,7 @@
         panel.hidden = panel.dataset.stagePanel !== nextStage;
       });
 
-      document.querySelectorAll('[data-stage-target]').forEach((button) => {
+      document.querySelectorAll('[data-stepper] [data-stage-target]').forEach((button) => {
         const isActive = button.dataset.stageTarget === nextStage;
         button.classList.toggle('ring-2', isActive);
         button.classList.toggle('ring-emerald-300', isActive);
