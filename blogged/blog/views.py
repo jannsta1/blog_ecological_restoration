@@ -211,7 +211,7 @@ def publish_post(request, id):
     post = get_object_or_404(Post, id=id, status=Post.ArticleStatus.DRAFT)
     if not post.title or not post.date or not post.content.strip():
         messages.error(request, "Complete the post content before publishing.")
-        stage = "2" if not post.content.strip() else "3"
+        stage = "1" if (not post.title or not post.date) else ("2" if not post.content.strip() else "3")
         return redirect(f"{reverse('upload-post')}?draft={post.pk}&stage={stage}")
 
     post.status = Post.ArticleStatus.PUBLISHED
