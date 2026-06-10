@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 from activities.models import TransportCar
@@ -209,9 +208,9 @@ def publish_post(request, id):
         return redirect("draft_posts")
 
     post = get_object_or_404(Post, id=id, status=Post.ArticleStatus.DRAFT)
-    if not post.title or not post.date or not post.content.strip():
-        messages.error(request, "Complete the post content before publishing.")
-        stage = "1" if (not post.title or not post.date) else ("2" if not post.content.strip() else "3")
+    stage, error_message = get_publish_incomplete_stage(post)
+    if stage is not None:
+        messages.error(request, error_message)
         return redirect(f"{reverse('upload-post')}?draft={post.pk}&stage={stage}")
 
     post.status = Post.ArticleStatus.PUBLISHED
@@ -230,6 +229,16 @@ def delete_draft(request, id):
         Activity.objects.filter(post=post).delete()
         post.delete()
     return redirect("draft_posts")
+
+
+def get_publish_incomplete_stage(post):
+    if not (post.title or "").strip() or not post.date:
+        return "1", "Complete the post details step before publishing."
+
+    if not (post.content or "").strip():
+        return "2", "Complete the content step before publishing."
+
+    return None, None
 
 
 @login_required
@@ -460,11 +469,10 @@ def upload_post(request):
                 video_formset.save()
 
                 if publish_after_save:
-                    if not draft_post.content.strip():
-                        messages.error(
-                            request, "Complete the content step before publishing."
-                        )
-                        return redirect(upload_url(draft_post.pk, "2"))
+                    stage, error_message = get_publish_incomplete_stage(draft_post)
+                    if stage is not None:
+                        messages.error(request, error_message)
+                        return redirect(upload_url(draft_post.pk, stage))
 
                     draft_post.status = Post.ArticleStatus.PUBLISHED
                     draft_post.save(update_fields=["status"])
@@ -563,8 +571,4 @@ def handle_extract_gps_coords(request):
                 f"skipping image {im.file.name} since it doesn't have the required GPS meta data"
             )
 
-    json_response = JsonResponse(
-        json.dumps(gps_data), safe=False
-    )  # TODO - is it OK to have safe=False?
-
-    return json_response
+    return JsonResponse(gps_data)

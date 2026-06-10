@@ -1,12 +1,16 @@
+from io import BytesIO
 from datetime import datetime
 
 import pytest
+from blog.forms import ImageFormSet
 from activities.models import TransportCar
 from blog.forms import PostForm
 from blog import views as blog_views
 from blog.models import Post
+from django.contrib.messages import get_messages
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from PIL import Image
 from PIL.TiffImagePlugin import IFDRational
 # from blogged.blog.forms import PostForm
 
@@ -343,10 +347,12 @@ def test_extract_gps_coords_handles_ifd_rational_altitude(
     )
 
     assert response.status_code == 200
-    assert (
-        response.json()
-        == '{"gps_data_found": true, "gps_array": [{"lat": 55.1234, "lon": -3.1234, "alt": 1.5, "source_name": "gps.jpg"}]}'
-    )
+    assert response.json() == {
+        "gps_data_found": True,
+        "gps_array": [
+            {"lat": 55.1234, "lon": -3.1234, "alt": 1.5, "source_name": "gps.jpg"}
+        ],
+    }
 
 
 @pytest.mark.django_db
@@ -386,6 +392,103 @@ def test_publish_post_view_publishes_draft(authenticated_client):
     assert response.status_code == 302
     draft.refresh_from_db()
     assert draft.status == Post.ArticleStatus.PUBLISHED
+
+
+@pytest.mark.django_db
+def test_publish_post_redirects_to_stage_one_when_post_details_missing(
+    authenticated_client,
+):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Ready to publish",
+        slug="draft-title-missing-details",
+    )
+    Post.objects.filter(pk=draft.pk).update(title="")
+
+    response = authenticated_client.post(reverse("publish_post", args=[draft.pk]))
+
+    assert response.status_code == 302
+    assert response.url == f"{reverse('upload-post')}?draft={draft.pk}&stage=1"
+    assert [message.message for message in get_messages(response.wsgi_request)] == [
+        "Complete the post details step before publishing."
+    ]
+    draft.refresh_from_db()
+    assert draft.status == Post.ArticleStatus.DRAFT
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_three_publish_redirects_to_stage_one_when_details_missing(
+    authenticated_client,
+):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Stage two content",
+        slug="draft-title-stage-three-missing-details",
+    )
+    Post.objects.filter(pk=draft.pk).update(title="")
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "3",
+            "action": "publish",
+            "draft_id": str(draft.pk),
+            "gps-TOTAL_FORMS": "0",
+            "gps-INITIAL_FORMS": "0",
+            "gps-MIN_NUM_FORMS": "0",
+            "gps-MAX_NUM_FORMS": "1000",
+            "images-TOTAL_FORMS": "0",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+        },
+    )
+
+    assert response.status_code == 302
+    assert response.url == f"{reverse('upload-post')}?draft={draft.pk}&stage=1"
+    assert [message.message for message in get_messages(response.wsgi_request)] == [
+        "Complete the post details step before publishing."
+    ]
+    draft.refresh_from_db()
+    assert draft.status == Post.ArticleStatus.DRAFT
+
+
+def build_test_image_file(name="image.png"):
+    image = Image.new("RGB", (1, 1), color="green")
+    file_obj = BytesIO()
+    image.save(file_obj, format="PNG")
+    file_obj.seek(0)
+    return SimpleUploadedFile(name, file_obj.read(), content_type="image/png")
+
+
+@pytest.mark.django_db
+def test_image_formset_requires_main_image_when_images_are_present():
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="Stage two content",
+        slug="draft-title-image-validation",
+    )
+
+    formset = ImageFormSet(
+        data={
+            "images-TOTAL_FORMS": "1",
+            "images-INITIAL_FORMS": "0",
+            "images-MIN_NUM_FORMS": "0",
+            "images-MAX_NUM_FORMS": "1000",
+            "images-0-caption": "Caption",
+        },
+        files={"images-0-image": build_test_image_file()},
+        instance=draft,
+        prefix="images",
+    )
+
+    assert not formset.is_valid()
+    assert formset.non_form_errors() == [
+        "Select at least one main image before saving or publishing."
+    ]
 
 
 @pytest.mark.django_db

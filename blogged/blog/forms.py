@@ -207,9 +207,34 @@ GpsFormSet = inlineformset_factory(
 
 class ImageInlineFormSet(BaseInlineFormSet):
     def clean(self):
-        # super().clean()
+        super().clean()
 
-        pass
+        if any(self.errors):
+            return
+
+        has_image = False
+        has_main_image = False
+
+        for form in self.forms:
+            if not hasattr(form, "cleaned_data"):
+                continue
+
+            cleaned_data = form.cleaned_data
+            if cleaned_data.get(DELETION_FIELD_NAME):
+                continue
+
+            image = cleaned_data.get("image") or getattr(form.instance, "image", None)
+            if not image:
+                continue
+
+            has_image = True
+            if cleaned_data.get("is_main_image"):
+                has_main_image = True
+
+        if has_image and not has_main_image:
+            raise forms.ValidationError(
+                "Select at least one main image before saving or publishing."
+            )
 
     def clean_caption(self):
         pass

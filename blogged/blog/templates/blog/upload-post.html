@@ -637,8 +637,7 @@
       });
     }
 
-    function extractGpsFromImagesCallback(response) {
-      const jsonResponse = JSON.parse(response);
+    function extractGpsFromImagesCallback(jsonResponse) {
       if (jsonResponse.gps_data_found) {
         const gpsFormset = document.getElementById('gps-form-list');
         const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
