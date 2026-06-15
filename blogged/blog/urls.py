@@ -9,6 +9,9 @@ from .views import OrganisationAutocomplete
 urlpatterns = [
     path("blog-image-gallery/", views.blog_image_gallery, name="blog-image-gallery"),
     path("upload-post/", views.upload_post, name="upload-post"),
+    path("draft-posts/", views.draft_posts, name="draft_posts"),
+    path("draft-posts/<int:id>/publish/", views.publish_post, name="publish_post"),
+    path("draft-posts/<int:id>/delete/", views.delete_draft, name="delete_draft"),
     path("upload-location/", views.upload_location, name="upload-location"),
     path("upload-image/", views.upload_image, name="upload-image"),
     path("extract-gps-coordinates-script/", views.handle_extract_gps_coords),

@@ -1,5 +1,8 @@
 from datetime import datetime
 
+from activities.models import TransportCar
+from activities.models import TransportPublic
+from django import forms
 from dal import autocomplete
 from django.forms import BaseInlineFormSet
 from django.forms import ClearableFileInput
@@ -17,6 +20,7 @@ from .models import GpsCoordinates
 from .models import Images
 from .models import Organisation
 from .models import Post
+from .models import Videos
 
 
 class PostForm(ModelForm):
@@ -35,7 +39,8 @@ class PostForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.initial["date"] = datetime.today().date()
+        if not self.is_bound and not self.initial.get("date") and not self.instance.pk:
+            self.initial["date"] = datetime.today().date()
 
     class Meta:
         model = Post
@@ -51,6 +56,80 @@ class PostForm(ModelForm):
             "content": Textarea(attrs={"class": "form-text-field block w-full"}),
         }
         required_fields = ["title", "date", "content"]
+
+
+class PostStageOneForm(PostForm):
+    class Meta(PostForm.Meta):
+        fields = ("title", "date", "organisation_tags")
+
+
+class PostContentForm(PostForm):
+    class Meta(PostForm.Meta):
+        fields = ("content",)
+
+
+class PostTransportForm(forms.Form):
+    TRAVEL_OPTION_CAR = "car"
+    TRAVEL_OPTION_PUBLIC = "public"
+    TRAVEL_OPTION_WALKING = "walking"
+
+    TRAVEL_OPTION_CHOICES = (
+        ("", "Select travel option"),
+        (TRAVEL_OPTION_CAR, "Car"),
+        (TRAVEL_OPTION_PUBLIC, "Public transport"),
+        (TRAVEL_OPTION_WALKING, "Walking"),
+    )
+
+    travel_option = forms.ChoiceField(
+        choices=TRAVEL_OPTION_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    distance = forms.FloatField(
+        required=False,
+        min_value=0,
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    carbon_offset = forms.BooleanField(required=False)
+    powertrain = forms.ChoiceField(
+        choices=TransportCar.Powertrain.choices,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    passengers = forms.IntegerField(
+        required=False,
+        min_value=0,
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    public_type = forms.ChoiceField(
+        choices=TransportPublic.Type.choices,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        travel_option = cleaned_data.get("travel_option")
+        distance = cleaned_data.get("distance")
+
+        if not travel_option:
+            return cleaned_data
+
+        if distance is None:
+            self.add_error("distance", "Distance is required for transport entries.")
+
+        if travel_option == self.TRAVEL_OPTION_CAR:
+            if not cleaned_data.get("powertrain"):
+                self.add_error("powertrain", "Select a powertrain for car travel.")
+            if cleaned_data.get("passengers") is None:
+                self.add_error("passengers", "Enter passenger count for car travel.")
+
+        if travel_option == self.TRAVEL_OPTION_PUBLIC and not cleaned_data.get(
+            "public_type"
+        ):
+            self.add_error("public_type", "Select a public transport type.")
+
+        return cleaned_data
 
 
 class MultipleFileInput(ClearableFileInput):
@@ -128,9 +207,34 @@ GpsFormSet = inlineformset_factory(
 
 class ImageInlineFormSet(BaseInlineFormSet):
     def clean(self):
-        # super().clean()
+        super().clean()
 
-        pass
+        if any(self.errors):
+            return
+
+        has_image = False
+        has_main_image = False
+
+        for form in self.forms:
+            if not hasattr(form, "cleaned_data"):
+                continue
+
+            cleaned_data = form.cleaned_data
+            if cleaned_data.get(DELETION_FIELD_NAME):
+                continue
+
+            image = cleaned_data.get("image") or getattr(form.instance, "image", None)
+            if not image:
+                continue
+
+            has_image = True
+            if cleaned_data.get("is_main_image"):
+                has_main_image = True
+
+        if has_image and not has_main_image:
+            raise forms.ValidationError(
+                "Select at least one main image before saving or publishing."
+            )
 
     def clean_caption(self):
         pass
@@ -147,4 +251,17 @@ ImageFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
     formset=ImageInlineFormSet,
+)
+
+
+VideoFormSet = inlineformset_factory(
+    Post,
+    Videos,
+    fields=["video", "caption"],
+    widgets={
+        "caption": Textarea(attrs={"class": "form-text-field", "rows": 3}),
+        "video": FileInput(attrs={"class": "hidden", "accept": "video/*"}),
+    },
+    extra=1,
+    can_delete=True,
 )

@@ -23,6 +23,7 @@
         <div class="hidden sm:flex items-center space-x-4">
           {% if user.is_authenticated %}
             <a href="{% url 'upload-post' %}" class="navbar-content" data-url-name="upload-post" data-testid="nav-upload-post">Upload Post</a>
+            <a href="{% url 'draft_posts' %}" class="navbar-content" data-url-name="draft_posts" data-testid="nav-draft-posts">Drafts</a>
           {% endif %}
 
           {% if user.is_authenticated %}
@@ -70,6 +71,7 @@
 
         {% if user.is_authenticated %}
           <a href="{% url 'upload-post' %}" class="block px-3 py-2 rounded-xl navbar-content" data-url-name="upload-post">Upload Post</a>
+          <a href="{% url 'draft_posts' %}" class="block px-3 py-2 rounded-xl navbar-content" data-url-name="draft_posts">Drafts</a>
           <a
             href="#"
             class="block px-3 py-2 rounded-xl navbar-content"

@@ -13,6 +13,7 @@ def configure_mail_settings(settings):
 @pytest.fixture
 def seeded_post(db):
     return Post.objects.create(
+        status=Post.ArticleStatus.PUBLISHED,
         title="Selenium Seed Post",
         date=date.today(),
         content="This post exists to support selenium navigation checks.",
