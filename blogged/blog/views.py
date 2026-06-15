@@ -373,43 +373,44 @@ def upload_post(request):
         stage_two_form = PostContentForm(request.POST, instance=draft_post)
         stage_two_transport_form = PostTransportForm(request.POST)
         if stage_two_form.is_valid() and stage_two_transport_form.is_valid():
-            stage_two_form.save()
+            with transaction.atomic():
+                stage_two_form.save()
 
-            selected_activity = Activity.objects.filter(post=draft_post).first()
-            if selected_activity is None:
-                selected_activity = Activity.objects.create(post=draft_post)
+                selected_activity = Activity.objects.filter(post=draft_post).first()
+                if selected_activity is None:
+                    selected_activity = Activity.objects.create(post=draft_post)
 
-            TransportCar.objects.filter(activity__post=draft_post).delete()
-            TransportPublic.objects.filter(activity__post=draft_post).delete()
-            TransportWalking.objects.filter(activity__post=draft_post).delete()
+                TransportCar.objects.filter(activity__post=draft_post).delete()
+                TransportPublic.objects.filter(activity__post=draft_post).delete()
+                TransportWalking.objects.filter(activity__post=draft_post).delete()
 
-            travel_option = stage_two_transport_form.cleaned_data.get("travel_option")
-            if travel_option:
-                transport_kwargs = {
-                    "activity": selected_activity,
-                    "distance": stage_two_transport_form.cleaned_data.get("distance"),
-                    "carbon_offset": stage_two_transport_form.cleaned_data.get(
-                        "carbon_offset"
-                    ),
-                }
-
-                if travel_option == PostTransportForm.TRAVEL_OPTION_CAR:
-                    TransportCar.objects.create(
-                        **transport_kwargs,
-                        powertrain=stage_two_transport_form.cleaned_data.get(
-                            "powertrain"
+                travel_option = stage_two_transport_form.cleaned_data.get("travel_option")
+                if travel_option:
+                    transport_kwargs = {
+                        "activity": selected_activity,
+                        "distance": stage_two_transport_form.cleaned_data.get("distance"),
+                        "carbon_offset": stage_two_transport_form.cleaned_data.get(
+                            "carbon_offset"
                         ),
-                        passengers=stage_two_transport_form.cleaned_data.get(
-                            "passengers"
-                        ),
-                    )
-                elif travel_option == PostTransportForm.TRAVEL_OPTION_PUBLIC:
-                    TransportPublic.objects.create(
-                        **transport_kwargs,
-                        type=stage_two_transport_form.cleaned_data.get("public_type"),
-                    )
-                elif travel_option == PostTransportForm.TRAVEL_OPTION_WALKING:
-                    TransportWalking.objects.create(**transport_kwargs)
+                    }
+
+                    if travel_option == PostTransportForm.TRAVEL_OPTION_CAR:
+                        TransportCar.objects.create(
+                            **transport_kwargs,
+                            powertrain=stage_two_transport_form.cleaned_data.get(
+                                "powertrain"
+                            ),
+                            passengers=stage_two_transport_form.cleaned_data.get(
+                                "passengers"
+                            ),
+                        )
+                    elif travel_option == PostTransportForm.TRAVEL_OPTION_PUBLIC:
+                        TransportPublic.objects.create(
+                            **transport_kwargs,
+                            type=stage_two_transport_form.cleaned_data.get("public_type"),
+                        )
+                    elif travel_option == PostTransportForm.TRAVEL_OPTION_WALKING:
+                        TransportWalking.objects.create(**transport_kwargs)
 
             messages.success(request, "Stage 2 saved. Add photos and GPS data next.")
             return redirect(upload_url(draft_post.pk, "3"))
