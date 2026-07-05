@@ -547,7 +547,7 @@
                 <p class="text-sm text-slate-600">This final stage can still be saved as a draft and completed later.</p>
                 <div class="flex flex-col gap-3 sm:flex-row">
                   <p id="stage3-image-validation-error" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700" role="alert"></p>
-                  <button type="submit" name="stage" value="4" class="btn-primary" data-testid="upload-stage-3-submit">Save photos and GPS</button>
+                  <button type="submit" name="stage" value="4" class="btn-primary" data-testid="upload-stage-4-submit">Save photos and GPS</button>
                   <input type="hidden" name="publish_stage" value="4">
                   <button type="submit" name="action" value="publish" class="rounded-full border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100" data-testid="upload-stage-3-publish">
                     Publish post
@@ -939,7 +939,7 @@
       const gpsFormset = document.getElementById('gps-form-list');
       const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyGpsFormTemplate = document.getElementById('empty-gps-form');
-      const stageThreeSubmitButton = document.querySelector('[data-testid="upload-stage-3-submit"]');
+      const stageFourSubmitButton = document.querySelector('[data-testid="upload-stage-4-submit"]');
 
       if (addGpsButton && gpsFormset) {
         addGpsButton.addEventListener('click', () => {

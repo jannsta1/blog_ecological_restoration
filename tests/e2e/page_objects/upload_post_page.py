@@ -15,6 +15,10 @@ class UploadPostPage(BasePage):
         By.CSS_SELECTOR,
         '[data-testid="upload-stage-3-submit"]',
     )
+    STAGE_FOUR_SUBMIT_BUTTON = (
+        By.CSS_SELECTOR,
+        '[data-testid="upload-stage-4-submit"]',
+    )
     GPS_LAT_INPUT = (By.NAME, "gps-0-latitude")
     GPS_LON_INPUT = (By.NAME, "gps-0-longitude")
     GPS_ALT_INPUT = (By.NAME, "gps-0-altitude")
@@ -33,10 +37,10 @@ class UploadPostPage(BasePage):
         self.click(self.STAGE_ONE_SUBMIT_BUTTON)
 
     def save_content(self):
-        self.click(self.STAGE_TWO_SUBMIT_BUTTON)
+        self.click(self.STAGE_THREE_SUBMIT_BUTTON)
 
     def save_photos_and_locations(self):
-        self.click(self.STAGE_THREE_SUBMIT_BUTTON)
+        self.click(self.STAGE_FOUR_SUBMIT_BUTTON)
 
     def add_gps_row(self, latitude, longitude, altitude):
         self.click(self.ADD_GPS_BUTTON)
