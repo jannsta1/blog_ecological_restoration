@@ -145,7 +145,7 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
+            "stage": "3",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "gps-TOTAL_FORMS": "0",
@@ -176,7 +176,7 @@ def test_upload_post_stage_two_saves_car_transport_details(authenticated_client)
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
+            "stage": "3",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "travel_option": "car",
@@ -215,8 +215,8 @@ def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
-            "publish_stage": "3",
+            "stage": "3",
+            "publish_stage": "4",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "gps-TOTAL_FORMS": "0",
@@ -247,7 +247,7 @@ def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
             "gps-INITIAL_FORMS": "0",
@@ -277,7 +277,7 @@ def test_upload_post_stage_three_publishes_post(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
@@ -308,7 +308,7 @@ def test_upload_post_publish_uses_publish_stage_marker(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "publish_stage": "3",
+            "publish_stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
@@ -403,7 +403,7 @@ def test_draft_posts_view_uses_publish_validation_for_resume_stage(
     content = response.content.decode()
     assert f"?draft={incomplete_stage_one_draft.pk}&stage=1" in content
     assert f"publish-draft-{incomplete_stage_one_draft.pk}" not in content
-    assert f"?draft={ready_draft.pk}&stage=3" in content
+    assert f"?draft={ready_draft.pk}&stage=4" in content
     assert f"publish-draft-{ready_draft.pk}" in content
 
 
@@ -480,7 +480,7 @@ def test_upload_post_stage_three_publish_redirects_to_stage_one_when_details_mis
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",

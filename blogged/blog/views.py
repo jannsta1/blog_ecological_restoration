@@ -8,13 +8,16 @@ from activities.models import ActivityInvasiveSpeciesRemoval
 from activities.models import ActivitySurveying
 from activities.models import ActivityTraining
 from activities.models import ActivityTreePlantingSession
+from activities.models import TreePlanting
 from activities.models import ActivityVoleGuardRemoval
 from activities.models import ActivityWorkshop
+from activities.models import DEFAULT_TREE_WEIGHT_G
 from activities.models import Location
 from blog.forms import GpsCoordinates
 from blog.forms import GpsFormSet
 from blog.forms import ImageFormSet
 from blog.forms import VideoFormSet
+from blog.forms import PostActivityForm
 from blog.forms import PostForm
 from blog.forms import PostContentForm
 from blog.forms import PostTransportForm
@@ -195,7 +198,7 @@ def draft_posts(request):
         drafts.append(
             {
                 "post": draft,
-                "resume_stage": incomplete_stage or "3",
+                "resume_stage": incomplete_stage or "4",
                 "can_publish": incomplete_stage is None,
             }
         )
@@ -237,7 +240,7 @@ def get_publish_incomplete_stage(post):
         return "1", "Complete the post details step before publishing."
 
     if not (post.content or "").strip():
-        return "2", "Complete the content step before publishing."
+        return "3", "Complete the content step before publishing."
 
     return None, None
 
@@ -271,7 +274,8 @@ def upload_post(request):
         active_stage_value: str | None = None,
         stage_one_form=None,
         stage_two_form=None,
-        stage_two_transport_form=None,
+        stage_three_form=None,
+        stage_three_transport_form=None,
         gps_formset=None,
         image_formset=None,
         video_formset=None,
@@ -311,12 +315,89 @@ def upload_post(request):
                     "carbon_offset": walking_transport.carbon_offset,
                 }
 
+        # ── Stage-4 activity initial data ────────────────────────────────────
+        activity_initial = {}
+        if draft_post and stage_two_form is None:
+            _typed_activity = None
+            for _cls in [
+                ActivityVoleGuardRemoval,
+                ActivityTreeGuardRemoval,
+                ActivityInvasiveSpeciesRemoval,
+                ActivityTreePlantingSession,
+                ActivityTraining,
+                ActivityWorkshop,
+                ActivitySurveying,
+            ]:
+                _typed_activity = _cls.objects.filter(post=draft_post).first()
+                if _typed_activity:
+                    break
+            if _typed_activity:
+                activity_initial["activity_type"] = str(_typed_activity.activity_type)
+                activity_initial["location"] = _typed_activity.location or ""
+                activity_initial["hours_spent"] = _typed_activity.hours_spent
+                if isinstance(_typed_activity, ActivityVoleGuardRemoval):
+                    import json as _json
+
+                    activity_initial["area_covered"] = _typed_activity.area_covered
+                    activity_initial["plastic_removed"] = (
+                        _typed_activity.plastic_removed
+                    )
+                    activity_initial["trees_liberated"] = (
+                        _typed_activity.trees_liberated
+                    )
+                    if _typed_activity.gps_track:
+                        activity_initial["vgr_gps_track"] = _json.dumps(
+                            _typed_activity.gps_track
+                        )
+                elif isinstance(_typed_activity, ActivityTreeGuardRemoval):
+                    import json as _json
+
+                    activity_initial["tubes_removed"] = _typed_activity.tubes_removed
+                    activity_initial["tube_weight_g"] = _typed_activity.tube_weight_g
+                    if _typed_activity.gps_track:
+                        activity_initial["tgr_gps_track"] = _json.dumps(
+                            _typed_activity.gps_track
+                        )
+                elif isinstance(_typed_activity, ActivityInvasiveSpeciesRemoval):
+                    import json as _json
+
+                    activity_initial["species_removed"] = (
+                        _typed_activity.species_removed_id
+                    )
+                    activity_initial["quantity_removed"] = (
+                        _typed_activity.quantity_removed
+                    )
+                    if _typed_activity.gps_track:
+                        activity_initial["isr_gps_track"] = _json.dumps(
+                            _typed_activity.gps_track
+                        )
+                elif isinstance(_typed_activity, ActivityTreePlantingSession):
+                    activity_initial["tps_notes"] = _typed_activity.notes or ""
+                    tree_planting = _typed_activity.tree_plantings.first()
+                    if tree_planting:
+                        import json as _json
+
+                        activity_initial["tps_species"] = (
+                            tree_planting.species.common_name
+                        )
+                        activity_initial["tps_quantity"] = tree_planting.quantity
+                        activity_initial["tps_planting_style"] = str(
+                            tree_planting.planting_style
+                        )
+                        if tree_planting.gps_data:
+                            activity_initial["tps_gps_data"] = _json.dumps(
+                                tree_planting.gps_data
+                            )
+
         context = {
             "draft_post": draft_post,
             "active_stage": active_stage_value or active_stage,
             "stage_one_form": stage_one_form or PostStageOneForm(instance=draft_post),
-            "stage_two_form": stage_two_form or PostContentForm(instance=draft_post),
-            "stage_two_transport_form": stage_two_transport_form
+            "stage_two_form": stage_two_form
+            or PostActivityForm(initial=activity_initial),
+            "stage_three_form": stage_three_form
+            or PostContentForm(instance=draft_post),
+            "stage_three_transport_form": stage_three_transport_form
             or PostTransportForm(initial=transport_initial),
             "gps_formset": gps_formset
             or GpsFormSet(
@@ -356,7 +437,7 @@ def upload_post(request):
             post.status = Post.ArticleStatus.DRAFT
             post.save()
             stage_one_form.save_m2m()
-            messages.success(request, "Stage 1 saved. Continue with the content step.")
+            messages.success(request, "Stage 1 saved. Add activity details next.")
             return redirect(upload_url(post.pk, "2"))
 
         return render(
@@ -367,14 +448,133 @@ def upload_post(request):
 
     if request.method == "POST" and active_stage == "2":
         if draft_post is None:
+            messages.error(
+                request, "Save stage 1 first before adding activity details."
+            )
+            return redirect(upload_url(stage="1"))
+
+        stage_two_form = PostActivityForm(request.POST)
+        if stage_two_form.is_valid():
+            import json as _json
+
+            with transaction.atomic():
+                for _cls in [
+                    ActivityVoleGuardRemoval,
+                    ActivityTreeGuardRemoval,
+                    ActivityInvasiveSpeciesRemoval,
+                    ActivityTreePlantingSession,
+                    ActivityTraining,
+                    ActivityWorkshop,
+                    ActivitySurveying,
+                ]:
+                    _cls.objects.filter(post=draft_post).delete()
+
+                activity_type_raw = stage_two_form.cleaned_data.get("activity_type")
+                if activity_type_raw:
+                    activity_type_int = int(activity_type_raw)
+                    common_kwargs = {
+                        "post": draft_post,
+                        "location": stage_two_form.cleaned_data.get("location") or None,
+                        "hours_spent": stage_two_form.cleaned_data.get("hours_spent")
+                        or 0.0,
+                    }
+
+                    if activity_type_int == Activity.ActivityType.VOLE_GUARD_REMOVAL:
+                        gps_raw = stage_two_form.cleaned_data.get(
+                            "vgr_gps_track", ""
+                        ).strip()
+                        ActivityVoleGuardRemoval.objects.create(
+                            **common_kwargs,
+                            area_covered=stage_two_form.cleaned_data.get("area_covered")
+                            or 0.0,
+                            plastic_removed=stage_two_form.cleaned_data.get(
+                                "plastic_removed"
+                            ),
+                            trees_liberated=stage_two_form.cleaned_data.get(
+                                "trees_liberated"
+                            ),
+                            gps_track=_json.loads(gps_raw) if gps_raw else None,
+                        )
+                    elif activity_type_int == Activity.ActivityType.TREE_GUARD_REMOVAL:
+                        gps_raw = stage_two_form.cleaned_data.get(
+                            "tgr_gps_track", ""
+                        ).strip()
+                        ActivityTreeGuardRemoval.objects.create(
+                            **common_kwargs,
+                            tubes_removed=stage_two_form.cleaned_data.get(
+                                "tubes_removed"
+                            ),
+                            tube_weight_g=stage_two_form.cleaned_data.get(
+                                "tube_weight_g"
+                            )
+                            or DEFAULT_TREE_WEIGHT_G,
+                            gps_track=_json.loads(gps_raw) if gps_raw else None,
+                        )
+                    elif (
+                        activity_type_int
+                        == Activity.ActivityType.INVASIVE_SPECIES_REMOVAL
+                    ):
+                        gps_raw = stage_two_form.cleaned_data.get(
+                            "isr_gps_track", ""
+                        ).strip()
+                        ActivityInvasiveSpeciesRemoval.objects.create(
+                            **common_kwargs,
+                            species_removed=stage_two_form.cleaned_data[
+                                "species_removed"
+                            ],
+                            quantity_removed=stage_two_form.cleaned_data.get(
+                                "quantity_removed"
+                            )
+                            or 0.0,
+                            gps_track=_json.loads(gps_raw) if gps_raw else None,
+                        )
+                    elif (
+                        activity_type_int == Activity.ActivityType.TREE_PLANTING_SESSION
+                    ):
+                        tps_activity = ActivityTreePlantingSession.objects.create(
+                            **common_kwargs,
+                            notes=stage_two_form.cleaned_data.get("tps_notes") or None,
+                        )
+                        gps_raw = stage_two_form.cleaned_data.get(
+                            "tps_gps_data", ""
+                        ).strip()
+                        TreePlanting.objects.create(
+                            trees_planted=tps_activity,
+                            quantity=stage_two_form.cleaned_data["tps_quantity"],
+                            species=stage_two_form.cleaned_data["tps_species"],
+                            planting_style=int(
+                                stage_two_form.cleaned_data["tps_planting_style"]
+                            ),
+                            gps_data=_json.loads(gps_raw) if gps_raw else None,
+                        )
+                    elif activity_type_int == Activity.ActivityType.TRAINING:
+                        ActivityTraining.objects.create(**common_kwargs)
+                    elif activity_type_int == Activity.ActivityType.WORKSHOP:
+                        ActivityWorkshop.objects.create(**common_kwargs)
+                    elif activity_type_int == Activity.ActivityType.SURVEY:
+                        ActivitySurveying.objects.create(**common_kwargs)
+
+            messages.success(
+                request, "Activity details saved. Continue with the content step."
+            )
+            return redirect(upload_url(draft_post.pk, "3"))
+
+        return render(
+            request,
+            "blog/upload-post.html",
+            build_context(stage_two_form=stage_two_form, active_stage_value="2"),
+        )
+
+    if request.method == "POST" and active_stage == "3":
+        if draft_post is None:
             messages.error(request, "Save stage 1 first before entering content.")
             return redirect(upload_url(stage="1"))
 
-        stage_two_form = PostContentForm(request.POST, instance=draft_post)
-        stage_two_transport_form = PostTransportForm(request.POST)
-        if stage_two_form.is_valid() and stage_two_transport_form.is_valid():
+        stage_three_form = PostContentForm(request.POST, instance=draft_post)
+        stage_three_transport_form = PostTransportForm(request.POST)
+        if stage_three_form.is_valid() and stage_three_transport_form.is_valid():
             with transaction.atomic():
-                stage_two_form.save()
+                stage_three_form.save()
 
                 selected_activity = Activity.objects.filter(post=draft_post).first()
                 if selected_activity is None:
@@ -384,12 +584,16 @@ def upload_post(request):
                 TransportPublic.objects.filter(activity__post=draft_post).delete()
                 TransportWalking.objects.filter(activity__post=draft_post).delete()
 
-                travel_option = stage_two_transport_form.cleaned_data.get("travel_option")
+                travel_option = stage_three_transport_form.cleaned_data.get(
+                    "travel_option"
+                )
                 if travel_option:
                     transport_kwargs = {
                         "activity": selected_activity,
-                        "distance": stage_two_transport_form.cleaned_data.get("distance"),
-                        "carbon_offset": stage_two_transport_form.cleaned_data.get(
+                        "distance": stage_three_transport_form.cleaned_data.get(
+                            "distance"
+                        ),
+                        "carbon_offset": stage_three_transport_form.cleaned_data.get(
                             "carbon_offset"
                         ),
                     }
@@ -397,35 +601,37 @@ def upload_post(request):
                     if travel_option == PostTransportForm.TRAVEL_OPTION_CAR:
                         TransportCar.objects.create(
                             **transport_kwargs,
-                            powertrain=stage_two_transport_form.cleaned_data.get(
+                            powertrain=stage_three_transport_form.cleaned_data.get(
                                 "powertrain"
                             ),
-                            passengers=stage_two_transport_form.cleaned_data.get(
+                            passengers=stage_three_transport_form.cleaned_data.get(
                                 "passengers"
                             ),
                         )
                     elif travel_option == PostTransportForm.TRAVEL_OPTION_PUBLIC:
                         TransportPublic.objects.create(
                             **transport_kwargs,
-                            type=stage_two_transport_form.cleaned_data.get("public_type"),
+                            type=stage_three_transport_form.cleaned_data.get(
+                                "public_type"
+                            ),
                         )
                     elif travel_option == PostTransportForm.TRAVEL_OPTION_WALKING:
                         TransportWalking.objects.create(**transport_kwargs)
 
-            messages.success(request, "Stage 2 saved. Add photos and GPS data next.")
-            return redirect(upload_url(draft_post.pk, "3"))
+            messages.success(request, "Stage 3 saved. Add photos and GPS data next.")
+            return redirect(upload_url(draft_post.pk, "4"))
 
         return render(
             request,
             "blog/upload-post.html",
             build_context(
-                stage_two_form=stage_two_form,
-                stage_two_transport_form=stage_two_transport_form,
-                active_stage_value="2",
+                stage_three_form=stage_three_form,
+                stage_three_transport_form=stage_three_transport_form,
+                active_stage_value="3",
             ),
         )
 
-    if request.method == "POST" and active_stage == "3":
+    if request.method == "POST" and active_stage == "4":
         if draft_post is None:
             messages.error(
                 request, "Save stage 1 first before adding media or GPS data."
@@ -481,8 +687,8 @@ def upload_post(request):
                     messages.success(request, "Post published.")
                     return redirect(draft_post.get_absolute_url())
 
-            messages.success(request, "Stage 3 saved. Your draft is ready for review.")
-            return redirect(upload_url(draft_post.pk, "3"))
+            messages.success(request, "Stage 4 saved. Your draft is ready for review.")
+            return redirect(upload_url(draft_post.pk, "4"))
 
         return render(
             request,
@@ -491,11 +697,17 @@ def upload_post(request):
                 gps_formset=gps_formset,
                 image_formset=image_formset,
                 video_formset=video_formset,
-                active_stage_value="3",
+                active_stage_value="4",
             ),
         )
 
     if request.method == "POST":
+        if draft_post is None:
+            messages.error(
+                request, "Save stage 1 first before adding activity details."
+            )
+            return redirect(upload_url(stage="1"))
+
         post_form = PostForm(request.POST, instance=draft_post)
         gps_formset = GpsFormSet(
             request.POST,
