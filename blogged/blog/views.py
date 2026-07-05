@@ -318,19 +318,7 @@ def upload_post(request):
         # ── Stage-4 activity initial data ────────────────────────────────────
         activity_initial = {}
         if draft_post and stage_two_form is None:
-            _typed_activity = None
-            for _cls in [
-                ActivityVoleGuardRemoval,
-                ActivityTreeGuardRemoval,
-                ActivityInvasiveSpeciesRemoval,
-                ActivityTreePlantingSession,
-                ActivityTraining,
-                ActivityWorkshop,
-                ActivitySurveying,
-            ]:
-                _typed_activity = _cls.objects.filter(post=draft_post).first()
-                if _typed_activity:
-                    break
+            _typed_activity = Activity.objects.filter(post=draft_post).first()
             if _typed_activity:
                 activity_initial["activity_type"] = str(_typed_activity.activity_type)
                 activity_initial["location"] = _typed_activity.location or ""
@@ -377,9 +365,7 @@ def upload_post(request):
                     if tree_planting:
                         import json as _json
 
-                        activity_initial["tps_species"] = (
-                            tree_planting.species.common_name
-                        )
+                        activity_initial["tps_species"] = tree_planting.species_id
                         activity_initial["tps_quantity"] = tree_planting.quantity
                         activity_initial["tps_planting_style"] = str(
                             tree_planting.planting_style

@@ -25,9 +25,7 @@ class TreeSpecies(models.Model):
         return botanical_name
 
     def __str__(self):
-        return (
-            self.botanical_name
-        )  # ensure botanical_name is computed before common_name
+        return self.botanical_name
 
 
 ################################################################
