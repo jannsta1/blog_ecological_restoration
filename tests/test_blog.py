@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 from blog.forms import ImageFormSet
-from activities.models import TransportCar
+from activities.models import Activity, ActivityTraining, TransportCar
 from blog.forms import PostForm
 from blog import views as blog_views
 from blog.models import Post
@@ -134,7 +134,44 @@ def test_upload_post_stage_one_creates_draft(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_updates_draft(authenticated_client):
+def test_upload_post_stage_two_creates_activity(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-stage-two-activity",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "draft_id": str(draft.pk),
+            "activity_type": str(Activity.ActivityType.TRAINING),
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=3" in response.url
+    assert ActivityTraining.objects.filter(post=draft).exists()
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_two_requires_draft_first(authenticated_client):
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "activity_type": str(Activity.ActivityType.TRAINING),
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=1" in response.url
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_three_updates_draft(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -165,7 +202,7 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_saves_car_transport_details(authenticated_client):
+def test_upload_post_stage_three_saves_car_transport_details(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -204,7 +241,7 @@ def test_upload_post_stage_two_saves_car_transport_details(authenticated_client)
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client):
+def test_upload_post_stage_three_ignores_publish_stage_marker(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -236,7 +273,7 @@ def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
+def test_upload_post_stage_four_saves_empty_formsets(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -266,7 +303,7 @@ def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_publishes_post(authenticated_client):
+def test_upload_post_stage_four_publishes_post(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -466,7 +503,7 @@ def test_publish_post_redirects_to_stage_one_when_post_details_missing(
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_publish_redirects_to_stage_one_when_details_missing(
+def test_upload_post_stage_four_publish_redirects_to_stage_one_when_details_missing(
     authenticated_client,
 ):
     draft = Post.objects.create(
