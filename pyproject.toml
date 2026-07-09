@@ -43,7 +43,6 @@ dev = [
     "django-extensions>=4.1",
     "pydot>=4.0.1",
     "pyparsing>=3.2.5",
-    "pygraphviz>=1.14",
 ]
 
 [tool.pytest.ini_options]

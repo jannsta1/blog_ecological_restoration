@@ -22,18 +22,22 @@
           {% endif %}
         </div>
 
-        <div class="mt-6 grid gap-3 sm:grid-cols-3" data-stepper>
+        <div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-4" data-stepper>
           <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="1">
             <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 1</span>
-            <span>Title, date, organisation tags</span>
+            <span>Post details</span>
           </button>
           <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="2" {% if not draft_post %}disabled{% endif %}>
             <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 2</span>
-            <span>Content</span>
+            <span>Activity details</span>
           </button>
           <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="3" {% if not draft_post %}disabled{% endif %}>
             <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 3</span>
-            <span>Photos and GPS coordinates</span>
+            <span>Content</span>
+          </button>
+          <button type="button" class="stage-step rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-sm font-medium text-white transition hover:bg-white/20" data-stage-target="4" {% if not draft_post %}disabled{% endif %}>
+            <span class="block text-xs uppercase tracking-[0.24em] text-emerald-200">Stage 4</span>
+            <span>Photos and GPS</span>
           </button>
         </div>
       </div>
@@ -69,19 +73,207 @@
             </div>
           </section>
 
-          <!-- Stage 2: Content -->
+          <!-- Stage 2: Activity details -->
           <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="2" {% if active_stage != '2' %}hidden{% endif %}>
             <div class="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 2</p>
-                <h2 class="mt-1 text-xl font-semibold text-slate-900">Content</h2>
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">Activity details</h2>
               </div>
               <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="1">Back to stage 1</button>
             </div>
 
             {% if draft_post %}
               {{ stage_two_form.non_field_errors }}
-              <div>{{ stage_two_form.content.as_field_group }}</div>
+
+              <div class="space-y-6">
+                <!-- Activity type dropdown -->
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                  <div class="grid gap-6 lg:grid-cols-3">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.activity_type.id_for_label }}">Activity type</label>
+                      {{ stage_two_form.activity_type }}
+                      {% if stage_two_form.activity_type.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.activity_type.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.location.id_for_label }}">Location</label>
+                      {{ stage_two_form.location }}
+                      {% if stage_two_form.location.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.location.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.hours_spent.id_for_label }}">Hours spent</label>
+                      {{ stage_two_form.hours_spent }}
+                      {% if stage_two_form.hours_spent.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.hours_spent.errors }}</div>{% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Vole Guard Removal fields -->
+                <div id="activity-fields-vgr" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                  <h3 class="text-base font-semibold text-slate-900 mb-4">Vole Guard Removal</h3>
+                  <div class="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.area_covered.id_for_label }}">{{ stage_two_form.area_covered.label }}</label>
+                      {{ stage_two_form.area_covered }}
+                      {% if stage_two_form.area_covered.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.area_covered.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.plastic_removed.id_for_label }}">{{ stage_two_form.plastic_removed.label }}</label>
+                      {{ stage_two_form.plastic_removed }}
+                      {% if stage_two_form.plastic_removed.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.plastic_removed.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.trees_liberated.id_for_label }}">{{ stage_two_form.trees_liberated.label }}</label>
+                      {{ stage_two_form.trees_liberated }}
+                      {% if stage_two_form.trees_liberated.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.trees_liberated.errors }}</div>{% endif %}
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.vgr_gps_track.id_for_label }}">{{ stage_two_form.vgr_gps_track.label }}</label>
+                    {{ stage_two_form.vgr_gps_track }}
+                    {% if stage_two_form.vgr_gps_track.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.vgr_gps_track.errors }}</div>{% endif %}
+                  </div>
+                </div>
+
+                <!-- Tree Guard Removal fields -->
+                <div id="activity-fields-tgr" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                  <h3 class="text-base font-semibold text-slate-900 mb-4">Tree Guard Removal</h3>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tubes_removed.id_for_label }}">{{ stage_two_form.tubes_removed.label }}</label>
+                      {{ stage_two_form.tubes_removed }}
+                      {% if stage_two_form.tubes_removed.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tubes_removed.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tube_weight_g.id_for_label }}">{{ stage_two_form.tube_weight_g.label }}</label>
+                      {{ stage_two_form.tube_weight_g }}
+                      {% if stage_two_form.tube_weight_g.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tube_weight_g.errors }}</div>{% endif %}
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tgr_gps_track.id_for_label }}">{{ stage_two_form.tgr_gps_track.label }}</label>
+                    {{ stage_two_form.tgr_gps_track }}
+                    {% if stage_two_form.tgr_gps_track.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tgr_gps_track.errors }}</div>{% endif %}
+                  </div>
+                </div>
+
+                <!-- Invasive Species Removal fields -->
+                <div id="activity-fields-isr" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                  <h3 class="text-base font-semibold text-slate-900 mb-4">Invasive Species Removal</h3>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.species_removed.id_for_label }}">{{ stage_two_form.species_removed.label }}</label>
+                      {{ stage_two_form.species_removed }}
+                      {% if stage_two_form.species_removed.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.species_removed.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.quantity_removed.id_for_label }}">{{ stage_two_form.quantity_removed.label }}</label>
+                      {{ stage_two_form.quantity_removed }}
+                      {% if stage_two_form.quantity_removed.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.quantity_removed.errors }}</div>{% endif %}
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.isr_gps_track.id_for_label }}">{{ stage_two_form.isr_gps_track.label }}</label>
+                    {{ stage_two_form.isr_gps_track }}
+                    {% if stage_two_form.isr_gps_track.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.isr_gps_track.errors }}</div>{% endif %}
+                  </div>
+                </div>
+
+                <!-- Tree Planting Session fields -->
+                <div id="activity-fields-tps" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                  <h3 class="text-base font-semibold text-slate-900 mb-4">Tree Planting Session</h3>
+                  <div class="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tps_species.id_for_label }}">{{ stage_two_form.tps_species.label }}</label>
+                      {{ stage_two_form.tps_species }}
+                      {% if stage_two_form.tps_species.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tps_species.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tps_quantity.id_for_label }}">{{ stage_two_form.tps_quantity.label }}</label>
+                      {{ stage_two_form.tps_quantity }}
+                      {% if stage_two_form.tps_quantity.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tps_quantity.errors }}</div>{% endif %}
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tps_planting_style.id_for_label }}">{{ stage_two_form.tps_planting_style.label }}</label>
+                      {{ stage_two_form.tps_planting_style }}
+                      {% if stage_two_form.tps_planting_style.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tps_planting_style.errors }}</div>{% endif %}
+                    </div>
+                  </div>
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tps_gps_data.id_for_label }}">{{ stage_two_form.tps_gps_data.label }}</label>
+                    {{ stage_two_form.tps_gps_data }}
+                    {% if stage_two_form.tps_gps_data.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tps_gps_data.errors }}</div>{% endif %}
+                  </div>
+                  <div class="mt-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1" for="{{ stage_two_form.tps_notes.id_for_label }}">{{ stage_two_form.tps_notes.label }}</label>
+                    {{ stage_two_form.tps_notes }}
+                    {% if stage_two_form.tps_notes.errors %}<div class="mt-1 text-sm text-rose-700">{{ stage_two_form.tps_notes.errors }}</div>{% endif %}
+                  </div>
+                </div>
+
+                <!-- No-extra-fields activities: Generic, Training, Workshop, Survey -->
+                <div id="activity-fields-simple" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
+                  <p class="text-sm text-slate-600">No additional fields are required for this activity type.</p>
+                </div>
+              </div>
+
+              <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-slate-600">Record what type of activity took place on this outing.</p>
+                <button type="submit" name="stage" value="2" class="btn-primary" data-testid="upload-stage-2-submit">Save activity details</button>
+              </div>
+
+              <script>
+                (function () {
+                  const ACTIVITY_PANELS = {
+                    '0': 'activity-fields-simple',
+                    '2': 'activity-fields-vgr',
+                    '7': 'activity-fields-tgr',
+                    '3': 'activity-fields-isr',
+                    '1': 'activity-fields-tps',
+                    '4': 'activity-fields-simple',
+                    '5': 'activity-fields-simple',
+                    '6': 'activity-fields-simple',
+                  };
+                  const ALL_PANEL_IDS = [...new Set(Object.values(ACTIVITY_PANELS))];
+                  function showActivityFields(value) {
+                    ALL_PANEL_IDS.forEach(id => {
+                      const el = document.getElementById(id);
+                      if (el) el.classList.add('hidden');
+                    });
+                    const target = ACTIVITY_PANELS[value];
+                    if (target) {
+                      const el = document.getElementById(target);
+                      if (el) el.classList.remove('hidden');
+                    }
+                  }
+                  const select = document.getElementById('activity-type-select');
+                  if (select) {
+                    select.addEventListener('change', () => showActivityFields(select.value));
+                    showActivityFields(select.value);
+                  }
+                })();
+              </script>
+
+            {% else %}
+              <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                Save stage 1 first to unlock activity details.
+              </div>
+            {% endif %}
+          </section>
+
+          <!-- Stage 3: Content -->
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="3" {% if active_stage != '3' %}hidden{% endif %}>
+            <div class="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 3</p>
+                <h2 class="mt-1 text-xl font-semibold text-slate-900">Content</h2>
+              </div>
+              <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="2">Back to stage 2</button>
+            </div>
+
+            {% if draft_post %}
+              {{ stage_three_form.non_field_errors }}
+              <div>{{ stage_three_form.content.as_field_group }}</div>
 
               <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5">
                 <div class="mb-4">
@@ -89,27 +281,27 @@
                   <p class="text-sm text-slate-600">Capture how travel was completed for this post.</p>
                 </div>
 
-                {{ stage_two_transport_form.non_field_errors }}
-                <div>{{ stage_two_transport_form.travel_option.as_field_group }}</div>
+                {{ stage_three_transport_form.non_field_errors }}
+                <div>{{ stage_three_transport_form.travel_option.as_field_group }}</div>
 
                 <div id="transport-common-fields" class="mt-4 grid gap-4 sm:grid-cols-2" hidden>
-                  <div>{{ stage_two_transport_form.distance.as_field_group }}</div>
-                  <div>{{ stage_two_transport_form.carbon_offset.as_field_group }}</div>
+                  <div>{{ stage_three_transport_form.distance.as_field_group }}</div>
+                  <div>{{ stage_three_transport_form.carbon_offset.as_field_group }}</div>
                 </div>
 
                 <div id="transport-car-fields" class="mt-4 grid gap-4 sm:grid-cols-2" hidden>
-                  <div>{{ stage_two_transport_form.powertrain.as_field_group }}</div>
-                  <div>{{ stage_two_transport_form.passengers.as_field_group }}</div>
+                  <div>{{ stage_three_transport_form.powertrain.as_field_group }}</div>
+                  <div>{{ stage_three_transport_form.passengers.as_field_group }}</div>
                 </div>
 
                 <div id="transport-public-fields" class="mt-4" hidden>
-                  <div>{{ stage_two_transport_form.public_type.as_field_group }}</div>
+                  <div>{{ stage_three_transport_form.public_type.as_field_group }}</div>
                 </div>
               </div>
 
               <div class="mt-8 flex flex-col gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-sm text-slate-600">Content can be revised independently of images and GPS.</p>
-                <button type="submit" name="stage" value="2" class="btn-primary" data-testid="upload-stage-2-submit">Save content</button>
+                <button type="submit" name="stage" value="3" class="btn-primary" data-testid="upload-stage-3-submit">Save content</button>
               </div>
             {% else %}
               <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
@@ -118,14 +310,14 @@
             {% endif %}
           </section>
 
-          <!-- Stage 3: Photos and GPS coordinates -->
-          <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="3" {% if active_stage != '3' %}hidden{% endif %}>
+          <!-- Stage 4: Photos and GPS coordinates -->
+          <section class="stage-panel rounded-3xl border border-slate-200 bg-white p-6 shadow-sm" data-stage-panel="4" {% if active_stage != '4' %}hidden{% endif %}>
             <div class="mb-6 flex items-start justify-between gap-4">
               <div>
-                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 3</p>
+                <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Stage 4</p>
                 <h2 class="mt-1 text-xl font-semibold text-slate-900">Photos and GPS coordinates</h2>
               </div>
-              <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="2">Back to stage 2</button>
+              <button type="button" class="text-sm font-medium text-slate-600 transition hover:text-slate-900" data-stage-target="3">Back to stage 3</button>
             </div>
 
             {% if draft_post %}
@@ -356,8 +548,8 @@
                 <p class="text-sm text-slate-600">This final stage can still be saved as a draft and completed later.</p>
                 <div class="flex flex-col gap-3 sm:flex-row">
                   <p id="stage3-image-validation-error" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700" role="alert"></p>
-                  <button type="submit" name="stage" value="3" class="btn-primary" data-testid="upload-stage-3-submit">Save photos and GPS</button>
-                  <input type="hidden" name="publish_stage" value="3">
+                  <button type="submit" name="stage" value="4" class="btn-primary" data-testid="upload-stage-4-submit">Save photos and GPS</button>
+                  <input type="hidden" name="publish_stage" value="4">
                   <button type="submit" name="action" value="publish" class="rounded-full border border-emerald-300 bg-emerald-50 px-5 py-2.5 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100" data-testid="upload-stage-3-publish">
                     Publish post
                   </button>
@@ -369,6 +561,7 @@
               </div>
             {% endif %}
           </section>
+
         </div>
       </form>
     </div>
@@ -747,7 +940,7 @@
       const gpsFormset = document.getElementById('gps-form-list');
       const gpsTotalForms = document.querySelector('#id_' + '{{ gps_formset.prefix }}' + '-TOTAL_FORMS');
       const emptyGpsFormTemplate = document.getElementById('empty-gps-form');
-      const stageThreeSubmitButton = document.querySelector('[data-testid="upload-stage-3-submit"]');
+      const stageFourSubmitButton = document.querySelector('[data-testid="upload-stage-4-submit"]');
 
       if (addGpsButton && gpsFormset) {
         addGpsButton.addEventListener('click', () => {

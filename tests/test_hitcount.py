@@ -8,15 +8,15 @@ from hitcount.models import UrlHit
 from hitcount.views import get_client_ip
 
 
-@pytest.mark.asyncio
-def test_smoke_test(async_rf, admin_user):
+@pytest.mark.django_db
+def test_smoke_test(rf, admin_user):
     # begin by checking that the database is empty
     assert UrlHit.objects.count() == 0
     assert HitCount.objects.count() == 0
 
     # test setup
     session_key = "testsessionkey"
-    request = async_rf.get("index")
+    request = rf.get("index")
     ip = get_client_ip(request)
     ss = SessionStore(session_key=session_key)  # required for the hitcount app
     request.session = ss
@@ -38,7 +38,7 @@ def test_smoke_test(async_rf, admin_user):
     assert url_hit_count.date is not None
 
 
-@pytest.mark.asyncio
-def test_get_client_ip(async_rf, admin_user):
+@pytest.mark.django_db
+def test_get_client_ip(rf, admin_user):
     # TODO
     ...

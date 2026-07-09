@@ -1,8 +1,14 @@
+import json
 from datetime import datetime
 
+from activities.models import Activity
+from activities.models import Location
 from activities.models import TransportCar
 from activities.models import TransportPublic
+from activities.models import TreeSpecies
+from activities.models import TreePlanting
 from django import forms
+from django.db.models.functions import Lower
 from dal import autocomplete
 from django.forms import BaseInlineFormSet
 from django.forms import ClearableFileInput
@@ -265,3 +271,194 @@ VideoFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+_GPS_TRACK_WIDGET = Textarea(
+    attrs={
+        "class": "form-text-field block w-full font-mono text-xs",
+        "rows": 3,
+        "placeholder": '{"type": "LineString", "coordinates": [[lon, lat, alt], ...]}',
+    }
+)
+
+
+class PostActivityForm(forms.Form):
+    ACTIVITY_TYPE_CHOICES = [("", "Select activity type")] + [
+        (choice[0], choice[1]) for choice in Activity.ActivityType.choices
+    ]
+
+    activity_type = forms.ChoiceField(
+        choices=ACTIVITY_TYPE_CHOICES,
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": "form-text-field block w-full",
+                "id": "activity-type-select",
+            }
+        ),
+    )
+    location = forms.ChoiceField(
+        choices=[("", "Select location")] + list(Location.choices),
+        required=False,
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    hours_spent = forms.FloatField(
+        required=False,
+        min_value=0,
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+
+    # ── Vole Guard Removal ───────────────────────────────────────────────────
+    area_covered = forms.FloatField(
+        required=False,
+        min_value=0,
+        label="Area covered (m²)",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    plastic_removed = forms.FloatField(
+        required=False,
+        min_value=0,
+        label="Plastic removed (kg)",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    trees_liberated = forms.IntegerField(
+        required=False,
+        min_value=0,
+        label="Trees liberated",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    vgr_gps_track = forms.CharField(
+        required=False,
+        label="GPS track (JSON)",
+        widget=_GPS_TRACK_WIDGET,
+    )
+
+    # ── Tree Guard Removal ───────────────────────────────────────────────────
+    tubes_removed = forms.IntegerField(
+        required=False,
+        min_value=0,
+        label="Tubes removed",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    tube_weight_g = forms.FloatField(
+        required=False,
+        min_value=0,
+        label="Tube weight (g)",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    tgr_gps_track = forms.CharField(
+        required=False,
+        label="GPS track (JSON)",
+        widget=_GPS_TRACK_WIDGET,
+    )
+
+    # ── Invasive Species Removal ─────────────────────────────────────────────
+    species_removed = forms.ModelChoiceField(
+        queryset=TreeSpecies.objects.order_by(
+            Lower("genus"),
+            Lower("specific_epithet"),
+            Lower("subspecies"),
+            Lower("common_name"),
+        ),
+        required=False,
+        label="Species removed",
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    quantity_removed = forms.FloatField(
+        required=False,
+        min_value=0,
+        label="Quantity removed",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    isr_gps_track = forms.CharField(
+        required=False,
+        label="GPS track (JSON)",
+        widget=_GPS_TRACK_WIDGET,
+    )
+
+    # ── Tree Planting Session ────────────────────────────────────────────────
+    tps_notes = forms.CharField(
+        required=False,
+        max_length=200,
+        label="Notes",
+        widget=TextInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    tps_species = forms.ModelChoiceField(
+        queryset=TreeSpecies.objects.order_by(
+            Lower("genus"),
+            Lower("specific_epithet"),
+            Lower("subspecies"),
+            Lower("common_name"),
+        ),
+        required=False,
+        label="Species planted",
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    tps_quantity = forms.IntegerField(
+        required=False,
+        min_value=1,
+        label="Quantity planted",
+        widget=NumberInput(attrs={"class": "form-text-field block w-full"}),
+    )
+    tps_planting_style = forms.ChoiceField(
+        choices=TreePlanting.PlantingStyle.choices,
+        required=False,
+        label="Planting style",
+        widget=forms.Select(attrs={"class": "form-text-field block w-full"}),
+    )
+    tps_gps_data = forms.CharField(
+        required=False,
+        label="Tree planting GPS data (JSON)",
+        widget=_GPS_TRACK_WIDGET,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        initial_species = self.initial.get("tps_species")
+        if isinstance(initial_species, str) and initial_species.strip():
+            match = TreeSpecies.objects.filter(common_name=initial_species).first()
+            if match is not None:
+                self.initial["tps_species"] = match.pk
+
+    def _parse_gps_track(self, field_name):
+        raw = self.cleaned_data.get(field_name, "").strip()
+        if not raw:
+            return None
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            self.add_error(field_name, "Enter valid JSON for the GPS track.")
+            return None
+
+    def clean(self):
+        cleaned_data = super().clean()
+        activity_type = cleaned_data.get("activity_type")
+        if not activity_type:
+            return cleaned_data
+
+        activity_type_int = int(activity_type)
+
+        if activity_type_int == Activity.ActivityType.VOLE_GUARD_REMOVAL:
+            if cleaned_data.get("area_covered") is None:
+                self.add_error("area_covered", "Area covered is required.")
+            self._parse_gps_track("vgr_gps_track")
+
+        elif activity_type_int == Activity.ActivityType.TREE_GUARD_REMOVAL:
+            self._parse_gps_track("tgr_gps_track")
+
+        elif activity_type_int == Activity.ActivityType.INVASIVE_SPECIES_REMOVAL:
+            if not cleaned_data.get("species_removed"):
+                self.add_error("species_removed", "Species is required.")
+            if cleaned_data.get("quantity_removed") is None:
+                self.add_error("quantity_removed", "Quantity removed is required.")
+            self._parse_gps_track("isr_gps_track")
+
+        elif activity_type_int == Activity.ActivityType.TREE_PLANTING_SESSION:
+            if not cleaned_data.get("tps_species"):
+                self.add_error("tps_species", "Species planted is required.")
+            if cleaned_data.get("tps_quantity") is None:
+                self.add_error("tps_quantity", "Quantity planted is required.")
+            if not cleaned_data.get("tps_planting_style"):
+                self.add_error("tps_planting_style", "Planting style is required.")
+            self._parse_gps_track("tps_gps_data")
+
+        return cleaned_data

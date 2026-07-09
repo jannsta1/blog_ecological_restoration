@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 from blog.forms import ImageFormSet
-from activities.models import TransportCar
+from activities.models import Activity, ActivityGeneric, ActivityTraining, TransportCar
 from blog.forms import PostForm
 from blog import views as blog_views
 from blog.models import Post
@@ -134,7 +134,89 @@ def test_upload_post_stage_one_creates_draft(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_updates_draft(authenticated_client):
+def test_upload_post_stage_two_creates_activity(authenticated_client):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-stage-two-activity",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "draft_id": str(draft.pk),
+            "activity_type": str(Activity.ActivityType.TRAINING),
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=3" in response.url
+    assert ActivityTraining.objects.filter(post=draft).exists()
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_two_generic_activity_persists_and_prefills_on_reload(
+    authenticated_client,
+):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-stage-two-generic",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "draft_id": str(draft.pk),
+            "activity_type": str(Activity.ActivityType.GENERIC),
+            "location": "TA",
+            "hours_spent": "2.5",
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=3" in response.url
+
+    activities = Activity.objects.filter(post=draft)
+    assert activities.count() == 1
+    created_activity = activities.first()
+    assert created_activity is not None
+    assert isinstance(created_activity, ActivityGeneric)
+    assert created_activity.activity_type == Activity.ActivityType.GENERIC
+    assert created_activity.location == "TA"
+    assert created_activity.hours_spent == 2.5
+
+    reload_response = authenticated_client.get(
+        f"{reverse('upload-post')}?draft={draft.pk}&stage=2"
+    )
+
+    assert reload_response.status_code == 200
+    html = reload_response.content.decode()
+    assert 'option value="0" selected' in html
+    assert 'option value="TA" selected' in html
+    assert 'name="hours_spent" value="2.5"' in html
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_two_requires_draft_first(authenticated_client):
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "activity_type": str(Activity.ActivityType.TRAINING),
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=1" in response.url
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_three_updates_draft(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -145,7 +227,7 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
+            "stage": "3",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "gps-TOTAL_FORMS": "0",
@@ -165,7 +247,7 @@ def test_upload_post_stage_two_updates_draft(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_saves_car_transport_details(authenticated_client):
+def test_upload_post_stage_three_saves_car_transport_details(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -176,7 +258,7 @@ def test_upload_post_stage_two_saves_car_transport_details(authenticated_client)
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
+            "stage": "3",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "travel_option": "car",
@@ -204,7 +286,7 @@ def test_upload_post_stage_two_saves_car_transport_details(authenticated_client)
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client):
+def test_upload_post_stage_three_ignores_publish_stage_marker(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -215,8 +297,8 @@ def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "2",
-            "publish_stage": "3",
+            "stage": "3",
+            "publish_stage": "4",
             "draft_id": str(draft.pk),
             "content": "Stage two content",
             "gps-TOTAL_FORMS": "0",
@@ -236,7 +318,7 @@ def test_upload_post_stage_two_ignores_publish_stage_marker(authenticated_client
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
+def test_upload_post_stage_four_saves_empty_formsets(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -247,7 +329,7 @@ def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
             "gps-INITIAL_FORMS": "0",
@@ -266,7 +348,7 @@ def test_upload_post_stage_three_saves_empty_formsets(authenticated_client):
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_publishes_post(authenticated_client):
+def test_upload_post_stage_four_publishes_post(authenticated_client):
     draft = Post.objects.create(
         title="Draft title",
         date=datetime.today().date(),
@@ -277,7 +359,7 @@ def test_upload_post_stage_three_publishes_post(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
@@ -308,7 +390,7 @@ def test_upload_post_publish_uses_publish_stage_marker(authenticated_client):
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "publish_stage": "3",
+            "publish_stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",
@@ -403,7 +485,7 @@ def test_draft_posts_view_uses_publish_validation_for_resume_stage(
     content = response.content.decode()
     assert f"?draft={incomplete_stage_one_draft.pk}&stage=1" in content
     assert f"publish-draft-{incomplete_stage_one_draft.pk}" not in content
-    assert f"?draft={ready_draft.pk}&stage=3" in content
+    assert f"?draft={ready_draft.pk}&stage=4" in content
     assert f"publish-draft-{ready_draft.pk}" in content
 
 
@@ -466,7 +548,7 @@ def test_publish_post_redirects_to_stage_one_when_post_details_missing(
 
 
 @pytest.mark.django_db
-def test_upload_post_stage_three_publish_redirects_to_stage_one_when_details_missing(
+def test_upload_post_stage_four_publish_redirects_to_stage_one_when_details_missing(
     authenticated_client,
 ):
     draft = Post.objects.create(
@@ -480,7 +562,7 @@ def test_upload_post_stage_three_publish_redirects_to_stage_one_when_details_mis
     response = authenticated_client.post(
         reverse("upload-post"),
         {
-            "stage": "3",
+            "stage": "4",
             "action": "publish",
             "draft_id": str(draft.pk),
             "gps-TOTAL_FORMS": "0",

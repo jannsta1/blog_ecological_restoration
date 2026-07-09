@@ -16,6 +16,17 @@ class TreeSpecies(models.Model):
     specific_epithet = models.CharField(max_length=100)
     subspecies = models.CharField(max_length=100, null=True, blank=True)
 
+    @property
+    def botanical_name(self):
+        botanical_name = f"{self.genus} {self.specific_epithet}".strip()
+        if self.subspecies:
+            botanical_name = f"{botanical_name} subsp. {self.subspecies}".strip()
+
+        return botanical_name
+
+    def __str__(self):
+        return self.botanical_name
+
 
 ################################################################
 # Activities Models
@@ -170,6 +181,10 @@ class ActivityWorkshop(Activity):
 
 class ActivitySurveying(Activity):
     activity_type = Activity.ActivityType.SURVEY
+
+
+class ActivityGeneric(Activity):
+    activity_type = Activity.ActivityType.GENERIC
 
 
 ################################################################

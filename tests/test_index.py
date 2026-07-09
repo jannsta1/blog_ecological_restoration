@@ -5,9 +5,9 @@ from blog.views import blog_listing
 from django.contrib.sessions.backends.db import SessionStore
 
 
-@pytest.mark.asyncio
-def test_home(async_rf, admin_user):
-    request = async_rf.get("index")
+@pytest.mark.django_db
+def test_home(rf, admin_user):
+    request = rf.get("index")
 
     ss = SessionStore()  # required fot the hitcount app
     request.session = ss
