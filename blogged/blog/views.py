@@ -41,7 +41,6 @@ from image_processing.meta_data_processing import get_gps_coordinates_from_meta_
 from django.urls import reverse
 
 SELECT_ALL_OPTION_STR = "-- All --"
-SELECT_ALL_OPTION_VAL = "All"
 
 
 @track_hit_count
@@ -55,10 +54,10 @@ def blog_listing(request):
     location_tags = Location.choices
     current_activity_id = 0
     current_organisation_id = 0
-    current_location_id = SELECT_ALL_OPTION_VAL
+    current_location_id = ""
 
-    if request.GET.get("activity-select"):
-        activity_id = request.GET.get("activity-select")
+    activity_id = (request.GET.get("activity-select") or "").strip()
+    if activity_id and activity_id.isdigit():
         current_activity_id = int(activity_id)
 
         # TODO - ideally the commented line below would work, but it doesn't seem to filter correctly with polymorphic models
@@ -66,8 +65,6 @@ def blog_listing(request):
         # for now we use if/else statements to check each child activity type individually
         if activity_id == str(Activity.ActivityType.GENERIC):
             candidates = ActivityGeneric.objects.all()
-        elif activity_id == SELECT_ALL_OPTION_VAL:
-            candidates = Activity.objects.all()
         elif activity_id == str(Activity.ActivityType.TREE_PLANTING_SESSION):
             candidates = ActivityTreePlantingSession.objects.all()
         elif activity_id == str(Activity.ActivityType.VOLE_GUARD_REMOVAL):
@@ -89,19 +86,18 @@ def blog_listing(request):
         post_ids = [a.post.pk for a in candidates if a.post is not None]
         posts = posts.filter(pk__in=post_ids)
 
-    if request.GET.get("org-select"):
-        org_id = request.GET.get("org-select")
-        # NOTE: we check isdigit() to avoid filtering when the value is SELECT_ALL_OPTION_STR
+    org_id = (request.GET.get("org-select") or "").strip()
+    if org_id:
+        # NOTE: only numeric IDs should trigger organisation filtering.
         if org_id.isdigit():
             posts = posts.filter(organisation_tags=org_id)
             current_organisation_id = int(org_id)
 
-    if request.GET.get("location-select"):
-        location = request.GET.get("location-select")
+    location = (request.GET.get("location-select") or "").strip()
+    if location:
         # print(f"Filtering by location: {location}")
-        if location != SELECT_ALL_OPTION_VAL:
-            current_location_id = location
-            posts = posts.filter(activities__location=location).distinct()
+        current_location_id = location
+        posts = posts.filter(activities__location=location).distinct()
 
     return render(
         request,
@@ -113,7 +109,6 @@ def blog_listing(request):
             "current_activity_id": current_activity_id,
             "current_organisation_id": current_organisation_id,
             "select_all_option_str": SELECT_ALL_OPTION_STR,
-            "select_all_option_val": SELECT_ALL_OPTION_VAL,
             "current_location_id": current_location_id,
             "location_select_options": location_tags,
         },

@@ -11,8 +11,10 @@
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="org-select">Filter by Organisation:</label>
-          <select name="org-select" id="org-select" data-testid="org-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
-            <option value={{ select_all_option_val }} > {{ select_all_option_str }} </option>
+          <select name="org-select" id="org-select" data-testid="org-select"
+            class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full"
+            onchange="submitFilterIfSelected(this)">
+            <option value="" {% if current_organisation_id==0 %} selected{% endif %}>{{ select_all_option_str }}</option>
             {% for org_tag in organisation_tags %}
               <option value="{{ org_tag.id }}" {% if current_organisation_id == org_tag.id %} selected{% endif %}>{{ org_tag.name }}</option>
             {% endfor %}
@@ -22,9 +24,15 @@
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="activity-select">Filter by Activity:</label>
-          <select name="activity-select" id="activity-select" data-testid="activity-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
+          <select name="activity-select" id="activity-select" data-testid="activity-select"
+            class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full"
+            onchange="submitFilterIfSelected(this)">
+            <option value="" {% if current_activity_id==0 %} selected{% endif %}>{{ select_all_option_str }}</option>
             {% for activity_id, activity_label in activity_tags.items %}
-              <option value="{{ activity_id }}" {% if current_activity_id == activity_id %} selected{% endif %}>{{ activity_label }}</option>
+              {% if activity_id != 0 %}
+              <option value="{{ activity_id }}" {% if current_activity_id==activity_id %} selected{% endif %}>{{ activity_label }}
+              </option>
+              {% endif %}
             {% endfor %}
           </select>
         </div>
@@ -32,8 +40,10 @@
       <div class="p-2 content-center w-56">
         <div class="flex flex-col">
           <label for="location-select">Filter by Location:</label>
-          <select name="location-select" id="location-select" data-testid="location-select" class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full" onchange="this.form.submit()">
-            <option value={{ select_all_option_val }} > {{ select_all_option_str }} </option>
+          <select name="location-select" id="location-select" data-testid="location-select"
+            class="rounded-md px-3 py-1 text-sm font-semibold shadow-xs inset-ring-1 inset-ring-gray-300 bg-[var(--color-bg)] hover:bg-[var(--color-surface-alt)] w-full"
+            onchange="submitFilterIfSelected(this)">
+            <option value="" {% if not current_location_id %} selected{% endif %}>{{ select_all_option_str }}</option>
             {% for location in location_select_options %}
               <option value="{{ location|first }}" {% if current_location_id == location|first %} selected{% endif %}>{{ location|last }}</option>
             {% endfor %}
@@ -51,6 +61,15 @@
 
   {% comment %} enables parsing of markdown->html, see "marked.parse" below  {% endcomment %}
   <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+  <script>
+    function submitFilterIfSelected(selectEl) {
+      if (!selectEl.value) {
+        return;
+      }
+
+      selectEl.form.submit();
+    }
+  </script>
 
 
 {% endblock content %}

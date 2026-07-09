@@ -4,7 +4,7 @@ import os
 def get_secret(key):
     value = os.getenv(key)
 
-    if os.path.isfile(value):
+    if value and os.path.isfile(value):
         with open(value) as f:
             return f.read()
     # else:
