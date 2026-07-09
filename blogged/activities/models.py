@@ -183,6 +183,10 @@ class ActivitySurveying(Activity):
     activity_type = Activity.ActivityType.SURVEY
 
 
+class ActivityGeneric(Activity):
+    activity_type = Activity.ActivityType.GENERIC
+
+
 ################################################################
 # Transport Models
 ################################################################

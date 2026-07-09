@@ -283,9 +283,7 @@ _GPS_TRACK_WIDGET = Textarea(
 
 class PostActivityForm(forms.Form):
     ACTIVITY_TYPE_CHOICES = [("", "Select activity type")] + [
-        (choice[0], choice[1])
-        for choice in Activity.ActivityType.choices
-        if choice[0] != Activity.ActivityType.GENERIC
+        (choice[0], choice[1]) for choice in Activity.ActivityType.choices
     ]
 
     activity_type = forms.ChoiceField(

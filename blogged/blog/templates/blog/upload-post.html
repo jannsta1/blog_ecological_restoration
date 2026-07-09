@@ -211,7 +211,7 @@
                   </div>
                 </div>
 
-                <!-- No-extra-fields activities: Training, Workshop, Survey -->
+                <!-- No-extra-fields activities: Generic, Training, Workshop, Survey -->
                 <div id="activity-fields-simple" class="rounded-2xl border border-slate-200 bg-slate-50 p-5 hidden">
                   <p class="text-sm text-slate-600">No additional fields are required for this activity type.</p>
                 </div>
@@ -225,6 +225,7 @@
               <script>
                 (function () {
                   const ACTIVITY_PANELS = {
+                    '0': 'activity-fields-simple',
                     '2': 'activity-fields-vgr',
                     '7': 'activity-fields-tgr',
                     '3': 'activity-fields-isr',

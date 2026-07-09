@@ -9,6 +9,7 @@ from activities.models import ActivitySurveying
 from activities.models import ActivityTraining
 from activities.models import ActivityTreePlantingSession
 from activities.models import TreePlanting
+from activities.models import ActivityGeneric
 from activities.models import ActivityVoleGuardRemoval
 from activities.models import ActivityWorkshop
 from activities.models import DEFAULT_TREE_WEIGHT_G
@@ -63,7 +64,9 @@ def blog_listing(request):
         # TODO - ideally the commented line below would work, but it doesn't seem to filter correctly with polymorphic models
         # candidates = Activity.objects.all().filter(activity_type=activity_id)
         # for now we use if/else statements to check each child activity type individually
-        if activity_id == SELECT_ALL_OPTION_STR or Activity.ActivityType.GENERIC:
+        if activity_id == str(Activity.ActivityType.GENERIC):
+            candidates = ActivityGeneric.objects.all()
+        elif activity_id == SELECT_ALL_OPTION_VAL:
             candidates = Activity.objects.all()
         elif activity_id == str(Activity.ActivityType.TREE_PLANTING_SESSION):
             candidates = ActivityTreePlantingSession.objects.all()
@@ -444,16 +447,8 @@ def upload_post(request):
             import json as _json
 
             with transaction.atomic():
-                for _cls in [
-                    ActivityVoleGuardRemoval,
-                    ActivityTreeGuardRemoval,
-                    ActivityInvasiveSpeciesRemoval,
-                    ActivityTreePlantingSession,
-                    ActivityTraining,
-                    ActivityWorkshop,
-                    ActivitySurveying,
-                ]:
-                    _cls.objects.filter(post=draft_post).delete()
+                # Keep exactly one activity per draft by removing previous activity entries.
+                Activity.objects.filter(post=draft_post).delete()
 
                 activity_type_raw = stage_two_form.cleaned_data.get("activity_type")
                 if activity_type_raw:
@@ -465,7 +460,9 @@ def upload_post(request):
                         or 0.0,
                     }
 
-                    if activity_type_int == Activity.ActivityType.VOLE_GUARD_REMOVAL:
+                    if activity_type_int == Activity.ActivityType.GENERIC:
+                        ActivityGeneric.objects.create(**common_kwargs)
+                    elif activity_type_int == Activity.ActivityType.VOLE_GUARD_REMOVAL:
                         gps_raw = stage_two_form.cleaned_data.get(
                             "vgr_gps_track", ""
                         ).strip()

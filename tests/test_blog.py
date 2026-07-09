@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 from blog.forms import ImageFormSet
-from activities.models import Activity, ActivityTraining, TransportCar
+from activities.models import Activity, ActivityGeneric, ActivityTraining, TransportCar
 from blog.forms import PostForm
 from blog import views as blog_views
 from blog.models import Post
@@ -154,6 +154,51 @@ def test_upload_post_stage_two_creates_activity(authenticated_client):
     assert response.status_code == 302
     assert "stage=3" in response.url
     assert ActivityTraining.objects.filter(post=draft).exists()
+
+
+@pytest.mark.django_db
+def test_upload_post_stage_two_generic_activity_persists_and_prefills_on_reload(
+    authenticated_client,
+):
+    draft = Post.objects.create(
+        title="Draft title",
+        date=datetime.today().date(),
+        content="",
+        slug="draft-title-stage-two-generic",
+    )
+
+    response = authenticated_client.post(
+        reverse("upload-post"),
+        {
+            "stage": "2",
+            "draft_id": str(draft.pk),
+            "activity_type": str(Activity.ActivityType.GENERIC),
+            "location": "TA",
+            "hours_spent": "2.5",
+        },
+    )
+
+    assert response.status_code == 302
+    assert "stage=3" in response.url
+
+    activities = Activity.objects.filter(post=draft)
+    assert activities.count() == 1
+    created_activity = activities.first()
+    assert created_activity is not None
+    assert isinstance(created_activity, ActivityGeneric)
+    assert created_activity.activity_type == Activity.ActivityType.GENERIC
+    assert created_activity.location == "TA"
+    assert created_activity.hours_spent == 2.5
+
+    reload_response = authenticated_client.get(
+        f"{reverse('upload-post')}?draft={draft.pk}&stage=2"
+    )
+
+    assert reload_response.status_code == 200
+    html = reload_response.content.decode()
+    assert 'option value="0" selected' in html
+    assert 'option value="TA" selected' in html
+    assert 'name="hours_spent" value="2.5"' in html
 
 
 @pytest.mark.django_db
