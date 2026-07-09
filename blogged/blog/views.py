@@ -442,11 +442,11 @@ def upload_post(request):
             import json as _json
 
             with transaction.atomic():
-                # Keep exactly one activity per draft by removing previous activity entries.
-                Activity.objects.filter(post=draft_post).delete()
-
                 activity_type_raw = stage_two_form.cleaned_data.get("activity_type")
                 if activity_type_raw:
+                    # Keep exactly one activity per draft by removing previous activity entries.
+                    Activity.objects.filter(post=draft_post).delete()
+
                     activity_type_int = int(activity_type_raw)
                     common_kwargs = {
                         "post": draft_post,
